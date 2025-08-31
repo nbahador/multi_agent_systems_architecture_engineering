@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Google Cloud Build Template Tutorial</title>
+    <style>
+        /* Base Styles - Using the extracted design system */
+        :root {
+            --primary-blue: #3498db;
+            --dark-blue-1: #2c3e50;
+            --dark-blue-2: #34495e;
+            --light-grey: #f8f9fa;
+            --off-white: #f1f2f6;
+            --pure-white: #ffffff;
+            --border-color: #e9ecef;
+            --border-color-2: #ddd;
+            --text-dark: #333;
+            --text-medium: #7f8c8d;
+            --warning-bg: #fff3cd;
+            --warning-border: #f39c12;
+            --info-bg: #d1ecf1;
+            --info-border: #17a2b8;
+            --success-bg: #d4edda;
+            --success-border: #28a745;
+            --code-bg: #2d3748;
+            --code-text: #e2e8f0;
+            --python-color: #ff6b6b;
+            --string-color: #4ecdc4;
+            --comment-color: #95a5a6;
+            --keyword-color: #e74c3c;
+            --number-color: #f39c12;
+            --block-color: #e74c3c;
+            --allow-color: #27ae60;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background-color: var(--pure-white);
+            display: grid;
+            grid-template-columns: 280px 1fr;
+        }
+
+        /* Header Styles */
+        header {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 2rem;
+            border-bottom: 3px solid var(--primary-blue);
+            background: linear-gradient(135deg, var(--pure-white) 0%, var(--light-grey) 100%);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--dark-blue-1);
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: var(--dark-blue-1);
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 0.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: var(--dark-blue-2);
+            margin: 1.5rem 0 0.5rem;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            color: var(--dark-blue-2);
+            margin: 1rem 0 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        /* Table of Contents */
+        .toc {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            background-color: var(--light-grey);
+            padding: 1.5rem;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .toc h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            border-bottom: none;
+        }
+
+        .toc ul {
+            list-style-type: none;
+        }
+
+        .toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        .toc a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.3rem 0;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .toc a:hover {
+            color: #2980b9;
+            background-color: rgba(52, 152, 219, 0.1);
+            padding-left: 0.5rem;
+        }
+
+        .toc .sub-item {
+            margin-left: 1rem;
+            font-size: 0.8rem;
+        }
+
+        /* Main Content */
+        .content {
+            padding: 2rem;
+            max-width: 1200px;
+        }
+
+        section {
+            margin-bottom: 3rem;
+        }
+
+        /* Interactive Code Display */
+        .interactive-code {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .code-line {
+            display: block;
+            padding: 0.2rem 0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-radius: 4px;
+            margin: 0.1rem 0;
+        }
+
+        .code-line:hover {
+            background-color: rgba(52, 152, 219, 0.2);
+        }
+
+        .code-line.highlighted {
+            background-color: rgba(52, 152, 219, 0.3);
+            border-left: 3px solid var(--primary-blue);
+            padding-left: 0.5rem;
+        }
+
+        .code-comment { color: var(--comment-color); font-style: italic; }
+        .code-keyword { color: var(--keyword-color); font-weight: bold; }
+        .code-string { color: var(--string-color); }
+        .code-number { color: var(--number-color); }
+
+        /* Explanation Panel */
+        .explanation-panel {
+            background-color: var(--light-grey);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .explanation-panel.active {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Status Boxes */
+        .status-box {
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 4px solid;
+            border-radius: 4px;
+        }
+
+        .warning {
+            background-color: var(--warning-bg);
+            border-left-color: var(--warning-border);
+        }
+
+        .info {
+            background-color: var(--info-bg);
+            border-left-color: var(--info-border);
+        }
+
+        .success {
+            background-color: var(--success-bg);
+            border-left-color: var(--success-border);
+        }
+
+        /* Template Builder */
+        .template-builder {
+            background-color: var(--off-white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .builder-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color-2);
+        }
+
+        .builder-section:last-child {
+            border-bottom: none;
+        }
+
+        .form-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-control {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: var(--dark-blue-2);
+        }
+
+        input, select, textarea {
+            padding: 0.7rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .button {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+
+        .button:hover {
+            background-color: #2980b9;
+        }
+
+        .button-secondary {
+            background-color: var(--text-medium);
+        }
+
+        .button-secondary:hover {
+            background-color: #6c7b7d;
+        }
+
+        /* Output Display */
+        .output-container {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        /* Progress Indicator */
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--border-color);
+            z-index: 1;
+        }
+
+        .progress-step {
+            background-color: var(--light-grey);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            z-index: 2;
+            transition: all 0.3s;
+        }
+
+        .progress-step.active {
+            background-color: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+        }
+
+        .progress-step.completed {
+            background-color: var(--allow-color);
+            color: white;
+            border-color: var(--allow-color);
+        }
+
+        /* Component Highlighter */
+        .component-highlighter {
+            position: relative;
+            display: inline-block;
+        }
+
+        .highlight-box {
+            position: absolute;
+            background-color: rgba(52, 152, 219, 0.2);
+            border: 2px solid var(--primary-blue);
+            border-radius: 4px;
+            pointer-events: none;
+            z-index: 10;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        /* Quiz Components */
+        .quiz-container {
+            background-color: var(--off-white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .quiz-question {
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: var(--dark-blue-1);
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .quiz-option {
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: var(--pure-white);
+        }
+
+        .quiz-option:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+
+        .quiz-option.correct {
+            background-color: var(--success-bg);
+            border-color: var(--success-border);
+        }
+
+        .quiz-option.incorrect {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .quiz-feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .quiz-feedback.show {
+            display: block;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                grid-template-columns: 1fr;
+            }
+
+            .toc {
+                position: static;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .form-group {
+                grid-template-columns: 1fr;
+            }
+
+            .progress-steps {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .progress-steps::before {
+                display: none;
+            }
+        }
+
+        /* Copy Button */
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(52, 152, 219, 0.8);
+            color: white;
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .interactive-code:hover .copy-button {
+            opacity: 1;
+        }
+
+        .copy-button:hover {
+            background-color: var(--primary-blue);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.7rem 1.2rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary-blue);
+            color: var(--primary-blue);
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🚀 Google Cloud Build Template Mastery</h1>
+        <p>Learn to build, deploy, and manage multi-service applications with Google Cloud Build</p>
+    </header>
+
+    <nav class="toc">
+        <h2>Navigation</h2>
+        <ul>
+            <li><a href="#basics">Template Basics</a></li>
+            <li><a href="#anatomy">Code Anatomy</a></li>
+            <li><a href="#interactive-breakdown">Interactive Breakdown</a></li>
+            <li><a href="#builder">Template Builder</a></li>
+            <li><a href="#quiz">Knowledge Quiz</a></li>
+            <li><a href="#examples">Real Examples</a></li>
+            <li><a href="#troubleshooting">Troubleshooting</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+        <section id="basics">
+            <h2>Understanding Cloud Build Templates</h2>
+            
+            <div class="status-box info">
+                <h4>What is a Cloud Build Template?</h4>
+                <p>A Cloud Build template is a YAML configuration file that defines automated build and deployment steps for your applications. It tells Google Cloud Build exactly how to build your code, create Docker images, and deploy services.</p>
+            </div>
+
+            <h3>Core Concepts</h3>
+            <div class="progress-steps">
+                <div class="progress-step completed">1</div>
+                <div class="progress-step completed">2</div>
+                <div class="progress-step completed">3</div>
+                <div class="progress-step active">4</div>
+            </div>
+            <p style="text-align: center; margin-top: 1rem;"><strong>Build → Push → Deploy → Manage</strong></p>
+
+            <div class="tabs">
+                <div class="tab active" data-tab="concepts">Key Concepts</div>
+                <div class="tab" data-tab="benefits">Benefits</div>
+                <div class="tab" data-tab="when-to-use">When to Use</div>
+            </div>
+
+            <div id="concepts" class="tab-content active">
+                <h4>Essential Components</h4>
+                <p><strong>Steps:</strong> Individual build actions (build, push, deploy)</p>
+                <p><strong>Substitutions:</strong> Variables that make your template reusable</p>
+                <p><strong>Builders:</strong> Pre-configured tools (Docker, gcloud, etc.)</p>
+                <p><strong>Dependencies:</strong> Control execution order with waitFor</p>
+            </div>
+
+            <div id="benefits" class="tab-content">
+                <h4>Why Use This Approach?</h4>
+                <p><strong>Consistency:</strong> Same codebase, multiple services</p>
+                <p><strong>Efficiency:</strong> Build once, deploy multiple times</p>
+                <p><strong>Scalability:</strong> Easy to add new services</p>
+                <p><strong>Automation:</strong> No manual deployment steps</p>
+            </div>
+
+            <div id="when-to-use" class="tab-content">
+                <h4>Perfect Use Cases</h4>
+                <p><strong>Microservices:</strong> Multiple services from one codebase</p>
+                <p><strong>Multi-environment:</strong> Different configurations per environment</p>
+                <p><strong>Modular Apps:</strong> API + Worker + Scheduler patterns</p>
+                <p><strong>Team Collaboration:</strong> Standardized deployment process</p>
+            </div>
+        </section>
+
+        <section id="anatomy">
+            <h2>Template Code Anatomy</h2>
+            
+            <p>Let's break down a complete Cloud Build template. Click on any line to see detailed explanations:</p>
+
+            <div class="interactive-code">
+                <button class="copy-button" onclick="copyCode()">Copy Code</button>
+                <div class="code-line" data-explanation="header">
+                    <span class="code-comment"># =============================================================================</span>
+                </div>
+                <div class="code-line" data-explanation="header">
+                    <span class="code-comment"># GOOGLE CLOUD BUILD TEMPLATE - MULTI-SERVICE DEPLOYMENT</span>
+                </div>
+                <div class="code-line" data-explanation="header">
+                    <span class="code-comment"># =============================================================================</span>
+                </div>
+                <div class="code-line" data-explanation="steps-intro">
+                    <span class="code-keyword">steps</span>:
+                </div>
+                <div class="code-line" data-explanation="build-step">
+                    &nbsp;&nbsp;<span class="code-comment"># Step 1: Build Docker image</span>
+                </div>
+                <div class="code-line" data-explanation="build-step">
+                    &nbsp;&nbsp;- <span class="code-keyword">name</span>: <span class="code-string">'gcr.io/cloud-builders/docker'</span>
+                </div>
+                <div class="code-line" data-explanation="build-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">id</span>: <span class="code-string">'build-base-image'</span>
+                </div>
+                <div class="code-line" data-explanation="build-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">args</span>: 
+                </div>
+                <div class="code-line" data-explanation="build-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="code-string">'build'</span>
+                </div>
+                <div class="code-line" data-explanation="build-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="code-string">'-t'</span>
+                </div>
+                <div class="code-line" data-explanation="build-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="code-string">'${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'</span>
+                </div>
+                <div class="code-line" data-explanation="build-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="code-string">'.'</span>
+                </div>
+                <div class="code-line">&nbsp;</div>
+                <div class="code-line" data-explanation="push-step">
+                    &nbsp;&nbsp;<span class="code-comment"># Step 2: Push to Artifact Registry</span>
+                </div>
+                <div class="code-line" data-explanation="push-step">
+                    &nbsp;&nbsp;- <span class="code-keyword">name</span>: <span class="code-string">'gcr.io/cloud-builders/docker'</span>
+                </div>
+                <div class="code-line" data-explanation="push-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">id</span>: <span class="code-string">'push-base-image'</span>
+                </div>
+                <div class="code-line" data-explanation="push-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">waitFor</span>: [<span class="code-string">'build-base-image'</span>]
+                </div>
+                <div class="code-line" data-explanation="push-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">args</span>: 
+                </div>
+                <div class="code-line" data-explanation="push-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="code-string">'push'</span>
+                </div>
+                <div class="code-line" data-explanation="push-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="code-string">'${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'</span>
+                </div>
+                <div class="code-line">&nbsp;</div>
+                <div class="code-line" data-explanation="deploy-step">
+                    &nbsp;&nbsp;<span class="code-comment"># Step 3: Deploy Service 1</span>
+                </div>
+                <div class="code-line" data-explanation="deploy-step">
+                    &nbsp;&nbsp;- <span class="code-keyword">name</span>: <span class="code-string">'gcr.io/google.com/cloudsdktool/cloud-sdk'</span>
+                </div>
+                <div class="code-line" data-explanation="deploy-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">id</span>: <span class="code-string">'deploy-service-one'</span>
+                </div>
+                <div class="code-line" data-explanation="deploy-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">waitFor</span>: [<span class="code-string">'push-base-image'</span>]
+                </div>
+                <div class="code-line" data-explanation="deploy-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">entrypoint</span>: gcloud
+                </div>
+                <div class="code-line" data-explanation="deploy-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">args</span>:
+                </div>
+                <div class="code-line" data-explanation="deploy-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="code-string">'run'</span>
+                </div>
+                <div class="code-line" data-explanation="deploy-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="code-string">'deploy'</span>
+                </div>
+                <div class="code-line" data-explanation="deploy-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="code-string">'${_SERVICE_ONE_NAME}'</span>
+                </div>
+                <div class="code-line" data-explanation="deploy-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="code-string">'--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'</span>
+                </div>
+                <div class="code-line" data-explanation="deploy-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="code-string">'--region=${_REGION}'</span>
+                </div>
+                <div class="code-line" data-explanation="deploy-step">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="code-string">'--allow-unauthenticated'</span>
+                </div>
+                <div class="code-line">&nbsp;</div>
+                <div class="code-line" data-explanation="substitutions">
+                    <span class="code-comment"># Substitution Variables</span>
+                </div>
+                <div class="code-line" data-explanation="substitutions">
+                    <span class="code-keyword">substitutions</span>:
+                </div>
+                <div class="code-line" data-explanation="substitutions">
+                    &nbsp;&nbsp;<span class="code-keyword">_PROJECT_ID</span>: <span class="code-string">"my-project-123"</span>
+                </div>
+                <div class="code-line" data-explanation="substitutions">
+                    &nbsp;&nbsp;<span class="code-keyword">_REGION</span>: <span class="code-string">"us-central1"</span>
+                </div>
+                <div class="code-line" data-explanation="substitutions">
+                    &nbsp;&nbsp;<span class="code-keyword">_REPO_NAME</span>: <span class="code-string">"my-app-repo"</span>
+                </div>
+                <div class="code-line" data-explanation="substitutions">
+                    &nbsp;&nbsp;<span class="code-keyword">_IMAGE_NAME</span>: <span class="code-string">"multi-service-app"</span>
+                </div>
+                <div class="code-line" data-explanation="substitutions">
+                    &nbsp;&nbsp;<span class="code-keyword">_SERVICE_ONE_NAME</span>: <span class="code-string">"api-service"</span>
+                </div>
+            </div>
+
+            <div id="explanation-display" class="explanation-panel">
+                <h4>Click on any line above to see explanations!</h4>
+                <p>Each component of the Cloud Build template serves a specific purpose. Explore the interactive code to understand how each piece works together.</p>
+            </div>
+        </section>
+
+        <section id="interactive-breakdown">
+            <h2>Interactive Component Breakdown</h2>
+            
+            <div class="template-builder">
+                <h3>Component Explorer</h3>
+                <p>Select a component to learn about its purpose and configuration:</p>
+                
+                <div class="form-group">
+                    <div class="form-control">
+                        <label>Component Type</label>
+                        <select id="componentSelect">
+                            <option value="">Select a component...</option>
+                            <option value="steps">Steps Section</option>
+                            <option value="docker-build">Docker Build Step</option>
+                            <option value="artifact-push">Artifact Registry Push</option>
+                            <option value="cloud-run-deploy">Cloud Run Deployment</option>
+                            <option value="substitutions">Substitution Variables</option>
+                            <option value="waitfor">WaitFor Dependencies</option>
+                            <option value="options">Build Options</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label>Complexity Level</label>
+                        <select id="complexitySelect">
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button class="button" onclick="explainComponent()">Explain Component</button>
+                
+                <div id="component-explanation" class="explanation-panel">
+                    <p>Select a component above to see detailed explanations, examples, and best practices.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="builder">
+            <h2>Template Builder</h2>
+            
+            <div class="status-box warning">
+                <p><strong>Interactive Template Generator:</strong> Fill in the details below to generate your custom Cloud Build template.</p>
+            </div>
+
+            <div class="template-builder">
+                <div class="builder-section">
+                    <h3>Project Configuration</h3>
+                    <div class="form-group">
+                        <div class="form-control">
+                            <label for="projectId">Google Cloud Project ID</label>
+                            <input type="text" id="projectId" placeholder="my-project-123" />
+                        </div>
+                        <div class="form-control">
+                            <label for="region">Deployment Region</label>
+                            <select id="region">
+                                <option value="us-central1">us-central1</option>
+                                <option value="us-east1">us-east1</option>
+                                <option value="us-west1">us-west1</option>
+                                <option value="europe-west1">europe-west1</option>
+                                <option value="asia-northeast1">asia-northeast1</option>
