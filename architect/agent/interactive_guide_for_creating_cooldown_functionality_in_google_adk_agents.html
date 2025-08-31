@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent System Template: Interactive Guide</title>
+    <style>
+        /* Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #ffffff;
+        }
+        
+        /* Layout */
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 100vh;
+        }
+        
+        /* Table of Contents */
+        .toc {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            padding: 20px;
+        }
+        
+        .toc h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .toc ul {
+            list-style-type: none;
+        }
+        
+        .toc li {
+            margin-bottom: 10px;
+        }
+        
+        .toc a {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 1.1rem;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .toc a:hover {
+            background-color: #e9ecef;
+            color: #2980b9;
+        }
+        
+        /* Main Content */
+        .content {
+            padding: 40px;
+        }
+        
+        section {
+            margin-bottom: 60px;
+            scroll-margin-top: 20px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            color: #34495e;
+            margin-bottom: 15px;
+        }
+        
+        p {
+            margin-bottom: 15px;
+        }
+        
+        /* Code Blocks */
+        .code-explanation {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .code-block {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .explanation {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        
+        .code-keyword {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .code-string {
+            color: #4ecdc4;
+        }
+        
+        .code-comment {
+            color: #95a5a6;
+            font-style: italic;
+        }
+        
+        .code-number {
+            color: #f39c12;
+        }
+        
+        /* Interactive Components */
+        .collapsible {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .collapsible-header {
+            background-color: #f8f9fa;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .collapsible-header::after {
+            content: '▶';
+            font-size: 0.8rem;
+        }
+        
+        .collapsible-header.active::after {
+            content: '▼';
+        }
+        
+        .collapsible-content {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .collapsible-content.active {
+            max-height: 1000px;
+            padding: 20px;
+        }
+        
+        /* Demo Boxes */
+        .demo-box {
+            background-color: #f1f2f6;
+            border: 1px solid #3498db;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .input-box {
+            background-color: white;
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .output-box {
+            background-color: #fdf2f2;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        /* Status Boxes */
+        .status-box {
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid;
+            border-radius: 4px;
+        }
+        
+        .warning {
+            background-color: #fff3cd;
+            border-left-color: #f39c12;
+        }
+        
+        .info {
+            background-color: #d1ecf1;
+            border-left-color: #17a2b8;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            border-left-color: #28a745;
+        }
+        
+        /* Flow Diagram */
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 30px 0;
+            gap: 10px;
+        }
+        
+        .flow-box {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: #2c3e50;
+        }
+        
+        /* Buttons */
+        .button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        
+        .button:hover {
+            background-color: #2980b9;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .toc {
+                position: static;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+            }
+            
+            .code-explanation {
+                grid-template-columns: 1fr;
+            }
+            
+            .flow-diagram {
+                flex-direction: column;
+            }
+            
+            .flow-arrow {
+                transform: rotate(90deg);
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#overview">Template Overview</a></li>
+                <li><a href="#structure">Code Structure</a></li>
+                <li><a href="#configuration">Configuration</a></li>
+                <li><a href="#implementation">Implementation Details</a></li>
+                <li><a href="#examples">Usage Examples</a></li>
+                <li><a href="#customization">Customization Guide</a></li>
+                <li><a href="#deployment">Deployment</a></li>
+                <li><a href="#demo">Interactive Demo</a></li>
+            </ul>
+        </nav>
+        
+        <main class="content">
+            <section id="introduction">
+                <h1>Multi-Agent System Template: Cooldown Plugin</h1>
+                <p>This interactive guide will teach you how to use and customize the cooldown plugin template for Google ADK agents. The template prevents rapid successive actions by enforcing a waiting period between requests.</p>
+                
+                <div class="status-box info">
+                    <strong>Learning Objectives:</strong> By the end of this guide, you will understand how to implement rate limiting in multi-agent systems, customize the cooldown plugin for your specific use case, and deploy it effectively.
+                </div>
+            </section>
+            
+            <section id="overview">
+                <h2>Template Overview</h2>
+                <p>The cooldown plugin template provides a reusable foundation for implementing rate limiting functionality in Google ADK agents. It's designed to be flexible and adaptable to various use cases.</p>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <span class="code-comment"># cooldown_plugin_template.py</span><br>
+                        <span class="code-comment">"""<br>
+                        COOLDOWN PLUGIN TEMPLATE<br>
+                        ========================<br>
+                        A reusable template for creating cooldown functionality<br>
+                        in Google ADK agents.<br>
+                        This plugin prevents rapid successive actions by<br>
+                        enforcing a waiting period.<br>
+                        """</span>
+                    </div>
+                    <div class="explanation">
+                        <h3>What This Template Does:</h3>
+                        <ul>
+                            <li>Tracks when actions were last performed</li>
+                            <li>Enforces a cooldown period between actions</li>
+                            <li>Integrates with external APIs for state management</li>
+                            <li>Provides callbacks for agent behavior modification</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="flow-diagram">
+                    <div class="flow-box">Request Received</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Check Cooldown</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box" style="background-color: #27ae60;">Allow Request</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Record Action</div>
+                </div>
+                
+                <div class="flow-diagram">
+                    <div class="flow-box">Request Received</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Check Cooldown</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box" style="background-color: #e74c3c;">Block Request</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Send Error Message</div>
+                </div>
+            </section>
+            
+            <section id="structure">
+                <h2>Code Structure</h2>
+                <p>The template is organized into logical sections that make customization straightforward. Here's the overall structure:</p>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Imports Section</div>
+                    <div class="collapsible-content">
+                        <div class="code-block">
+                            <span class="code-keyword">from</span> google.adk.agents.base_agent <span class="code-keyword">import</span> BaseAgent<br>
+                            <span class="code-keyword">from</span> google.adk.agents.callback_context <span class="code-keyword">import</span> CallbackContext<br>
+                            <span class="code-keyword">from</span> google.adk.models.llm_request <span class="code-keyword">import</span> LlmRequest<br>
+                            <span class="code-keyword">from</span> google.adk.plugins.base_plugin <span class="code-keyword">import</span> BasePlugin<br>
+                            <span class="code-keyword">from</span> typing <span class="code-keyword">import</span> Optional<br>
+                            <span class="code-keyword">from</span> google.genai <span class="code-keyword">import</span> types<br>
+                            <span class="code-keyword">import</span> requests<br>
+                            <span class="code-keyword">from</span> datetime <span class="code-keyword">import</span> datetime, timezone, timedelta<br>
+                            <span class="code-keyword">import</span> os
+                        </div>
+                        <p>These are the required imports for Google ADK plugins. You typically won't need to modify this section unless you're adding additional functionality.</p>
+                    </div>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Configuration Section</div>
+                    <div class="collapsible-content">
+                        <div class="code-block">
+                            <span class="code-comment"># [PLACEHOLDER 1] - Cooldown Duration</span><br>
+                            COOLDOWN_PERIOD_SECONDS = <span class="code-number">60</span>  <span class="code-comment"># Replace with your desired cooldown time</span><br><br>
+                            
+                            <span class="code-comment"># [PLACEHOLDER 2] - API Endpoint</span><br>
+                            COOLDOWN_API_URL = os.environ.get(<span class="code-string">"API_SERVER_URL"</span>)<br><br>
+                            
+                            <span class="code-comment"># [PLACEHOLDER 3] - Additional Configuration</span><br>
+                            <span class="code-comment"># COOLDOWN_MAX_RETRIES = 3</span><br>
+                            <span class="code-comment"># COOLDOWN_ERROR_MESSAGE = "Please wait before trying again"</span>
+                        </div>
+                        <p>This is where you configure the core behavior of your cooldown plugin. The placeholders indicate values you need to customize for your specific use case.</p>
+                    </div>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Plugin Class Definition</div>
+                    <div class="collapsible-content">
+                        <div class="code-block">
+                            <span class="code-keyword">class</span> <span class="code-keyword">CooldownPlugin</span>(BasePlugin):<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">"""</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">[PLACEHOLDER 4] - Plugin Class Name and Description</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">"""</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">def</span> <span class="code-keyword">__init__</span>(<span class="code-keyword">self</span>):<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">"""</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">[PLACEHOLDER 5] - Initialization Logic</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">"""</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">super</span>().<span class="code-keyword">__init__</span>()<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Add your initialization code here</span>
+                        </div>
+                        <p>This is the main plugin class that contains all the cooldown logic. You'll customize various methods within this class to implement your specific requirements.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="configuration">
+                <h2>Configuration Guide</h2>
+                <p>Proper configuration is essential for the cooldown plugin to work effectively. Here are the key configuration options:</p>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <span class="code-comment"># Cooldown duration in seconds</span><br>
+                        COOLDOWN_PERIOD_SECONDS = <span class="code-number">60</span>  <span class="code-comment"># 1 minute</span><br><br>
+                        
+                        <span class="code-comment"># API endpoint for cooldown state management</span><br>
+                        COOLDOWN_API_URL = os.environ.get(<span class="code-string">"API_SERVER_URL"</span>)<br><br>
+                        
+                        <span class="code-comment"># Additional configuration options</span><br>
+                        COOLDOWN_MAX_RETRIES = <span class="code-number">3</span><br>
+                        COOLDOWN_ERROR_MESSAGE = <span class="code-string">"Please wait before trying again"</span><br>
+                        COOLDOWN_BYPASS_ROLES = [<span class="code-string">"admin"</span>, <span class="code-string">"premium"</span>]
+                    </div>
+                    <div class="explanation">
+                        <h3>Configuration Parameters:</h3>
+                        <ul>
+                            <li><strong>COOLDOWN_PERIOD_SECONDS</strong>: How long users must wait between actions</li>
+                            <li><strong>COOLDOWN_API_URL</strong>: Your backend API URL for cooldown state management</li>
+                            <li><strong>COOLDOWN_MAX_RETRIES</strong>: Maximum retry attempts for API calls</li>
+                            <li><strong>COOLDOWN_ERROR_MESSAGE</strong>: Custom message shown during cooldown</li>
+                            <li><strong>COOLDOWN_BYPASS_ROLES</strong>: Roles that can bypass cooldown restrictions</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="status-box warning">
+                    <strong>Important:</strong> Always validate your configuration using the validate_configuration() function before deployment.
+                </div>
+            </section>
+            
+            <section id="implementation">
+                <h2>Implementation Details</h2>
+                <p>Understanding the key methods in the cooldown plugin will help you customize it effectively.</p>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">on_agent_request Method</div>
+                    <div class="collapsible-content">
+                        <div class="code-block">
+                            <span class="code-keyword">def</span> on_agent_request(<span class="code-keyword">self</span>, agent, request, context):<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Extract user identifier</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;user_id = <span class="code-keyword">self</span>._extract_user_id(request, context)<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">if</span> <span class="code-keyword">not</span> user_id:<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Handle missing user ID</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> request<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">if</span> <span class="code-keyword">self</span>._is_user_in_cooldown(user_id):<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Handle cooldown violation</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">self</span>._handle_cooldown_violation(agent, request, context, user_id)<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> <span class="code-keyword">None</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Record the action and allow request</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">self</span>._record_user_action(user_id)<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> request
+                        </div>
+                        <p>This is the main method that gets called when an agent receives a request. It coordinates the cooldown checking process:</p>
+                        <ol>
+                            <li>Extracts user identification</li>
+                            <li>Checks if the user is in cooldown period</li>
+                            <li>Either blocks the request or allows it to proceed</li>
+                            <li>Records the action for future cooldown checks</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">User Identification</div>
+                    <div class="collapsible-content">
+                        <div class="code-block">
+                            <span class="code-keyword">def</span> _extract_user_id(<span class="code-keyword">self</span>, request, context):<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Option 1: Use session ID from context</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># return getattr(context, 'session_id', None)</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Option 2: Extract from request headers</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># return request.headers.get('user-id')</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Option 3: Use IP address as identifier</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># return getattr(request, 'client_ip', None)</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Option 4: Custom metadata extraction</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># return request.metadata.get('user_identifier')</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># [REPLACE THIS] - Implement your user ID extraction logic</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> <span class="code-string">"default_user"</span>
+                        </div>
+                        <p>This method determines how to identify unique users. You need to customize this based on your application's authentication and user tracking system.</p>
+                        <div class="status-box info">
+                            <strong>Tip:</strong> Choose an identification method that balances accuracy with privacy considerations. Session-based identification is often a good starting point.
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="examples">
+                <h2>Usage Examples</h2>
+                <p>Here are some practical examples of how to customize the cooldown plugin for different use cases:</p>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">E-commerce Rate Limiting</div>
+                    <div class="collapsible-content">
+                        <div class="code-block">
+                            <span class="code-comment"># For an e-commerce site preventing rapid order attempts:</span><br>
+                            COOLDOWN_PERIOD_SECONDS = <span class="code-number">120</span>  <span class="code-comment"># 2 minutes between orders</span><br>
+                            COOLDOWN_API_URL = <span class="code-string">"https://shop-api.com/rate-limit"</span><br><br>
+                            
+                            <span class="code-comment"># In _extract_user_id:</span><br>
+                            <span class="code-keyword">return</span> request.headers.get(<span class="code-string">'customer-id'</span>) <span class="code-keyword">or</span> request.session_id<br><br>
+                            
+                            <span class="code-comment"># In _handle_cooldown_violation:</span><br>
+                            error_message = <span class="code-string">"Please wait 2 minutes between order attempts for security."</span>
+                        </div>
+                        <p>This configuration helps prevent fraudulent rapid ordering while maintaining a good user experience for legitimate customers.</p>
+                    </div>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Content Moderation</div>
+                    <div class="collapsible-content">
+                        <div class="code-block">
+                            <span class="code-comment"># For content platforms preventing spam posting:</span><br>
+                            COOLDOWN_PERIOD_SECONDS = <span class="code-number">300</span>  <span class="code-comment"># 5 minutes between posts</span><br>
+                            COOLDOWN_API_URL = <span class="code-string">"https://content-api.com/moderation/cooldown"</span><br><br>
+                            
+                            <span class="code-comment"># In _handle_cooldown_violation:</span><br>
+                            error_message = <span class="code-string">"To prevent spam, please wait 5 minutes between posts."</span><br><br>
+                            
+                            <span class="code-comment"># Add content-specific logging:</span><br>
+                            <span class="code-keyword">def</span> _log_content_attempt(<span class="code-keyword">self</span>, user_id, content_type):<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Log attempted content creation for analysis</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;pass
+                        </div>
+                        <p>This configuration helps maintain content quality by preventing spam while allowing genuine users to contribute meaningfully.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="customization">
+                <h2>Customization Guide</h2>
+                <p>Use this checklist to ensure you've customized all necessary aspects of the template:</p>
+                
+                <div class="status-box info">
+                    <strong>Customization Checklist:</strong>
+                    <ul>
+                        <li>□ Replace COOLDOWN_PERIOD_SECONDS with your desired duration</li>
+                        <li>□ Set COOLDOWN_API_URL to your backend endpoint</li>
+                        <li>□ Implement _extract_user_id for your user identification system</li>
+                        <li>□ Customize _handle_cooldown_violation for your error responses</li>
+                        <li>□ Add any additional configuration variables you need</li>
+                        <li>□ Implement proper error handling for your environment</li>
+                        <li>□ Add logging and monitoring for your analytics system</li>
+                        <li>□ Test with your specific agent and request types</li>
+                    </ul>
+                </div>
+                
+                <div class="demo-box">
+                    <h3>Customization Demo</h3>
+                    <p>Try customizing the cooldown period and see how it affects the behavior:</p>
+                    
+                    <div class="input-box">
+                        <label for="cooldown-period">Cooldown Period (seconds):</label>
+                        <input type="number" id="cooldown-period" value="60" min="1" max="3600">
+                        <button class="button" onclick="updateCooldownDemo()">Update</button>
+                    </div>
+                    
+                    <div class="output-box">
+                        <p id="demo-output">Current cooldown period: 60 seconds. Users must wait 1 minute between actions.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="deployment">
+                <h2>Deployment Steps</h2>
+                <p>Follow these steps to deploy your customized cooldown plugin:</p>
+                
+                <div class="flow-diagram">
+                    <div class="flow-box">1. Copy Template</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">2. Customize Code</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">3. Set Environment Variables</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">4. Test Locally</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">5. Deploy</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">6. Monitor</div>
+                </div>
+                
+                <div class="status-box success">
+                    <strong>Deployment Checklist:</strong>
+                    <ol>
+                        <li>Copy this template to your project</li>
+                        <li>Fill in all [PLACEHOLDER] sections</li>
+                        <li>Set environment variable API_SERVER_URL</li>
+                        <li>Test locally with your agent</li>
+                        <li>Deploy to your environment</li>
+                        <li>Monitor cooldown effectiveness</li>
+                        <li>Adjust timing and logic as needed</li>
+                    </ol>
+                </div>
+            </section>
+            
+            <section id="demo">
+                <h2>Interactive Demo</h2>
+                <p>Experiment with the cooldown mechanism in this interactive demonstration:</p>
+                
+                <div class="demo-box">
+                    <div class="input-box">
+                        <label for="user-id">User ID:</label>
+                        <input type="text" id="user-id" value="user123">
+                        
+                        <label for="action-type">Action Type:</label>
+                        <select id="action-type">
+                            <option value="message">Send Message</option>
+                            <option value="order">Place Order</option>
+                            <option value="post">Create Post</option>
+                        </select>
+                        
+                        <button class="button" onclick="simulateRequest()">Simulate Request</button>
+                    </div>
+                    
+                    <div class="output-box">
+                        <h4>Request Output:</h4>
+                        <div id="request-output">No requests yet. Click the button to simulate a request.</div>
+                        
+                        <h4>Cooldown Status:</h4>
+                        <div id="cooldown-status">No active cooldowns</div>
+                    </div>
+                </div>
+                
+                <div class="status-box info">
+                    <strong>How it works:</strong> This demo simulates the cooldown mechanism using your browser's local storage. It helps you understand how the plugin would behave in a real application.
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Collapsible sections functionality
+        document.querySelectorAll('.collapsible-header').forEach(header => {
+            header.addEventListener('click', () => {
+                header.classList.toggle('active');
+                const content = header.nextElementSibling;
+                content.classList.toggle('active');
+            });
+        });
+        
+        // Cooldown customization demo
+        function updateCooldownDemo() {
+            const cooldownPeriod = document.getElementById('cooldown-period').value;
+            const minutes = Math.floor(cooldownPeriod / 60);
+            const seconds = cooldownPeriod % 60;
+            
+            let timeString = '';
+            if (minutes > 0) {
+                timeString += `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+            }
+            if (seconds > 0) {
+                if (timeString) timeString += ' and ';
+                timeString += `${seconds} second${seconds !== 1 ? 's' : ''}`;
+            }
+            
+            document.getElementById('demo-output').textContent = 
+                `Current cooldown period: ${cooldownPeriod} seconds. Users must wait ${timeString} between actions.`;
+        }
+        
+        // Interactive demo functionality
+        const userCooldowns = {};
+        
+        function simulateRequest() {
+            const userId = document.getElementById('user-id').value;
+            const actionType = document.getElementById('action-type').value;
+            const outputElement = document.getElementById('request-output');
+            const statusElement = document.getElementById('cooldown-status');
+            
+            const now = Date.now();
+            const cooldownPeriod = parseInt(document.getElementById('cooldown-period').value) * 1000;
+            
+            // Check if user is in cooldown
+            if (userCooldowns[userId] && (now - userCooldowns[userId].timestamp < cooldownPeriod)) {
+                const remaining = Math.ceil((cooldownPeriod - (now - userCooldowns[userId].timestamp)) / 1000);
+                
+                outputElement.innerHTML = `❌ Request <strong>blocked</strong> for user <strong>${userId}</strong> (${actionType}).<br>
+                                         User is in cooldown period. Please wait ${remaining} seconds.`;
+                
+                statusElement.innerHTML = `User <strong>${userId}</strong> is in cooldown until 
+                                         ${new Date(userCooldowns[userId].timestamp + cooldownPeriod).toLocaleTimeString()}.<br>
+                                         Last action: ${userCooldowns[userId].actionType} at 
+                                         ${new Date(userCooldowns[userId].timestamp).toLocaleTimeString()}.`;
+            } else {
+                // Allow request and record action
+                userCooldowns[userId] = {
+                    timestamp: now,
+                    actionType: actionType
+                };
+                
+                outputElement.innerHTML = `✅ Request <strong>allowed</strong> for user <strong>${userId}</strong> (${actionType}).<br>
+                                         Action recorded at ${new Date(now).toLocaleTimeString()}.`;
+                
+                statusElement.innerHTML = `User <strong>${userId}</strong> can make another request after 
+                                         ${new Date(now + cooldownPeriod).toLocaleTimeString()}.`;
+            }
+            
+            // Add to history
+            outputElement.innerHTML += `<div style="margin-top: 10px; font-size: 0.9em; color: #777;">
+                                      <strong>Request History:</strong><br>`;
+            
+            for (const [id, data] of Object.entries(userCooldowns)) {
+                outputElement.innerHTML += `- ${id}: ${data.actionType} at ${new Date(data.timestamp).toLocaleTimeString()}<br>`;
+            }
+            
+            outputElement.innerHTML += `</div>`;
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCooldownDemo();
+        });
+    </script>
+</body>
+</html>
