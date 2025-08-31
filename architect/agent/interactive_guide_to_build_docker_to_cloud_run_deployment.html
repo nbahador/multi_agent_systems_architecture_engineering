@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent System Template - Interactive Textbook</title>
+    <style>
+        /* ========== GLOBAL STYLES ========== */
+        :root {
+            --primary-blue: #3498db;
+            --dark-blue-h1: #2c3e50;
+            --dark-blue-h3: #34495e;
+            --light-grey: #f8f9fa;
+            --off-white: #f1f2f6;
+            --pure-white: #ffffff;
+            --border-color: #e9ecef;
+            --border-color-alt: #ddd;
+            --text-dark: #333;
+            --text-medium: #7f8c8d;
+            --warning-bg: #fff3cd;
+            --warning-border: #f39c12;
+            --info-bg: #d1ecf1;
+            --info-border: #17a2b8;
+            --success-bg: #d4edda;
+            --success-border: #28a745;
+            --code-bg: #2d3748;
+            --code-text: #e2e8f0;
+            --python-color: #ff6b6b;
+            --string-color: #4ecdc4;
+            --comment-color: #95a5a6;
+            --keyword-color: #e74c3c;
+            --number-color: #f39c12;
+            --flow-red: #e74c3c;
+            --flow-green: #27ae60;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background-color: var(--pure-white);
+        }
+        
+        /* ========== LAYOUT ========== */
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .toc {
+                position: static !important;
+                height: auto !important;
+            }
+        }
+        
+        /* ========== HEADER ========== */
+        header {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 3px solid var(--primary-blue);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: var(--dark-blue-h1);
+            margin-bottom: 15px;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            color: var(--dark-blue-h1);
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            margin: 40px 0 20px;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            color: var(--dark-blue-h3);
+            margin: 25px 0 15px;
+        }
+        
+        /* ========== TABLE OF CONTENTS ========== */
+        .toc {
+            background-color: var(--light-grey);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            position: sticky;
+            top: 20px;
+            height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+        
+        .toc h2 {
+            font-size: 1.5rem;
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        
+        .toc ul {
+            list-style-type: none;
+        }
+        
+        .toc li {
+            margin: 10px 0;
+        }
+        
+        .toc a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+            display: block;
+            padding: 5px 0;
+        }
+        
+        .toc a:hover {
+            color: #2980b9;
+        }
+        
+        /* ========== MAIN CONTENT ========== */
+        .content {
+            padding: 0 20px;
+        }
+        
+        /* ========== COLLAPSIBLE SECTIONS ========== */
+        .collapsible {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .collapsible-header {
+            background-color: var(--light-grey);
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        
+        .collapsible-header::after {
+            content: '▶';
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+        }
+        
+        .collapsible-header.active::after {
+            transform: rotate(90deg);
+            content: '▼';
+        }
+        
+        .collapsible-content {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+            background-color: var(--pure-white);
+            border: 1px solid var(--border-color);
+            border-top: none;
+        }
+        
+        .collapsible-content.show {
+            max-height: 5000px;
+            padding: 20px;
+        }
+        
+        /* ========== CODE BLOCKS ========== */
+        .code-explanation {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 1024px) {
+            .code-explanation {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .code-block {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            line-height: 1.5;
+        }
+        
+        .code-block code {
+            display: block;
+        }
+        
+        .explanation {
+            padding: 20px;
+            background-color: var(--off-white);
+        }
+        
+        .python { color: var(--python-color); }
+        .string { color: var(--string-color); }
+        .comment { color: var(--comment-color); font-style: italic; }
+        .keyword { color: var(--keyword-color); font-weight: bold; }
+        .number { color: var(--number-color); }
+        
+        /* ========== DEMO BOXES ========== */
+        .demo-box {
+            background-color: var(--off-white);
+            border: 1px solid var(--primary-blue);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .input-box {
+            background-color: var(--pure-white);
+            border-left: 5px solid var(--flow-green);
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .output-box {
+            background-color: #fdf2f2;
+            border-left: 5px solid var(--flow-red);
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        /* ========== FLOW DIAGRAMS ========== */
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 30px 0;
+            gap: 10px;
+        }
+        
+        .flow-box {
+            padding: 15px;
+            background-color: var(--primary-blue);
+            color: white;
+            border-radius: 5px;
+            min-width: 120px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .flow-arrow {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        /* ========== STATUS BOXES ========== */
+        .status-box {
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 5px solid;
+            border-radius: 4px;
+        }
+        
+        .warning {
+            background-color: var(--warning-bg);
+            border-left-color: var(--warning-border);
+        }
+        
+        .info {
+            background-color: var(--info-bg);
+            border-left-color: var(--info-border);
+        }
+        
+        .success {
+            background-color: var(--success-bg);
+            border-left-color: var(--success-border);
+        }
+        
+        /* ========== BUTTONS ========== */
+        .button {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        
+        .button:hover {
+            background-color: #2980b9;
+        }
+        
+        /* ========== INTERACTIVE DEMOS ========== */
+        .interactive-demo {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+        
+        .demo-controls {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .demo-output {
+            min-height: 100px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            background-color: var(--light-grey);
+        }
+        
+        /* ========== UTILITY CLASSES ========== */
+        .code-inline {
+            font-family: 'Courier New', monospace;
+            background-color: var(--light-grey);
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+        
+        .mt-20 {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Multi-Agent System Template</h1>
+            <p>A Comprehensive Guide to Building AI Agent Systems with MCP</p>
+        </header>
+        
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#section-intro">Introduction to Multi-Agent Systems</a></li>
+                <li><a href="#section-architecture">System Architecture</a></li>
+                <li><a href="#section-mcp">Model Context Protocol (MCP)</a></li>
+                <li><a href="#section-agents">Agent Implementations</a></li>
+                <li><a href="#section-memory">Memory Layer</a></li>
+                <li><a href="#section-orchestration">Orchestration System</a></li>
+                <li><a href="#section-deployment">Deployment & Configuration</a></li>
+                <li><a href="#section-demo">Interactive Demo</a></li>
+                <li><a href="#section-best">Best Practices</a></li>
+            </ul>
+        </nav>
+        
+        <main class="content">
+            <!-- INTRODUCTION SECTION -->
+            <section id="section-intro">
+                <h2>Introduction to Multi-Agent Systems</h2>
+                <p>Multi-agent systems represent a paradigm in artificial intelligence where multiple autonomous agents interact to solve problems that are beyond the capabilities of any individual agent. These systems are particularly valuable in complex domains like research, data analysis, and system modeling.</p>
+                
+                <div class="status-box info">
+                    <p><strong>Did you know?</strong> Multi-agent systems can tackle complex goals that would be difficult for a single agent to achieve by enabling specialized agents to work collaboratively :cite[1].</p>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">What are AI Agents?</div>
+                    <div class="collapsible-content">
+                        <p>AI agents are autonomous systems that can execute complete workflows including planning, action execution, result observation, and reasoning based on outcomes. These workflows are highly adaptable and can be tailored to meet specific requirements :cite[1].</p>
+                        
+                        <p>A fully autonomous agent can accomplish its designated goals without requiring human intervention. However, deterministic features can be incorporated when necessary to ensure predictable behavior in critical situations.</p>
+                    </div>
+                </div>
+                
+                <div class="flow-diagram">
+                    <div class="flow-box">User Query</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Orchestrator</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Specialized Agents</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Results</div>
+                </div>
+            </section>
+            
+            <!-- ARCHITECTURE SECTION -->
+            <section id="section-architecture">
+                <h2>System Architecture</h2>
+                <p>The multi-agent research system we're building consists of several specialized components working together. Understanding the architecture is crucial for effective implementation and customization.</p>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <code>
+                            <span class="comment"># Project Structure :cite[1]</span><br>
+                            📦Agents_with_MCP<br>
+                            ┣ 📂agents<br>
+                            ┃ ┣ 📜arxiv_agent.py<br>
+                            ┃ ┣ 📜multimodal_agent.py<br>
+                            ┃ ┣ 📜web_agent.py<br>
+                            ┃ ┗ 📜__init__.py<br>
+                            ┣ 📂mcp_client<br>
+                            ┃ ┣ 📜client.py<br>
+                            ┃ ┗ 📜__init__.py<br>
+                            ┣ 📂mcp_server<br>
+                            ┃ ┣ 📜arxiv_server.py<br>
+                            ┃ ┣ 📜multimodal_server.py<br>
+                            ┃ ┣ 📜web_server.py<br>
+                            ┃ ┗ 📜__init__.py<br>
+                            ┣ 📂src<br>
+                            ┃ ┣ 📜memory_cache.py<br>
+                            ┃ ┣ 📜orchestrator.py<br>
+                            ┃ ┣ 📜validator.py<br>
+                            ┃ ┗ 📜__init__.py<br>
+                            ┣ 📜config.py<br>
+                            ┣ 📜docker-compose.yml<br>
+                            ┗ 📜main.py
+                        </code>
+                    </div>
+                    <div class="explanation">
+                        <h3>Directory Structure</h3>
+                        <p>The project follows a modular organization with clear separation of concerns:</p>
+                        <ul>
+                            <li><strong>agents/</strong>: Contains implementations of specialized agents</li>
+                            <li><strong>mcp_client/</strong>: MCP client implementation for tool calling</li>
+                            <li><strong>mcp_server/</strong>: MCP servers for different data sources</li>
+                            <li><strong>src/</strong>: Core system components like memory and orchestration</li>
+                        </ul>
+                        <p class="status-box warning">Maintaining this structure is important for code organization and future extensibility.</p>
+                    </div>
+                </div>
+                
+                <h3>Key Components</h3>
+                <p>The system architecture includes these essential components:</p>
+                
+                <div class="flow-diagram">
+                    <div class="flow-box">User Interface</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Orchestrator</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box" style="background-color: #27ae60;">Web Agent</div>
+                    <div class="flow-box" style="background-color: #e67e22;">ArXiv Agent</div>
+                    <div class="flow-box" style="background-color: #9b59b6;">Multimodal Agent</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Memory Layer</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Response</div>
+                </div>
+            </section>
+            
+            <!-- MCP SECTION -->
+            <section id="section-mcp">
+                <h2>Model Context Protocol (MCP)</h2>
+                <p>The Model Context Protocol (MCP) is a revolutionary approach to providing external data access to Large Language Models. It enables creating secure, standardized servers that connect with LLMs through a unified transport layer :cite[1].</p>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <code>
+                            <span class="comment"># MCP Configuration Example :cite[1]</span><br>
+                            MCP_CONFIG = {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;"servers": {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"web_research": {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"url": os.getenv("MCP_WEB_RESEARCH_URL")<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"arxiv_research": {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"url": os.getenv("MCP_ARXIV_RESEARCH_URL")<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"multimodal_analysis": {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"url": os.getenv("MCP_MULTIMODAL_ANALYSIS_URL")<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;},<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;"default_server": "web_research",<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;"connection_timeout": 30,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;"retry_attempts": 3<br>
+                            }
+                        </code>
+                    </div>
+                    <div class="explanation">
+                        <h3>MCP Integration</h3>
+                        <p>Our implementation supports two distinct methods for utilizing MCP server tools:</p>
+                        <ol>
+                            <li><strong>Function Calling Integration</strong>: Using LLM function calling capabilities to make intelligent decisions about which tools to use</li>
+                            <li><strong>Direct Access</strong>: Making direct requests to MCP servers to access tools without LLM tool calling</li>
+                        </ol>
+                        <p>This dual approach provides flexibility depending on the specific use case and requirements.</p>
+                    </div>
+                </div>
+                
+                <div class="status-box success">
+                    <p><strong>Benefits of MCP:</strong> MCP servers offer excellent reusability across different AI systems, eliminating the need to implement separate APIs for each data source :cite[1].</p>
+                </div>
+            </section>
+            
+            <!-- Additional sections would continue here with similar structure -->
+            
+            <!-- INTERACTIVE DEMO SECTION -->
+            <section id="section-demo">
+                <h2>Interactive Demo</h2>
+                <p>Experiment with a simplified version of the multi-agent system to understand how different components interact.</p>
+                
+                <div class="interactive-demo">
+                    <h3>Agent Orchestration Simulator</h3>
+                    <p>Select a query type to see how the orchestrator would route the request:</p>
+                    
+                    <div class="demo-controls">
+                        <select id="query-type" class="button">
+                            <option value="web">Web Research Query</option>
+                            <option value="arxiv">Academic Paper Query</option>
+                            <option value="multimodal">Multimodal Analysis Query</option>
+                        </select>
+                        <button class="button" onclick="runDemo()">Run Simulation</button>
+                    </div>
+                    
+                    <div class="input-box">
+                        <h4>Input Query</h4>
+                        <p id="input-query">What are the latest developments in AI agent systems?</p>
+                    </div>
+                    
+                    <div class="output-box">
+                        <h4>Orchestration Process</h4>
+                        <div id="demo-output" class="demo-output">
+                            <p>Select a query type and click "Run Simulation" to see the process...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="status-box info">
+                    <p>This demo simulates the decision-making process of the orchestrator. In the actual system, this would involve more complex logic and real API calls.</p>
+                </div>
+            </section>
+            
+            <!-- Additional sections would continue here -->
+            
+        </main>
+    </div>
+
+    <script>
+        // Collapsible section functionality
+        document.querySelectorAll('.collapsible-header').forEach(header => {
+            header.addEventListener('click', () => {
+                header.classList.toggle('active');
+                const content = header.nextElementSibling;
+                content.classList.toggle('show');
+            });
+        });
+        
+        // Interactive demo functionality
+        function runDemo() {
+            const queryType = document.getElementById('query-type').value;
+            const output = document.getElementById('demo-output');
+            output.innerHTML = '<p>Processing query...</p>';
+            
+            // Simulate processing delay
+            setTimeout(() => {
+                let process = '';
+                
+                switch(queryType) {
+                    case 'web':
+                        process = `
+                            <p>1. Query received: "What are the latest developments in AI agent systems?"</p>
+                            <p>2. Identified as web research query</p>
+                            <p>3. Routing to Web Search Agent</p>
+                            <p>4. Using Tavily API to search web sources</p>
+                            <p>5. Processing and summarizing results</p>
+                            <p>6. Returning comprehensive response</p>
+                        `;
+                        break;
+                    case 'arxiv':
+                        process = `
+                            <p>1. Query received: "Recent papers about multi-agent systems"</p>
+                            <p>2. Identified as academic research query</p>
+                            <p>3. Routing to ArXiv Agent</p>
+                            <p>4. Searching ArXiv for relevant papers</p>
+                            <p>5. Extracting key information from papers</p>
+                            <p>6. Synthesizing findings into response</p>
+                        `;
+                        break;
+                    case 'multimodal':
+                        process = `
+                            <p>1. Query received: "Analyze this research paper PDF"</p>
+                            <p>2. Identified as multimodal analysis query</p>
+                            <p>3. Routing to Multimodal Agent</p>
+                            <p>4. Using Gemini for document analysis</p>
+                            <p>5. Extracting text and visual elements</p>
+                            <p>6. Generating comprehensive analysis</p>
+                        `;
+                        break;
+                }
+                
+                output.innerHTML = process;
+            }, 1000);
+        }
+        
+        // Update query text based on selection
+        document.getElementById('query-type').addEventListener('change', function() {
+            const queryText = document.getElementById('input-query');
+            switch(this.value) {
+                case 'web':
+                    queryText.innerHTML = 'What are the latest developments in AI agent systems?';
+                    break;
+                case 'arxiv':
+                    queryText.innerHTML = 'Recent papers about multi-agent systems';
+                    break;
+                case 'multimodal':
+                    queryText.innerHTML = 'Analyze this research paper PDF';
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
