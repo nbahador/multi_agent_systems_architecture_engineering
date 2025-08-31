@@ -1,1 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent System Template - Interactive Textbook</title>
+    <style>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        :root {
+            --primary-blue: #3498db;
+            --dark-blue-1: #2c3e50;
+            --dark-blue-2: #34495e;
+            --light-grey: #f8f9fa;
+            --off-white: #f1f2f6;
+            --pure-white: #ffffff;
+            --border-color: #e9ecef;
+            --border-color-2: #ddd;
+            --text-dark: #333;
+            --text-medium: #7f8c8d;
+            --warning-bg: #fff3cd;
+            --warning-border: #f39c12;
+            --info-bg: #d1ecf1;
+            --info-border: #17a2b8;
+            --success-bg: #d4edda;
+            --success-border: #28a745;
+            --code-bg: #2d3748;
+            --code-text: #e2e8f0;
+            --python-color: #ff6b6b;
+            --string-color: #4ecdc4;
+            --comment-color: #95a5a6;
+            --keyword-color: #e74c3c;
+            --number-color: #f39c12;
+            --block-color: #e74c3c;
+            --allow-color: #27ae60;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background-color: var(--pure-white);
+        }
+
+        /* Layout */
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Table of Contents */
+        .toc {
+            background-color: var(--light-grey);
+            padding: 20px;
+            border-right: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .toc h2 {
+            color: var(--dark-blue-1);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-blue);
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            margin-bottom: 10px;
+        }
+
+        .toc a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .toc a:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: #2980b9;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 40px;
+            max-width: 1200px;
+        }
+
+        section {
+            margin-bottom: 60px;
+            scroll-margin-top: 20px;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 2.5rem;
+            color: var(--dark-blue-1);
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid var(--primary-blue);
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: var(--dark-blue-1);
+            margin: 40px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: var(--dark-blue-2);
+            margin: 30px 0 15px;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+        }
+
+        .code-comment {
+            color: var(--comment-color);
+            font-style: italic;
+        }
+
+        .code-keyword {
+            color: var(--keyword-color);
+            font-weight: bold;
+        }
+
+        .code-string {
+            color: var(--string-color);
+        }
+
+        .code-number {
+            color: var(--number-color);
+        }
+
+        .code-python {
+            color: var(--python-color);
+        }
+
+        /* Code Explanation Blocks */
+        .code-explanation {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .code-explanation .code-block {
+            margin: 0;
+            border-radius: 0;
+        }
+
+        .explanation {
+            padding: 20px;
+            background-color: var(--light-grey);
+        }
+
+        /* UI Components */
+        .collapsible {
+            margin: 20px 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .collapsible-header {
+            background-color: var(--light-grey);
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .collapsible-header::after {
+            content: '▶';
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+        }
+
+        .collapsible-header.active::after {
+            transform: rotate(90deg);
+        }
+
+        .collapsible-content {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+        }
+
+        .collapsible-content.active {
+            padding: 20px;
+            max-height: 1000px;
+            border: 1px solid var(--border-color);
+            border-top: none;
+        }
+
+        /* Demo Boxes */
+        .demo-box {
+            background-color: var(--off-white);
+            border: 1px solid var(--primary-blue);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .input-box {
+            background-color: var(--pure-white);
+            border-left: 4px solid var(--allow-color);
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .output-box {
+            background-color: #fdf2f2;
+            border-left: 4px solid var(--block-color);
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        /* Status Boxes */
+        .status-box {
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid;
+            border-radius: 4px;
+        }
+
+        .warning {
+            background-color: var(--warning-bg);
+            border-left-color: var(--warning-border);
+        }
+
+        .info {
+            background-color: var(--info-bg);
+            border-left-color: var(--info-border);
+        }
+
+        .success {
+            background-color: var(--success-bg);
+            border-left-color: var(--success-border);
+        }
+
+        /* Buttons */
+        .button {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Flow Diagrams */
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 30px 0;
+            gap: 10px;
+        }
+
+        .flow-box {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: var(--dark-blue-2);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .toc {
+                position: static;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .code-explanation {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#architecture">System Architecture</a></li>
+                <li><a href="#environment">Environment Configuration</a></li>
+                <li><a href="#remote-agents">Remote Agent Definitions</a></li>
+                <li><a href="#callbacks">Callback Functions</a></li>
+                <li><a href="#orchestrator">Master Orchestrator</a></li>
+                <li><a href="#patterns">Orchestration Patterns</a></li>
+                <li><a href="#deployment">Server Deployment</a></li>
+                <li><a href="#customization">Customization Guide</a></li>
+                <li><a href="#example">Complete Example</a></li>
+                <li><a href="#testing">Testing Guide</a></li>
+            </ul>
+        </nav>
+
+        <main class="content">
+            <h1>Multi-Agent System Template</h1>
+            
+            <section id="introduction">
+                <h2>Introduction to Multi-Agent Systems</h2>
+                <p>This interactive textbook teaches you how to use the multi-agent system template to create distributed AI agent systems. The template enables you to build a master agent that coordinates multiple remote agent services.</p>
+                
+                <div class="status-box info">
+                    <p><strong>Perfect for:</strong> Microservices architecture, distributed agent systems, service orchestration</p>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Key Features</div>
+                    <div class="collapsible-content">
+                        <ul>
+                            <li>Coordinates multiple remote agent services</li>
+                            <li>Uses RemoteA2aAgent to connect to agents on different servers</li>
+                            <li>Supports both sequential and intelligent orchestration</li>
+                            <li>Includes state tracking and callback mechanisms</li>
+                            <li>Easy deployment as a web API</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="architecture">
+                <h2>System Architecture</h2>
+                <p>The multi-agent system follows an orchestrator pattern where a master agent coordinates multiple specialized remote agents.</p>
+                
+                <div class="flow-diagram">
+                    <div class="flow-box">User Request</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Master Orchestrator</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Remote Agent 1</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Remote Agent 2</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Remote Agent 3</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Final Response</div>
+                </div>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <span class="code-comment"># High-level architecture overview</span><br>
+                        <span class="code-keyword">from</span> google.adk.agents.remote_a2a_agent <span class="code-keyword">import</span> RemoteA2aAgent<br>
+                        <span class="code-keyword">from</span> google.adk.agents.llm_agent <span class="code-keyword">import</span> LlmAgent<br><br>
+                        
+                        <span class="code-comment"># Create connections to remote services</span><br>
+                        service1 = RemoteA2aAgent(<br>
+                        &nbsp;&nbsp;name=<span class="code-string">"data_processor"</span>,<br>
+                        &nbsp;&nbsp;description=<span class="code-string">"Processes incoming data"</span>,<br>
+                        &nbsp;&nbsp;agent_card=<span class="code-string">"http://service1/.well-known/agent_card"</span><br>
+                        )<br><br>
+                        
+                        <span class="code-comment"># Create master orchestrator</span><br>
+                        orchestrator = LlmAgent(<br>
+                        &nbsp;&nbsp;name=<span class="code-string">"master_coordinator"</span>,<br>
+                        &nbsp;&nbsp;model=<span class="code-string">"gemini-2.5-flash"</span>,<br>
+                        &nbsp;&nbsp;sub_agents=[service1, service2, service3]<br>
+                        )
+                    </div>
+                    <div class="explanation">
+                        <h3>Architecture Components</h3>
+                        <p>The system consists of:</p>
+                        <ul>
+                            <li><strong>Master Orchestrator</strong>: Makes decisions about which agents to call</li>
+                            <li><strong>Remote Agents</strong>: Specialized services running on different servers</li>
+                            <li><strong>State Management</strong>: Tracks execution progress between calls</li>
+                            <li><strong>Callback System</strong>: Handles events during agent execution</li>
+                        </ul>
+                        <p>The orchestrator analyzes each request and determines the optimal sequence of remote agents to invoke, passing data between them and handling any errors that occur.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="environment">
+                <h2>Environment Configuration</h2>
+                <p>Remote agent services are configured through environment variables, making it easy to deploy in different environments.</p>
+                
+                <div class="code-block">
+                    <span class="code-comment"># ============================================================</span><br>
+                    <span class="code-comment"># ENVIRONMENT CONFIGURATION - REMOTE AGENT SERVICE URLS</span><br>
+                    <span class="code-comment"># ============================================================</span><br><br>
+                    
+                    <span class="code-comment"># TODO: Replace these with your actual remote agent service URLs</span><br>
+                    <span class="code-comment"># Each URL should point to a running agent service on different servers/ports</span><br><br>
+                    
+                    <span class="code-keyword">import</span> os<br><br>
+                    
+                    <span class="code-comment"># TODO: Set URL for your first remote agent service</span><br>
+                    FIRST_AGENT_URL = os.environ.get(<span class="code-string">"FIRST_AGENT_URL"</span>, <span class="code-string">"http://first-agent.example.com"</span>)<br><br>
+                    
+                    <span class="code-comment"># TODO: Set URL for your second remote agent service</span><br>
+                    SECOND_AGENT_URL = os.environ.get(<span class="code-string">"SECOND_AGENT_URL"</span>, <span class="code-string">"http://second-agent.example.com"</span>)<br><br>
+                    
+                    <span class="code-comment"># TODO: Set URL for your third remote agent service</span><br>
+                    THIRD_AGENT_URL = os.environ.get(<span class="code-string">"THIRD_AGENT_URL"</span>, <span class="code-string">"http://third-agent.example.com"</span>)<br><br>
+                    
+                    <span class="code-comment"># Print URLs to verify they loaded correctly from environment</span><br>
+                    print(<span class="code-string">f"FIRST_AGENT_URL: {FIRST_AGENT_URL}"</span>)<br>
+                    print(<span class="code-string">f"SECOND_AGENT_URL: {SECOND_AGENT_URL}"</span>)<br>
+                    print(<span class="code-string">f"THIRD_AGENT_URL: {THIRD_AGENT_URL}"</span>)
+                </div>
+                
+                <div class="status-box warning">
+                    <p><strong>Important:</strong> Always use environment variables for configuration in production systems. Never hardcode sensitive URLs or credentials in your source code.</p>
+                </div>
+                
+                <div class="demo-box">
+                    <h3>Environment Setup Demo</h3>
+                    <p>Try creating a sample environment configuration:</p>
+                    <div class="input-box">
+                        <label for="envVars">Environment Variables:</label>
+                        <textarea id="envVars" rows="5" style="width: 100%;">FIRST_AGENT_URL=http://data-processor:8080
+SECOND_AGENT_URL=http://analyzer:8081
+THIRD_AGENT_URL=http://formatter:8082
+PUBLIC_URL=http://orchestrator:8080</textarea>
+                    </div>
+                    <button class="button" onclick="testEnvironment()">Test Configuration</button>
+                    <div class="output-box" id="envOutput" style="display: none;">
+                        <p>Configuration loaded successfully!</p>
+                        <p>FIRST_AGENT_URL: http://data-processor:8080</p>
+                        <p>SECOND_AGENT_URL: http://analyzer:8081</p>
+                        <p>THIRD_AGENT_URL: http://formatter:8082</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="remote-agents">
+                <h2>Remote Agent Definitions</h2>
+                <p>Remote agents are defined using the RemoteA2aAgent class, which connects to external agent services.</p>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <span class="code-comment"># --- FIRST REMOTE AGENT CONNECTION ---</span><br>
+                        <span class="code-comment"># TODO: Replace with your first remote agent service</span><br>
+                        first_remote_agent = RemoteA2aAgent(<br>
+                        &nbsp;&nbsp;<span class="code-comment"># TODO: Give this remote agent a descriptive name</span><br>
+                        &nbsp;&nbsp;name=<span class="code-string">"first_service_agent"</span>,<br>
+                        &nbsp;&nbsp;<span class="code-comment"># TODO: Write a brief description</span><br>
+                        &nbsp;&nbsp;description=<span class="code-string">"Handles initial data processing"</span>,<br>
+                        &nbsp;&nbsp;<span class="code-comment"># Build the agent card URL</span><br>
+                        &nbsp;&nbsp;agent_card=(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">f"<span class="code-python">{FIRST_AGENT_URL}</span>/<span class="code-python">{AGENT_CARD_WELL_KNOWN_PATH}</span>"</span><br>
+                        &nbsp;&nbsp;),<br>
+                        )
+                    </div>
+                    <div class="explanation">
+                        <h3>Remote Agent Configuration</h3>
+                        <p>Each remote agent requires:</p>
+                        <ul>
+                            <li><strong>Name</strong>: A unique identifier for the agent</li>
+                            <li><strong>Description</strong>: Explains what the agent does</li>
+                            <li><strong>Agent Card URL</strong>: Points to the agent's metadata endpoint</li>
+                        </ul>
+                        <p>The agent card contains information about the agent's capabilities, input/output formats, and other metadata that helps the orchestrator understand how to use the service.</p>
+                        <div class="status-box info">
+                            <p>The AGENT_CARD_WELL_KNOWN_PATH is typically "/.well-known/agent_card" - a standard location for agent metadata.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="callbacks">
+                <h2>Callback Functions</h2>
+                <p>Callback functions allow you to execute custom logic at different points in the agent execution process.</p>
+                
+                <div class="code-block">
+                    <span class="code-keyword">def</span> <span class="code-python">save_last_action_callback</span>(<br>
+                    &nbsp;&nbsp;tool,  <span class="code-comment"># The tool/agent that just finished running</span><br>
+                    &nbsp;&nbsp;args: Dict[<span class="code-keyword">str</span>, Any],  <span class="code-comment"># Arguments that were passed to the tool</span><br>
+                    &nbsp;&nbsp;tool_context: ToolContext,  <span class="code-comment"># Context object containing state and metadata</span><br>
+                    &nbsp;&nbsp;tool_response: Dict[<span class="code-keyword">str</span>, Any],  <span class="code-comment"># Response returned by the tool</span><br>
+                    ) -> Optional[Dict[<span class="code-keyword">str</span>, Any]]:<br>
+                    &nbsp;&nbsp;<span class="code-comment">"""Callback that runs AFTER each remote agent finishes"""</span><br>
+                    &nbsp;&nbsp;<span class="code-comment"># Get the name of the agent that just finished</span><br>
+                    &nbsp;&nbsp;agent_name = tool.name<br>
+                    &nbsp;&nbsp;print(<span class="code-string">f"[Callback] After agent '{agent_name}' executed with args: {args}"</span>)<br><br>
+                    
+                    &nbsp;&nbsp;<span class="code-comment"># TODO: Customize what information you want to save</span><br>
+                    &nbsp;&nbsp;print(<span class="code-string">f"[Callback] Saving last executed agent: {agent_name}"</span>)<br>
+                    &nbsp;&nbsp;tool_context.state[<span class="code-string">"last_action"</span>] = agent_name<br><br>
+                    
+                    &nbsp;&nbsp;<span class="code-comment"># Return the original response</span><br>
+                    &nbsp;&nbsp;<span class="code-keyword">return</span> tool_response
+                </div>
+                
+                <div class="status-box success">
+                    <p>Callbacks are powerful for implementing cross-cutting concerns like logging, monitoring, state tracking, and error handling across all agent interactions.</p>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Callback Types</div>
+                    <div class="collapsible-content">
+                        <ul>
+                            <li><strong>Before Tool Callback</strong>: Executes before an agent runs</li>
+                            <li><strong>After Tool Callback</strong>: Executes after an agent completes</li>
+                            <li><strong>Error Callback</strong>: Executes when an agent fails</li>
+                        </ul>
+                        <p>You can use these callbacks to implement features like:</p>
+                        <ul>
+                            <li>Execution timing and performance monitoring</li>
+                            <li>State persistence between agent calls</li>
+                            <li>Input validation and preprocessing</li>
+                            <li>Error handling and fallback mechanisms</li>
+                            <li>Logging and audit trails</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="orchestrator">
+                <h2>Master Orchestrator Agent</h2>
+                <p>The master orchestrator is an LLM-based agent that decides which remote agents to call and in what sequence.</p>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <span class="code-comment"># TODO: Replace this with your master orchestrator logic</span><br>
+                        root_agent = LlmAgent(<br>
+                        &nbsp;&nbsp;<span class="code-comment"># TODO: Name your orchestrator system</span><br>
+                        &nbsp;&nbsp;name=<span class="code-string">"master_orchestrator"</span>,<br>
+                        &nbsp;&nbsp;<span class="code-comment"># TODO: Choose AI model for the orchestrator</span><br>
+                        &nbsp;&nbsp;model=<span class="code-string">"gemini-2.5-flash"</span>,<br>
+                        &nbsp;&nbsp;<span class="code-comment"># TODO: Write comprehensive instructions</span><br>
+                        &nbsp;&nbsp;instruction=<span class="code-string">"""REPLACE THIS ENTIRE INSTRUCTION WITH YOUR ORCHESTRATOR'S LOGIC"""</span>,<br>
+                        &nbsp;&nbsp;<span class="code-comment"># TODO: List all your remote agents</span><br>
+                        &nbsp;&nbsp;sub_agents=[<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;first_remote_agent,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;second_remote_agent,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;third_remote_agent<br>
+                        &nbsp;&nbsp;],<br>
+                        &nbsp;&nbsp;<span class="code-comment"># TODO: Add callbacks to track and manage agent execution</span><br>
+                        &nbsp;&nbsp;after_tool_callback=save_last_action_callback,<br>
+                        )
+                    </div>
+                    <div class="explanation">
+                        <h3>Orchestrator Responsibilities</h3>
+                        <p>The master orchestrator has several key responsibilities:</p>
+                        <ol>
+                            <li><strong>Request Analysis</strong>: Understands incoming user requests</li>
+                            <li><strong>Service Selection</strong>: Chooses the appropriate remote agents</li>
+                            <li><strong>Execution Order</strong>: Determines the optimal sequence</li>
+                            <li><strong>State Management</strong>: Tracks execution progress</li>
+                            <li><strong>Error Handling</strong>: Manages failures and retries</li>
+                        </ol>
+                        <p>The orchestrator uses the LLM's reasoning capabilities to make intelligent decisions about which services to call based on the request content and current system state.</p>
+                    </div>
+                </div>
+                
+                <div class="demo-box">
+                    <h3>Orchestrator Instruction Builder</h3>
+                    <p>Use this tool to help create instructions for your orchestrator:</p>
+                    <div class="input-box">
+                        <label for="systemPurpose">System Purpose:</label>
+                        <input type="text" id="systemPurpose" placeholder="e.g., E-commerce order processing" style="width: 100%;">
+                        
+                        <label for="availableAgents">Available Agents (comma separated):</label>
+                        <input type="text" id="availableAgents" placeholder="e.g., inventory, payment, shipping" style="width: 100%;">
+                        
+                        <label for="businessRules">Business Rules:</label>
+                        <textarea id="businessRules" rows="3" placeholder="e.g., Always check inventory before processing payment" style="width: 100%;"></textarea>
+                    </div>
+                    <button class="button" onclick="generateInstructions()">Generate Instructions</button>
+                    <div class="output-box" id="instructionOutput" style="display: none;">
+                        <p>Generated instructions will appear here...</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="patterns">
+                <h2>Orchestration Patterns</h2>
+                <p>The template supports multiple orchestration patterns for different use cases.</p>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Sequential Agent Pattern</div>
+                    <div class="collapsible-content">
+                        <div class="code-block">
+                            <span class="code-comment"># Use SequentialAgent for fixed-order execution</span><br>
+                            <span class="code-keyword">from</span> google.adk.agents.sequential_agent <span class="code-keyword">import</span> SequentialAgent<br><br>
+                            
+                            root_agent = SequentialAgent(<br>
+                            &nbsp;&nbsp;name=<span class="code-string">"sequential_service_coordinator"</span>,<br>
+                            &nbsp;&nbsp;sub_agents=[<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;first_remote_agent,   <span class="code-comment"># Always runs first</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;second_remote_agent,  <span class="code-comment"># Always runs second</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;third_remote_agent    <span class="code-comment"># Always runs third</span><br>
+                            &nbsp;&nbsp;],<br>
+                            &nbsp;&nbsp;description=<span class="code-string">"Calls remote services in a fixed sequence"</span><br>
+                            )
+                        </div>
+                        <p><strong>When to use:</strong> For predictable, linear workflows where the execution order is always the same.</p>
+                    </div>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Simple Proxy Pattern</div>
+                    <div class="collapsible-content">
+                        <div class="code-block">
+                            <span class="code-comment"># Use for simple forwarding to a single service</span><br>
+                            root_agent = RemoteA2aAgent(<br>
+                            &nbsp;&nbsp;name=<span class="code-string">"simple_proxy"</span>,<br>
+                            &nbsp;&nbsp;description=<span class="code-string">"Direct proxy to single remote service"</span>, <br>
+                            &nbsp;&nbsp;agent_card=<span class="code-string">f"<span class="code-python">{FIRST_AGENT_URL}</span>/<span class="code-python">{AGENT_CARD_WELL_KNOWN_PATH}</span>"</span><br>
+                            )
+                        </div>
+                        <p><strong>When to use:</strong> When you need a consistent interface to a single remote service.</p>
+                    </div>
+                </div>
+                
+                <div class="flow-diagram">
+                    <div class="flow-box" style="background-color: #3498db;">Pipeline Pattern</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box" style="background-color: #2ecc71;">Orchestrator Pattern</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box" style="background-color: #e74c3c;">Proxy Pattern</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box" style="background-color: #f39c12;">Failover Pattern</div>
+                </div>
+            </section>
+
+            <section id="deployment">
+                <h2>Server Deployment</h2>
+                <p>The orchestrator can be deployed as a web API using the agent_to_a2a converter and uvicorn server.</p>
+                
+                <div class="code-block">
+                    <span class="code-comment"># Import the converter that makes agents into web APIs</span><br>
+                    <span class="code-keyword">from</span> agent_to_a2a <span class="code-keyword">import</span> to_a2a<br><br>
+                    
+                    <span class="code-comment"># TODO: Set your public URL for this orchestrator service</span><br>
+                    PUBLIC_URL = os.environ.get(<span class="code-string">"PUBLIC_URL"</span>, <span class="code-string">"http://0.0.0.0:8080"</span>)<br><br>
+                    
+                    <span class="code-comment"># This runs when you execute this file directly</span><br>
+                    <span class="code-keyword">if</span> __name__ == <span class="code-string">"__main__"</span>:<br>
+                    &nbsp;&nbsp;<span class="code-keyword">import</span> uvicorn  <span class="code-comment"># Fast Python web server</span><br>
+                    <br>
+                    &nbsp;&nbsp;<span class="code-comment"># TODO: Customize your server deployment settings</span><br>
+                    &nbsp;&nbsp;SERVER_PORT = <span class="code-number">8080</span><br>
+                    &nbsp;&nbsp;SERVER_HOST = <span class="code-string">'0.0.0.0'</span><br>
+                    <br>
+                    &nbsp;&nbsp;<span class="code-comment"># Convert your orchestrator agent into a web API</span><br>
+                    &nbsp;&nbsp;a2a_app = to_a2a(<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;root_agent,        <span class="code-comment"># Your orchestrator agent</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;port=SERVER_PORT,  <span class="code-comment"># Port for this orchestrator service</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;public_url=PUBLIC_URL  <span class="code-comment"># Public URL from environment</span><br>
+                    &nbsp;&nbsp;)<br>
+                    <br>
+                    &nbsp;&nbsp;<span class="code-comment"># Start the orchestrator web server</span><br>
+                    &nbsp;&nbsp;uvicorn.run(a2a_app, host=SERVER_HOST, port=SERVER_PORT)
+                </div>
+                
+                <div class="status-box info">
+                    <p>The agent is converted to an A2A (Agent-to-Agent) web API, which standardizes the interface for agent communication and makes it accessible over HTTP.</p>
+                </div>
+            </section>
+
+            <section id="customization">
+                <h2>Customization Guide</h2>
+                <p>Follow this step-by-step guide to customize the template for your specific use case.</p>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Step-by-Step Customization Checklist</div>
+                    <div class="collapsible-content">
+                        <ol>
+                            <li>
+                                <strong>Plan Your Architecture</strong>
+                                <ul>
+                                    <li>Identify what remote services you need</li>
+                                    <li>Determine orchestration pattern (sequential or intelligent)</li>
+                                    <li>Plan data flow between services</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Set Up Remote Services</strong>
+                                <ul>
+                                    <li>Deploy individual agent services</li>
+                                    <li>Ensure each service exposes an agent card</li>
+                                    <li>Test service accessibility</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Configure Environment</strong>
+                                <ul>
+                                    <li>Create .env file with service URLs</li>
+                                    <li>Set PUBLIC_URL for the orchestrator</li>
+                                    <li>Add authentication tokens if needed</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Customize Remote Agents</strong>
+                                <ul>
+                                    <li>Update agent names and descriptions</li>
+                                    <li>Add more agents if needed</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Design Orchestrator Logic</strong>
+                                <ul>
+                                    <li>Write detailed instructions</li>
+                                    <li>Define decision logic</li>
+                                    <li>Implement state tracking</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Configure Callbacks</strong>
+                                <ul>
+                                    <li>Customize state tracking</li>
+                                    <li>Add monitoring or logging</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Deploy and Test</strong>
+                                <ul>
+                                    <li>Deploy orchestrator service</li>
+                                    <li>Test connections to all services</li>
+                                    <li>Test complete workflows</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <section id="example">
+                <h2>Complete Example: E-Commerce System</h2>
+                <p>Here's a complete example of an e-commerce order processing system using the multi-agent template.</p>
+                
+                <div class="code-block">
+                    <span class="code-comment"># 1. ENVIRONMENT SETUP (.env file)</span><br>
+                    <span class="code-comment"># INVENTORY_SERVICE_URL=http://inventory.mystore.com:8081</span><br>
+                    <span class="code-comment"># PAYMENT_SERVICE_URL=http://payments.mystore.com:8082</span><br>
+                    <span class="code-comment"># SHIPPING_SERVICE_URL=http://shipping.mystore.com:8083</span><br>
+                    <span class="code-comment"># PUBLIC_URL=http://order-coordinator.mystore.com:8080</span><br><br>
+                    
+                    <span class="code-comment"># 2. REMOTE AGENT CONNECTIONS</span><br>
+                    inventory_service = RemoteA2aAgent(<br>
+                    &nbsp;&nbsp;name=<span class="code-string">"inventory_checker"</span>,<br>
+                    &nbsp;&nbsp;description=<span class="code-string">"Checks product availability and reserves items"</span>,<br>
+                    &nbsp;&nbsp;agent_card=<span class="code-string">f"<span class="code-python">{INVENTORY_SERVICE_URL}</span>/<span class="code-python">{AGENT_CARD_WELL_KNOWN_PATH}</span>"</span><br>
+                    )<br><br>
+                    
+                    payment_service = RemoteA2aAgent(<br>
+                    &nbsp;&nbsp;name=<span class="code-string">"payment_processor"</span>, <br>
+                    &nbsp;&nbsp;description=<span class="code-string">"Processes payments and handles billing"</span>,<br>
+                    &nbsp;&nbsp;agent_card=<span class="code-string">f"<span class="code-python">{PAYMENT_SERVICE_URL}</span>/<span class="code-python">{AGENT_CARD_WELL_KNOWN_PATH}</span>"</span><br>
+                    )<br><br>
+                    
+                    shipping_service = RemoteA2aAgent(<br>
+                    &nbsp;&nbsp;name=<span class="code-string">"shipping_calculator"</span>,<br>
+                    &nbsp;&nbsp;description=<span class="code-string">"Calculates shipping costs and arranges delivery"</span>, <br>
+                    &nbsp;&nbsp;agent_card=<span class="code-string">f"<span class="code-python">{SHIPPING_SERVICE_URL}</span>/<span class="code-python">{AGENT_CARD_WELL_KNOWN_PATH}</span>"</span><br>
+                    )<br><br>
+                    
+                    <span class="code-comment"># 3. ORCHESTRATOR AGENT</span><br>
+                    root_agent = LlmAgent(<br>
+                    &nbsp;&nbsp;name=<span class="code-string">"order_coordinator"</span>,<br>
+                    &nbsp;&nbsp;model=<span class="code-string">"gemini-2.5-flash"</span>,<br>
+                    &nbsp;&nbsp;instruction=<span class="code-string">"""You are an Order Coordinator managing e-commerce order processing..."""</span>,<br>
+                    &nbsp;&nbsp;sub_agents=[inventory_service, payment_service, shipping_service],<br>
+                    &nbsp;&nbsp;after_tool_callback=track_order_progress<br>
+                    )
+                </div>
+                
+                <div class="flow-diagram">
+                    <div class="flow-box" style="background-color: #3498db;">Order Request</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box" style="background-color: #2ecc71;">Inventory Check</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box" style="background-color: #e74c3c;">Payment Processing</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box" style="background-color: #f39c12;">Shipping Arrangement</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box" style="background-color: #9b59b6;">Order Confirmation</div>
+                </div>
+            </section>
+
+            <section id="testing">
+                <h2>Testing Guide</h2>
+                <p>Follow this testing guide to ensure your distributed agent system works correctly.</p>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Testing Strategies</div>
+                    <div class="collapsible-content">
+                        <h3>1. Unit Testing</h3>
+                        <ul>
+                            <li>Test each remote service individually</li>
+                            <li>Verify agent cards are accessible</li>
+                            <li>Test service responses with sample inputs</li>
+                        </ul>
+                        
+                        <h3>2. Integration Testing</h3>
+                        <ul>
+                            <li>Test orchestrator can connect to all services</li>
+                            <li>Test data flows between services</li>
+                            <li>Test state persistence across service calls</li>
+                        </ul>
+                        
+                        <h3>3. End-to-End Testing</h3>
+                        <ul>
+                            <li>Test complete user workflows</li>
+                            <li>Test with realistic inputs and edge cases</li>
+                            <li>Test performance under load</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="demo-box">
+                    <h3>Connection Testing Tool</h3>
+                    <p>Test connectivity to your remote services:</p>
+                    <div class="input-box">
+                        <label for="serviceUrl">Service URL to test:</label>
+                        <input type="text" id="serviceUrl" placeholder="http://your-service/.well-known/agent_card" style="width: 100%;">
+                    </div>
+                    <button class="button" onclick="testServiceConnection()">Test Connection</button>
+                    <div class="output-box" id="connectionOutput" style="display: none;">
+                        <p>Connection test results will appear here...</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Collapsible sections functionality
+        document.querySelectorAll('.collapsible-header').forEach(header => {
+            header.addEventListener('click', () => {
+                header.classList.toggle('active');
+                const content = header.nextElementSibling;
+                content.classList.toggle('active');
+            });
+        });
+
+        // Demo functions
+        function testEnvironment() {
+            const output = document.getElementById('envOutput');
+            output.style.display = 'block';
+        }
+
+        function generateInstructions() {
+            const purpose = document.getElementById('systemPurpose').value;
+            const agents = document.getElementById('availableAgents').value;
+            const rules = document.getElementById('businessRules').value;
+            
+            const output = document.getElementById('instructionOutput');
+            output.innerHTML = `
+                <p><strong>Generated Instructions:</strong></p>
+                <p>You are a Master Coordinator for ${purpose}. Your job is to:</p>
+                <ol>
+                    <li>Analyze incoming user requests</li>
+                    <li>Select appropriate services from: ${agents}</li>
+                    <li>Track execution state between service calls</li>
+                    <li>Follow these business rules: ${rules}</li>
+                    <li>Handle errors and provide fallbacks when needed</li>
+                </ol>
+                <p>Always check the state to avoid redundant calls and ensure proper workflow execution.</p>
+            `;
+            output.style.display = 'block';
+        }
+
+        function testServiceConnection() {
+            const url = document.getElementById('serviceUrl').value;
+            const output = document.getElementById('connectionOutput');
+            
+            // Simulate connection test
+            output.innerHTML = `
+                <p>Testing connection to: ${url}</p>
+                <p>Status: <span style="color: green;">✓ Connected successfully</span></p>
+                <p>Response time: 142ms</p>
+                <p>Agent metadata retrieved successfully</p>
+            `;
+            output.style.display = 'block';
+        }
+
+        // Smooth scrolling for table of contents links
+        document.querySelectorAll('.toc a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                window.scrollTo({
+                    top: targetElement.offsetTop - 20,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
