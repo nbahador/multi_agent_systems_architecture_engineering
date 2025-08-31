@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent System with Cooldown - Interactive Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+        
+        .toc {
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .toc h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .toc ul {
+            list-style: none;
+        }
+        
+        .toc li {
+            margin-bottom: 8px;
+        }
+        
+        .toc a {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 5px 0;
+            display: block;
+            transition: color 0.2s;
+        }
+        
+        .toc a:hover {
+            color: #2980b9;
+        }
+        
+        .content {
+            background: white;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 3px solid #3498db;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+        }
+        
+        .section {
+            margin-bottom: 50px;
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        .section h3 {
+            color: #34495e;
+            font-size: 1.5rem;
+            margin: 25px 0 15px 0;
+        }
+        
+        .collapsible {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .collapsible-header {
+            padding: 15px 20px;
+            cursor: pointer;
+            background: #e9ecef;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .collapsible-header:hover {
+            background: #dee2e6;
+        }
+        
+        .collapsible-content {
+            padding: 20px;
+            display: none;
+        }
+        
+        .collapsible.active .collapsible-content {
+            display: block;
+        }
+        
+        .collapsible.active .collapsible-header::after {
+            content: '▼';
+        }
+        
+        .collapsible-header::after {
+            content: '▶';
+            font-size: 0.8em;
+        }
+        
+        .code-explanation {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .code-side {
+            background: #f8f9fa;
+            padding: 20px;
+        }
+        
+        .explanation-side {
+            padding: 20px;
+            background: white;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .highlight {
+            background: #ffeaa7;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        .demo-box {
+            background: #f1f2f6;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .demo-box h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .input-box, .output-box {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        
+        .input-box {
+            border-left: 4px solid #27ae60;
+        }
+        
+        .output-box {
+            border-left: 4px solid #e74c3c;
+            background: #fdf2f2;
+        }
+        
+        .diagram {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .flow-box {
+            background: #3498db;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            min-width: 120px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: #7f8c8d;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .info-box {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .button:hover {
+            background: #2980b9;
+        }
+        
+        .interactive-demo {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        
+        .demo-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .toc {
+                position: static;
+                margin-bottom: 20px;
+            }
+            
+            .code-explanation {
+                grid-template-columns: 1fr;
+            }
+            
+            .flow-diagram {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        .syntax-python { color: #ff6b6b; }
+        .syntax-string { color: #4ecdc4; }
+        .syntax-comment { color: #95a5a6; font-style: italic; }
+        .syntax-keyword { color: #e74c3c; font-weight: bold; }
+        .syntax-number { color: #f39c12; }
+        .syntax-function { color: #9b59b6; }
+        .syntax-class { color: #1abc9c; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#overview">System Overview</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#configuration">Configuration</a></li>
+                <li><a href="#cooldown">Cooldown System</a></li>
+                <li><a href="#tools">Tool Setup</a></li>
+                <li><a href="#agents">Creating Agents</a></li>
+                <li><a href="#orchestration">Orchestration</a></li>
+                <li><a href="#deployment">Deployment</a></li>
+                <li><a href="#examples">Complete Examples</a></li>
+                <li><a href="#customization">Customization Guide</a></li>
+            </ul>
+        </nav>
+        
+        <main class="content">
+            <header class="header">
+                <h1>Multi-Agent System with Cooldown</h1>
+                <p>Interactive Guide & Tutorial</p>
+            </header>
+            
+            <section id="overview" class="section">
+                <h2>System Overview</h2>
+                <p>This template helps you create intelligent multi-agent systems where AI agents work together to accomplish complex tasks. Each agent has a specific role, and they can use external tools and communicate with each other.</p>
+                
+                <div class="info-box">
+                    <strong>What makes this special:</strong> Built-in cooldown system prevents overuse, modular design allows easy customization, and MCP tools integration provides powerful external capabilities.
+                </div>
+                
+                <div class="diagram">
+                    <h3>System Flow</h3>
+                    <div class="flow-diagram">
+                        <div class="flow-box">User Request</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">Cooldown Check</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">Agent 1</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">Agent 2</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">Response</div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="architecture" class="section">
+                <h2>Architecture Components</h2>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Core Components</div>
+                    <div class="collapsible-content">
+                        <h4>1. LlmAgent - Individual AI Worker</h4>
+                        <p>Each LlmAgent is like hiring a specialist employee. You give them specific instructions, tools they can use, and they focus on one type of task.</p>
+                        
+                        <h4>2. LoopAgent/SequentialAgent - Team Manager</h4>
+                        <p>These orchestrate multiple agents, deciding when and how they should work together.</p>
+                        
+                        <h4>3. MCPToolset - External Capabilities</h4>
+                        <p>Connects your agents to external services like databases, APIs, calculators, etc.</p>
+                        
+                        <h4>4. Cooldown System - Usage Control</h4>
+                        <p>Prevents spam and manages resource usage by tracking when agents were last used.</p>
+                    </div>
+                </div>
+                
+                <div class="interactive-demo">
+                    <h4>🔧 Interactive Architecture Demo</h4>
+                    <p>Click components to see their role:</p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 15px;">
+                        <button class="button" onclick="showArchDemo('user')">User Input</button>
+                        <button class="button" onclick="showArchDemo('cooldown')">Cooldown Check</button>
+                        <button class="button" onclick="showArchDemo('agent1')">First Agent</button>
+                        <button class="button" onclick="showArchDemo('agent2')">Second Agent</button>
+                        <button class="button" onclick="showArchDemo('tools')">External Tools</button>
+                    </div>
+                    <div id="arch-demo-output" class="output-box" style="margin-top: 15px; min-height: 60px;">
+                        Click any component above to see its role in the system...
+                    </div>
+                </div>
+            </section>
+            
+            <section id="configuration" class="section">
+                <h2>Configuration Setup</h2>
+                
+                <div class="code-explanation">
+                    <div class="code-side">
+                        <h3>Environment Variables</h3>
+                        <div class="code-block">
+<span class="syntax-comment"># .env file</span>
+<span class="syntax-keyword">API_SERVER_URL</span>=http://your-server.com
+<span class="syntax-keyword">FUNCTION_TOOLS_URL</span>=http://tools.com
+<span class="syntax-keyword">PUBLIC_URL</span>=http://your-domain.com
+                        </div>
+                    </div>
+                    <div class="explanation-side">
+                        <h3>What Each Variable Does</h3>
+                        <p><strong>API_SERVER_URL:</strong> Where your cooldown tracking service runs. This prevents users from calling your agents too frequently.</p>
+                        <p><strong>FUNCTION_TOOLS_URL:</strong> URL of your MCP tools server that provides external functions your agents can call.</p>
+                        <p><strong>PUBLIC_URL:</strong> The public address where your agent system can be accessed from the internet.</p>
+                        
+                        <div class="warning-box">
+                            <strong>Security Note:</strong> Keep these URLs in a .env file, never hardcode them in your source code.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Configuration Code Walkthrough</div>
+                    <div class="collapsible-content">
+                        <div class="code-block">
+<span class="syntax-comment"># Load environment variables from .env file</span>
+<span class="syntax-keyword">from</span> dotenv <span class="syntax-keyword">import</span> load_dotenv
+load_dotenv()
+
+<span class="syntax-comment"># Set cooldown period (in seconds)</span>
+<span class="syntax-keyword">COOLDOWN_PERIOD_SECONDS</span> = <span class="syntax-number">60</span>
+
+<span class="syntax-comment"># Get URLs from environment</span>
+<span class="syntax-keyword">COOLDOWN_API_URL</span> = os.environ.get(<span class="syntax-string">"API_SERVER_URL"</span>)
+<span class="syntax-keyword">FUNCTION_TOOLS_URL</span> = os.environ.get(<span class="syntax-string">"FUNCTION_TOOLS_URL"</span>)
+                        </div>
+                        
+                        <p>This section loads your secret URLs and sets the cooldown timer. The cooldown prevents users from overwhelming your system with requests.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="cooldown" class="section">
+                <h2>Cooldown System Deep Dive</h2>
+                
+                <p>The cooldown system is like a bouncer at a club - it controls who gets in and when. Here's how it works:</p>
+                
+                <div class="diagram">
+                    <h3>Cooldown Flow</h3>
+                    <div class="flow-diagram">
+                        <div class="flow-box">Agent Called</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">Check Last Usage</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box" style="background: #e74c3c;">Too Soon?<br>Block</div>
+                        <div class="flow-arrow" style="transform: rotate(180deg);">→</div>
+                        <div class="flow-box" style="background: #27ae60;">OK?<br>Allow & Update</div>
+                    </div>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Cooldown Function Explanation</div>
+                    <div class="collapsible-content">
+                        <div class="code-explanation">
+                            <div class="code-side">
+                                <div class="code-block">
+<span class="syntax-keyword">def</span> <span class="syntax-python">check_cool_down</span>(callback_context):
+    agent_name = callback_context.agent_name
+    
+    <span class="syntax-comment"># Check when agent was last used</span>
+    response = requests.get(
+        f<span class="syntax-string">"{COOLDOWN_API_URL}/cooldown/{agent_name}"</span>
+    )
+    
+    <span class="syntax-keyword">if</span> too_recent:
+        <span class="syntax-keyword">return</span> <span class="syntax-string">"Please wait X seconds"</span>
+    
+    <span class="syntax-comment"># Update timestamp</span>
+    requests.post(
+        f<span class="syntax-string">"{COOLDOWN_API_URL}/cooldown/{agent_name}"</span>,
+        json={<span class="syntax-string">"timestamp"</span>: now}
+    )
+    
+    <span class="syntax-keyword">return</span> <span class="syntax-keyword">None</span>  <span class="syntax-comment"># Allow agent to run</span>
+                                </div>
+                            </div>
+                            <div class="explanation-side">
+                                <h3>Step-by-Step Process</h3>
+                                <ol>
+                                    <li><strong>Get Agent Name:</strong> Which agent is trying to run?</li>
+                                    <li><strong>Check API:</strong> When was this agent last used?</li>
+                                    <li><strong>Calculate Time:</strong> Has enough time passed?</li>
+                                    <li><strong>Block or Allow:</strong> Return error message or None</li>
+                                    <li><strong>Update Timestamp:</strong> Record current usage time</li>
+                                </ol>
+                                
+                                <div class="info-box">
+                                    <strong>Return Values:</strong><br>
+                                    • <code>None</code> = Let agent run<br>
+                                    • <code>Content(...)</code> = Block with message
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="interactive-demo">
+                    <h4>🕒 Cooldown Simulator</h4>
+                    <p>Test how the cooldown system works:</p>
+                    <input type="number" id="cooldown-seconds" class="demo-input" placeholder="Cooldown period (seconds)" value="30">
+                    <button class="button" onclick="simulateCooldown()">Call Agent</button>
+                    <div id="cooldown-result" class="output-box" style="margin-top: 10px;">
+                        Ready to test cooldown system...
+                    </div>
+                </div>
+            </section>
+            
+            <section id="tools" class="section">
+                <h2>Tool Setup & Integration</h2>
+                
+                <p>Tools are external services that give your agents superpowers. Think of them as apps on a smartphone - each tool does something specific that your agents can use.</p>
+                
+                <div class="code-explanation">
+                    <div class="code-side">
+                        <h3>MCP Toolset Setup</h3>
+                        <div class="code-block">
+<span class="syntax-comment"># Create toolset connection</span>
+toolFunction = <span class="syntax-python">MCPToolset</span>(
+    connection_params=<span class="syntax-python">SseServerParams</span>(
+        url=<span class="syntax-keyword">FUNCTION_TOOLS_URL</span>,
+        headers={}  <span class="syntax-comment"># Authentication if needed</span>
+    )
+)
+
+<span class="syntax-comment"># Add toolset to agents that need it</span>
+agent = <span class="syntax-python">LlmAgent</span>(
+    model=<span class="syntax-string">'gemini-2.5-flash'</span>,
+    name=<span class="syntax-string">'tool_user'</span>,
+    instruction=<span class="syntax-string">"Use tools to help users"</span>,
+    tools=[toolFunction]  <span class="syntax-comment"># Give agent access</span>
+)
+                        </div>
+                    </div>
+                    <div class="explanation-side">
+                        <h3>Understanding Tools</h3>
+                        <p><strong>What are MCP Tools?</strong> Model Context Protocol tools are external functions your AI agents can call, like:</p>
+                        <ul>
+                            <li>🌤️ Weather APIs</li>
+                            <li>🗄️ Database queries</li>
+                            <li>🧮 Calculators</li>
+                            <li>📧 Email senders</li>
+                            <li>🔍 Web scrapers</li>
+                        </ul>
+                        
+                        <div class="success-box">
+                            <strong>Best Practice:</strong> Only give tools to agents that actually need them. Not every agent needs every tool.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Tool Examples & Use Cases</div>
+                    <div class="collapsible-content">
+                        <h4>Common Tool Patterns:</h4>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                            <div class="info-box">
+                                <h5>🎯 Data Processing Agent</h5>
+                                <p><strong>Tools needed:</strong> Database connector, CSV processor, chart generator</p>
+                                <p><strong>Use case:</strong> Takes user data, cleans it, stores it, creates visualizations</p>
+                            </div>
+                            
+                            <div class="info-box">
+                                <h5>🤖 Customer Support Agent</h5>
+                                <p><strong>Tools needed:</strong> Knowledge base searcher, ticket creator, email sender</p>
+                                <p><strong>Use case:</strong> Answers questions, creates support tickets, sends follow-ups</p>
+                            </div>
+                            
+                            <div class="info-box">
+                                <h5>📊 Research Agent</h5>
+                                <p><strong>Tools needed:</strong> Web scraper, PDF reader, data analyzer</p>
+                                <p><strong>Use case:</strong> Gathers information from multiple sources, analyzes findings</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="agents" class="section">
+                <h2>Creating Intelligent Agents</h2>
+                
+                <p>Agents are the heart of your system. Each agent is like hiring a specialist employee with specific skills and responsibilities.</p>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Agent Anatomy</div>
+                    <div class="collapsible-content">
+                        <div class="code-explanation">
+                            <div class="code-side">
+                                <div class="code-block">
+first_agent = <span class="syntax-python">LlmAgent</span>(
+    <span class="syntax-comment"># Choose AI model</span>
+    model=<span class="syntax-string">'gemini-2.5-flash'</span>,
+    
+    <span class="syntax-comment"># Unique identifier</span>
+    name=<span class="syntax-string">'data_processor'</span>,
+    
+    <span class="syntax-comment"># Detailed job description</span>
+    instruction=<span class="syntax-string">"""
+    You are a data processor. Your job:
+    1. Take user's raw data
+    2. Clean and validate it
+    3. Use 'process_data' tool
+    4. Return only the results
+    """</span>,
+    
+    <span class="syntax-comment"># Tools this agent can use</span>
+    tools=[toolFunction]
+)
+                                </div>
+                            </div>
+                            <div class="explanation-side">
+                                <h3>Agent Components Explained</h3>
+                                <p><strong>Model:</strong> The AI brain (GPT-4, Claude, Gemini, etc.)</p>
+                                <p><strong>Name:</strong> Used in logs and API calls. Keep it descriptive but short.</p>
+                                <p><strong>Instruction:</strong> The most important part! This is the agent's job description. Be very specific about:</p>
+                                <ul>
+                                    <li>What input the agent receives</li>
+                                    <li>What steps it should take</li>
+                                    <li>Which tools to use and how</li>
+                                    <li>What output format is expected</li>
+                                </ul>
+                                <p><strong>Tools:</strong> List of external functions this agent can call</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="interactive-demo">
+                    <h4>🧠 Agent Instruction Builder</h4>
+                    <p>Build custom instructions for your agent:</p>
+                    
+                    <input type="text" id="agent-role" class="demo-input" placeholder="Agent role (e.g., 'data analyst', 'customer support')">
+                    <input type="text" id="agent-input" class="demo-input" placeholder="What input will it receive?">
+                    <input type="text" id="agent-task" class="demo-input" placeholder="Main task to perform">
+                    <input type="text" id="agent-output" class="demo-input" placeholder="Expected output format">
+                    
+                    <button class="button" onclick="buildInstruction()">Generate Instruction</button>
+                    
+                    <div id="instruction-result" class="output-box" style="margin-top: 15px;">
+                        Fill in the fields above to generate a custom agent instruction...
+                    </div>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Multi-Agent Communication</div>
+                    <div class="collapsible-content">
+                        <p>When agents work together, the output of one becomes the input of the next. Here's how they communicate:</p>
+                        
+                        <div class="diagram">
+                            <h4>Agent Communication Flow</h4>
+                            <div class="flow-diagram">
+                                <div class="flow-box">Agent 1<br><small>Processes input</small></div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-box" style="background: #9b59b6;">Shared Context<br><small>Agent 1's output</small></div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-box">Agent 2<br><small>Uses context</small></div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-box">
+                            <strong>Communication Tips:</strong><br>
+                            • Agent 1 should output clean, structured data<br>
+                            • Agent 2 should expect and handle Agent 1's output format<br>
+                            • Use output_key to save important results<br>
+                            • Test agent handoffs thoroughly
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="orchestration" class="section">
+                <h2>Orchestration Patterns</h2>
+                
+                <p>Orchestration decides how your agents work together. It's like choosing between a relay race (sequential) or multiple laps (loop).</p>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">LoopAgent - Iterative Processing</div>
+                    <div class="collapsible-content">
+                        <div class="code-explanation">
+                            <div class="code-side">
+                                <div class="code-block">
+root_agent = <span class="syntax-python">LoopAgent</span>(
+    name=<span class="syntax-string">"iterative_system"</span>,
+    sub_agents=[agent1, agent2],
+    max_iterations=<span class="syntax-number">3</span>,  <span class="syntax-comment"># Run 3 times</span>
+    description=<span class="syntax-string">"Refines results through multiple passes"</span>
+)
+                                </div>
+                            </div>
+                            <div class="explanation-side">
+                                <h3>When to Use LoopAgent</h3>
+                                <ul>
+                                    <li><strong>Iterative refinement:</strong> Each pass improves the result</li>
+                                    <li><strong>Quality improvement:</strong> Multiple reviews catch more issues</li>
+                                    <li><strong>Creative processes:</strong> Brainstorm → Refine → Polish</li>
+                                </ul>
+                                
+                                <p><strong>Example:</strong> A content creation system where the first agent writes a draft, and the second agent improves it over multiple iterations.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">SequentialAgent - Assembly Line</div>
+                    <div class="collapsible-content">
+                        <div class="code-explanation">
+                            <div class="code-side">
+                                <div class="code-block">
+root_agent = <span class="syntax-python">SequentialAgent</span>(
+    name=<span class="syntax-string">"assembly_line"</span>,
+    sub_agents=[agent1, agent2, agent3],
+    description=<span class="syntax-string">"Each agent performs one specialized task"</span>
+)
+                                </div>
+                            </div>
+                            <div class="explanation-side">
+                                <h3>When to Use SequentialAgent</h3>
+                                <ul>
+                                    <li><strong>Assembly line workflows:</strong> Each agent does one specialized task</li>
+                                    <li><strong>Multi-step processes:</strong> Data collection → Processing → Analysis</li>
+                                    <li><strong>Quality assurance:</strong> Validation → Execution → Verification</li>
+                                </ul>
+                                
+                                <p><strong>Example:</strong> A customer support system where one agent categorizes the request, another searches for solutions, and a third writes the response.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="interactive-demo">
+                    <h4>🔄 Orchestration Simulator</h4>
+                    <p>See how different orchestration patterns work:</p>
+                    <select id="orchestration-type" class="demo-input" onchange="simulateOrchestration()">
+                        <option value="sequential">Sequential (One after another)</option>
+                        <option value="loop">Loop (Multiple iterations)</option>
+                    </select>
+                    <div id="orchestration-result" class="output-box" style="margin-top: 10px; min-height: 100px;">
+                        Select an orchestration pattern to see how it works...
+                    </div>
+                </div>
+            </section>
+            
+            <section id="deployment" class="section">
+                <h2>Deployment & Server Setup</h2>
+                
+                <p>Once your agents are ready, you need to deploy them as a web service so users can interact with them.</p>
+                
+                <div class="code-explanation">
+                    <div class="code-side">
+                        <h3>Server Configuration</h3>
+                        <div class="code-block">
+<span class="syntax-comment"># Import the converter that turns agents into web APIs</span>
+<span class="syntax-keyword">from</span> agent_to_a2a <span class="syntax-keyword">import</span> to_a2a
+
+<span class="syntax-keyword">if</span> __name__ == <span class="syntax-string">"__main__"</span>:
+    <span class="syntax-keyword">import</span> uvicorn  <span class="syntax-comment"># Web server for Python</span>
+    
+    <span class="syntax-comment"># TODO: Customize server settings</span>
+    PORT = <span class="syntax-number">8080</span>  <span class="syntax-comment"># Change if you need a different port number</span>
+    HOST = <span class="syntax-string">'0.0.0.0'</span>  <span class="syntax-comment"># '0.0.0.0' means accept connections from anywhere</span>
+    
+    <span class="syntax-comment"># Convert your agent system into a web API</span>
+    a2a_app = to_a2a(
+        root_agent,     <span class="syntax-comment"># The main agent system we built above</span>
+        port=PORT,      <span class="syntax-comment"># Port number for the API</span>
+        public_url=PUBLIC_URL  <span class="syntax-comment"># Public URL from environment variables</span>
+    )
+    
+    <span class="syntax-comment"># Start the web server</span>
+    uvicorn.run(a2a_app, host=HOST, port=PORT)
+                        </div>
+                    </div>
+                    <div class="explanation-side">
+                        <h3>Deployment Components</h3>
+                        <p><strong>Uvicorn:</strong> A fast ASGI server that runs your Python application.</p>
+                        <p><strong>Agent to A2A:</strong> Converts your agent system into a web API that can handle HTTP requests.</p>
+                        <p><strong>Port & Host:</strong> Configuration for where your service will run.</p>
+                        
+                        <div class="warning-box">
+                            <strong>Security Note:</strong> Use '0.0.0.0' only in development. In production, use a reverse proxy like Nginx.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Environment File Setup</div>
+                    <div class="collapsible-content">
+                        <div class="code-block">
+<span class="syntax-comment"># .env file - Store all your secrets and URLs here</span>
+<span class="syntax-keyword">API_SERVER_URL</span>=http://your-cooldown-server.com
+<span class="syntax-keyword">FUNCTION_TOOLS_URL</span>=http://your-tools-server.com
+<span class="syntax-keyword">PUBLIC_URL</span>=http://your-agent-domain.com
+
+<span class="syntax-comment"># Add any other secrets or URLs your specific agents need:</span>
+<span class="syntax-keyword">DATABASE_URL</span>=postgresql://user:pass@host:5432/dbname
+<span class="syntax-keyword">API_KEY</span>=your-secret-api-key-here
+<span class="syntax-keyword">OPENAI_API_KEY</span>=sk-your-openai-key-here
+                        </div>
+                        
+                        <div class="info-box">
+                            <strong>Never commit your .env file to version control!</strong> Add it to your .gitignore file to keep your secrets safe.
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="examples" class="section">
+                <h2>Complete Examples</h2>
+                
+                <p>Here are complete examples of how to implement different types of multi-agent systems using this template.</p>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Weather Reporting System</div>
+                    <div class="collapsible-content">
+                        <div class="code-explanation">
+                            <div class="code-side">
+                                <div class="code-block">
+<span class="syntax-comment"># Weather Data Collector</span>
+weather_collector = <span class="syntax-python">LlmAgent</span>(
+    model=<span class="syntax-string">'gemini-2.5-flash'</span>,
+    name=<span class="syntax-string">'weather_collector'</span>,
+    instruction=<span class="syntax-string">"""
+    You are a weather data collector. Your job is to:
+    1. Take the city name provided by the user
+    2. Use the 'get_weather_data' tool to fetch current weather
+    3. Return only the raw weather data from the tool
+    4. Do not add any formatting or commentary
+    """</span>,
+    tools=[weather_tools]
+)
+
+<span class="syntax-comment"># Weather Report Generator</span>
+weather_reporter = <span class="syntax-python">LlmAgent</span>(
+    model=<span class="syntax-string">'gemini-2.5-flash'</span>,
+    name=<span class="syntax-string">'weather_reporter'</span>,
+    instruction=<span class="syntax-string">"""
+    You are a friendly weather reporter. Your job is to:
+    1. Take the raw weather data from the previous step
+    2. Create a friendly, conversational weather report
+    3. Include temperature, conditions, and a recommendation
+    4. Keep it under 100 words and make it engaging
+    """</span>,
+    output_key=<span class="syntax-string">"weather_report"</span>
+)
+
+<span class="syntax-comment"># Root Agent</span>
+root_agent = <span class="syntax-python">LoopAgent</span>(
+    name=<span class="syntax-string">"weather_reporting_system"</span>,
+    sub_agents=[weather_collector, weather_reporter],
+    max_iterations=<span class="syntax-number">1</span>,
+    description=<span class="syntax-string">"Collects weather data and creates friendly weather reports."</span>,
+    before_agent_callback=check_cool_down
+)
+                                </div>
+                            </div>
+                            <div class="explanation-side">
+                                <h3>How This Works</h3>
+                                <ol>
+                                    <li><strong>User Input:</strong> "Weather for New York"</li>
+                                    <li><strong>Weather Collector:</strong> Uses tool to get raw weather data</li>
+                                    <li><strong>Weather Reporter:</strong> Creates friendly report from the data</li>
+                                    <li><strong>Output:</strong> "Good morning! It's a sunny 72°F in New York today with clear skies. Perfect weather for a walk in the park!"</li>
+                                </ol>
+                                
+                                <div class="success-box">
+                                    <strong>Key Features:</strong><br>
+                                    • Separation of concerns: One agent gets data, another formats it<br>
+                                    • Tool integration: Uses external weather API<br>
+                                    • Cooldown protection: Prevents API overuse
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Customer Support System</div>
+                    <div class="collapsible-content">
+                        <div class="code-explanation">
+                            <div class="code-side">
+                                <div class="code-block">
+<span class="syntax-comment"># Inquiry Classifier</span>
+classifier = <span class="syntax-python">LlmAgent</span>(
+    model=<span class="syntax-string">'gemini-2.5-flash'</span>,
+    name=<span class="syntax-string">'inquiry_classifier'</span>,
+    instruction=<span class="syntax-string">"""
+    You classify customer inquiries. Your job is to:
+    1. Read the customer's message
+    2. Categorize it (billing, technical, general, etc.)
+    3. Extract key details (account number, error codes, etc.)
+    4. Output only the category and extracted details as JSON
+    """</span>
+)
+
+<span class="syntax-comment"># Solution Finder</span>
+solution_finder = <span class="syntax-python">LlmAgent</span>(
+    model=<span class="syntax-string">'gemini-2.5-flash'</span>,
+    name=<span class="syntax-string">'solution_finder'</span>,
+    instruction=<span class="syntax-string">"""
+    You find solutions to customer problems. Your job is to:
+    1. Take the classified inquiry from the previous step
+    2. Use the 'search_knowledge_base' tool to find solutions
+    3. Return the top 3 most relevant solutions
+    """</span>,
+    tools=[kb_tools]
+)
+
+<span class="syntax-comment"># Response Writer</span>
+response_writer = <span class="syntax-python">LlmAgent</span>(
+    model=<span class="syntax-string">'gemini-2.5-flash'</span>,
+    name=<span class="syntax-string">'response_writer'</span>,
+    instruction=<span class="syntax-string">"""
+    You write customer responses. Your job is to:
+    1. Take the inquiry classification and solutions
+    2. Write a friendly, helpful response to the customer
+    3. Include the solutions in a clear, actionable way
+    4. Maintain a professional but empathetic tone
+    """</span>,
+    output_key=<span class="syntax-string">"customer_response"</span>
+)
+
+<span class="syntax-comment"># Root Agent</span>
+root_agent = <span class="syntax-python">SequentialAgent</span>(
+    name=<span class="syntax-string">"customer_support_system"</span>,
+    sub_agents=[classifier, solution_finder, response_writer],
+    description=<span class="syntax-string">"Handles customer inquiries from classification to response."</span>
+)
+                                </div>
+                            </div>
+                            <div class="explanation-side">
+                                <h3>How This Works</h3>
+                                <ol>
+                                    <li><strong>User Input:</strong> "I can't login to my account, error code 502"</li>
+                                    <li><strong>Classifier:</strong> Identifies as technical issue, extracts error code</li>
+                                    <li><strong>Solution Finder:</strong> Searches knowledge base for error 502 solutions</li>
+                                    <li><strong>Response Writer:</strong> Creates helpful response with solutions</li>
+                                </ol>
+                                
+                                <div class="info-box">
+                                    <strong>Benefits:</strong><br>
+                                    • Specialized agents for each task<br>
+                                    • Consistent response quality<br>
+                                    • Knowledge base integration<br>
+                                    • Scalable to handle many inquiry types
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="customization" class="section">
+                <h2>Customization Guide</h2>
+                
+                <p>This template is designed to be easily customized for your specific use case. Follow this checklist to adapt it.</p>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Customization Checklist</div>
+                    <div class="collapsible-content">
+                        <h4>□ 1. BASIC SETUP</h4>
+                        <ul>
+                            <li>Create .env file with your URLs and secrets</li>
+                            <li>Set COOLDOWN_PERIOD_SECONDS to your preferred wait time</li>
+                            <li>Test that the script runs without errors</li>
+                        </ul>
+                        
+                        <h4>□ 2. REPLACE THE AGENTS</h4>
+                        <ul>
+                            <li>Change first_agent name and instructions for your primary task</li>
+                            <li>Change second_agent name and instructions for your secondary task</li>
+                            <li>Add more agents if your workflow needs them</li>
+                            <li>Remove agents you don't need</li>
+                        </ul>
+                        
+                        <h4>□ 3. CONFIGURE TOOLS (if needed)</h4>
+                        <ul>
+                            <li>Set up your MCP tools server</li>
+                            <li>Update FUNCTION_TOOLS_URL in .env</li>
+                            <li>Assign tools to the agents that need them</li>
+                            <li>Test tool connections</li>
+                        </ul>
+                        
+                        <h4>□ 4. CHOOSE ORCHESTRATION</h4>
+                        <ul>
+                            <li>Keep LoopAgent if you want agents to run multiple times</li>
+                            <li>Use SequentialAgent if agents should run once each, in order</li>
+                            <li>Use single LlmAgent if you only need one agent</li>
+                        </ul>
+                        
+                        <h4>□ 5. CUSTOMIZE BEHAVIOR</h4>
+                        <ul>
+                            <li>Modify cooldown messages and timing</li>
+                            <li>Add error handling for your specific use cases</li>
+                            <li>Adjust logging levels if needed</li>
+                        </ul>
+                        
+                        <h4>□ 6. DEPLOYMENT</h4>
+                        <ul>
+                            <li>Set PORT and HOST for your environment</li>
+                            <li>Configure PUBLIC_URL for external access</li>
+                            <li>Test the complete system end-to-end</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Troubleshooting Common Issues</div>
+                    <div class="collapsible-content">
+                        <div class="warning-box">
+                            <strong>Agent not using tools properly?</strong><br>
+                            Make sure your instructions clearly tell the agent when and how to use each tool. Be specific about the input format the tool expects.
+                        </div>
+                        
+                        <div class="warning-box">
+                            <strong>Agents not communicating well?</strong><br>
+                            Ensure each agent's output is in a format the next agent can understand. Use JSON for structured data when possible.
+                        </div>
+                        
+                        <div class="warning-box">
+                            <strong>Cooldown not working?</strong><br>
+                            Check that your API_SERVER_URL is correct and the cooldown API is running. Test the API endpoints directly with curl or Postman.
+                        </div>
+                        
+                        <div class="warning-box">
+                            <strong>Agents taking too long?</strong><br>
+                            Consider adding timeout settings to your agents or breaking complex tasks into smaller, specialized agents.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="interactive-demo">
+                    <h4>🔧 Customization Helper</h4>
+                    <p>Select your use case for tailored recommendations:</p>
+                    <select id="use-case" class="demo-input" onchange="showCustomizationTips()">
+                        <option value="">Select your use case...</option>
+                        <option value="support">Customer Support</option>
+                        <option value="content">Content Creation</option>
+                        <option value="data">Data Analysis</option>
+                        <option value="ecommerce">E-commerce</option>
+                        <option value="research">Research</option>
+                    </select>
+                    <div id="customization-tips" class="output-box" style="margin-top: 10px; min-height: 100px;">
+                        Select a use case to see customization tips...
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Toggle collapsible sections
+        document.querySelectorAll('.collapsible-header').forEach(header => {
+            header.addEventListener('click', () => {
+                header.parentElement.classList.toggle('active');
+            });
+        });
+        
+        // Interactive Architecture Demo
+        function showArchDemo(component) {
+            const output = document.getElementById('arch-demo-output');
+            const messages = {
+                'user': 'The user provides the initial input or question that starts the agent workflow. This could be text, files, or structured data.',
+                'cooldown': 'The cooldown system checks if this agent was used too recently. If so, it blocks the request to prevent overuse and API rate limiting.',
+                'agent1': 'The first agent processes the raw input. It might clean data, classify requests, or extract key information using its specialized instructions.',
+                'agent2': 'The second agent takes the first agent\'s output and performs additional processing, analysis, or formatting to create the final response.',
+                'tools': 'External tools provide capabilities beyond the AI model itself, like database access, API calls, calculators, or custom functions.'
+            };
+            
+            output.innerHTML = `<strong>${component.toUpperCase()}:</strong> ${messages[component]}`;
+        }
+        
+        // Cooldown Simulator
+        function simulateCooldown() {
+            const cooldownSeconds = document.getElementById('cooldown-seconds').value || 30;
+            const resultDiv = document.getElementById('cooldown-result');
+            
+            resultDiv.innerHTML = `Calling agent...<br>`;
+            
+            setTimeout(() => {
+                if (Math.random() > 0.5) {
+                    resultDiv.innerHTML += `<span style="color: #e74c3c;">❌ Agent on cooldown! Please wait ${cooldownSeconds} seconds before trying again.</span>`;
+                } else {
+                    resultDiv.innerHTML += `<span style="color: #27ae60;">✅ Agent available! Processing your request...</span><br>`;
+                    resultDiv.innerHTML += `<span style="color: #27ae60;">Agent completed successfully. Cooldown timer reset to ${cooldownSeconds} seconds.</span>`;
+                }
+            }, 1000);
+        }
+        
+        // Agent Instruction Builder
+        function buildInstruction() {
+            const role = document.getElementById('agent-role').value || 'specialist';
+            const input = document.getElementById('agent-input').value || 'user input';
+            const task = document.getElementById('agent-task').value || 'perform task';
+            const output = document.getElementById('agent-output').value || 'formatted output';
+            
+            const instruction = `
+You are a ${role}. Your job is to:
+1. Take the ${input} provided
+2. ${task}
+3. Return ${output}
+4. Be concise and focused on your specific role
+
+Additional guidelines:
+- If you need to use tools, do so appropriately
+- If you encounter errors, provide helpful feedback
+- Structure your output for easy processing by other agents
+            `.trim();
+            
+            document.getElementById('instruction-result').innerHTML = 
+                `<strong>Generated Instruction:</strong><br><br><pre>${instruction}</pre>`;
+        }
+        
+        // Orchestration Simulator
+        function simulateOrchestration() {
+            const type = document.getElementById('orchestration-type').value;
+            const resultDiv = document.getElementById('orchestration-result');
+            
+            if (type === 'sequential') {
+                resultDiv.innerHTML = `
+                <strong>Sequential Agent Flow:</strong><br>
+                1. Agent 1 processes input → Output A<br>
+                2. Agent 2 takes Output A → Output B<br>
+                3. Agent 3 takes Output B → Final Result<br><br>
+                <em>Like an assembly line where each agent does one specialized task and passes the result to the next.</em>
+                `;
+            } else if (type === 'loop') {
+                resultDiv.innerHTML = `
+                <strong>Loop Agent Flow (3 iterations):</strong><br>
+                Iteration 1:<br>
+                - Agent 1 → Output A1<br>
+                - Agent 2 → Output B1<br><br>
+                Iteration 2:<br>
+                - Agent 1 takes B1 → Output A2<br>
+                - Agent 2 takes A2 → Output B2<br><br>
+                Iteration 3:<br>
+                - Agent 1 takes B2 → Output A3<br>
+                - Agent 2 takes A3 → Final Result<br><br>
+                <em>Like refinement cycles where each iteration improves upon the previous result.</em>
+                `;
+            }
+        }
+        
+        // Customization Tips
+        function showCustomizationTips() {
+            const useCase = document.getElementById('use-case').value;
+            const tipsDiv = document.getElementById('customization-tips');
+            
+            const tips = {
+                'support': `
+                <strong>Customer Support System Tips:</strong><br>
+                • Create specialized agents for classification, solution finding, and response writing<br>
+                • Integrate with knowledge base and ticketing system tools<br>
+                • Set appropriate cooldown to prevent API overuse during high volume<br>
+                • Use output_key to save important customer information between agents
+                `,
+                'content': `
+                <strong>Content Creation System Tips:</strong><br>
+                • Consider agents for research, outlining, writing, and editing<br>
+                • Use LoopAgent for iterative refinement of content<br>
+                • Integrate with research tools and plagiarism checkers<br>
+                • Set longer cooldowns to allow for thoughtful content generation
+                `,
+                'data': `
+                <strong>Data Analysis System Tips:</strong><br>
+                • Create agents for data cleaning, analysis, and visualization<br>
+                • Integrate with database and charting tools<br>
+                • Use structured data formats (JSON, CSV) for agent communication<br>
+                • Consider using SequentialAgent for linear data processing pipelines
+                `,
+                'ecommerce': `
+                <strong>E-commerce System Tips:</strong><br>
+                • Create agents for product search, recommendation, and cart management<br>
+                • Integrate with inventory and payment system tools<br>
+                • Use cooldown to prevent abuse of recommendation engines<br>
+                • Personalize responses based on user purchase history
+                `,
+                'research': `
+                <strong>Research System Tips:</strong><br>
+                • Create agents for information gathering, analysis, and synthesis<br>
+                • Integrate with academic database and web search tools<br>
+                • Use longer cooldowns to allow for comprehensive research<br>
+                • Consider using LoopAgent for deepening research iterations
+                `
+            };
+            
+            tipsDiv.innerHTML = useCase ? tips[useCase] : 'Select a use case to see customization tips...';
+        }
+        
+        // Initialize page with first section open
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('.collapsible-header').click();
+        });
+    </script>
+</body>
+</html>
