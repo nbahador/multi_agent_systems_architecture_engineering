@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent System Template - Interactive Textbook</title>
+    <style>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #ffffff;
+        }
+        
+        /* Layout */
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 100vh;
+        }
+        
+        /* Table of Contents */
+        .toc {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            padding: 20px;
+        }
+        
+        .toc h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .toc ul {
+            list-style-type: none;
+        }
+        
+        .toc li {
+            margin-bottom: 10px;
+        }
+        
+        .toc a {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 1.1rem;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .toc a:hover {
+            color: #2980b9;
+            background-color: #e9ecef;
+        }
+        
+        /* Main Content */
+        .content {
+            padding: 40px;
+        }
+        
+        section {
+            margin-bottom: 60px;
+            scroll-margin-top: 20px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin: 30px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            color: #34495e;
+            margin: 25px 0 15px;
+        }
+        
+        p {
+            margin-bottom: 15px;
+        }
+        
+        /* Code Blocks */
+        .code-block {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .code-comment {
+            color: #95a5a6;
+            font-style: italic;
+        }
+        
+        .code-keyword {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .code-string {
+            color: #4ecdc4;
+        }
+        
+        .code-number {
+            color: #f39c12;
+        }
+        
+        .code-function {
+            color: #ff6b6b;
+        }
+        
+        /* Two-column Code Explanation */
+        .code-explanation {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .code-explanation {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Demo Boxes */
+        .demo-box {
+            background-color: #f1f2f6;
+            border: 1px solid #3498db;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .input-box {
+            background-color: #ffffff;
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .output-box {
+            background-color: #fdf2f2;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        /* Flow Diagrams */
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .flow-box {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px;
+            min-width: 100px;
+            text-align: center;
+        }
+        
+        .flow-arrow {
+            font-size: 1.5rem;
+            margin: 0 10px;
+        }
+        
+        /* Status Boxes */
+        .status-box {
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid;
+            border-radius: 4px;
+        }
+        
+        .warning {
+            background-color: #fff3cd;
+            border-left-color: #f39c12;
+        }
+        
+        .info {
+            background-color: #d1ecf1;
+            border-left-color: #17a2b8;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            border-left-color: #28a745;
+        }
+        
+        /* Buttons */
+        .button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        
+        .button:hover {
+            background-color: #2980b9;
+        }
+        
+        /* Collapsible Sections */
+        .collapsible {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .collapsible-header {
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #e9ecef;
+        }
+        
+        .collapsible-header::after {
+            content: '▶';
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+        }
+        
+        .collapsible-header.active::after {
+            transform: rotate(90deg);
+        }
+        
+        .collapsible-content {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+        }
+        
+        .collapsible-content.active {
+            padding: 20px;
+            max-height: 1000px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .toc {
+                position: static;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#what-is-a2a">What is A2A?</a></li>
+                <li><a href="#template-structure">Template Structure</a></li>
+                <li><a href="#section-1-imports">Section 1: Custom Imports</a></li>
+                <li><a href="#section-2-configuration">Section 2: Configuration</a></li>
+                <li><a href="#section-3-agent-creation">Section 3: Agent Creation</a></li>
+                <li><a href="#section-4-app-initialization">Section 4: App Initialization</a></li>
+                <li><a href="#flow-diagram">Flow Diagram</a></li>
+                <li><a href="#interactive-demo">Interactive Demo</a></li>
+                <li><a href="#best-practices">Best Practices</a></li>
+            </ul>
+        </nav>
+        
+        <main class="content">
+            <h1>Multi-Agent System Template Guide</h1>
+            
+            <section id="introduction">
+                <h2>Introduction</h2>
+                <p>This interactive textbook teaches you how to use the multi-agent system template to convert your ADK (Agent Development Kit) agent into an A2A (Agent-to-Agent) web application.</p>
+                
+                <div class="status-box info">
+                    <p><strong>What You'll Learn:</strong> How to wrap your existing ADK agent in a web server, create HTTP endpoints for agent communication, handle session management, and generate an agent card that describes your agent's capabilities.</p>
+                </div>
+            </section>
+            
+            <section id="what-is-a2a">
+                <h2>What is A2A?</h2>
+                <p>A2A (Agent-to-Agent) is a protocol that allows different AI agents to communicate with each other over HTTP. This enables creating systems where multiple specialized agents work together to solve complex problems.</p>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Why Use A2A?</div>
+                    <div class="collapsible-content">
+                        <p>A2A provides a standardized way for agents to:</p>
+                        <ul>
+                            <li>Discover each other's capabilities</li>
+                            <li>Exchange messages and data</li>
+                            <li>Coordinate on complex tasks</li>
+                            <li>Scale horizontally across multiple servers</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="template-structure">
+                <h2>Template Structure</h2>
+                <p>The multi-agent system template is organized into four main sections that you need to customize:</p>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <span class="code-comment"># SECTION 1: CUSTOM IMPORTS</span><br>
+                        <span class="code-comment"># REPLACE THIS SECTION WITH YOUR AGENT-SPECIFIC IMPORTS</span><br>
+                        <span class="code-keyword">from</span> my_agent <span class="code-keyword">import</span> MyCustomAgent<br>
+                        <span class="code-keyword">from</span> my_tools <span class="code-keyword">import</span> CalculatorTool, DatabaseTool<br><br>
+                        
+                        <span class="code-comment"># SECTION 2: CONFIGURATION</span><br>
+                        <span class="code-comment"># Add any configuration loading here</span><br>
+                        API_KEY = <span class="code-string">"your-api-key"</span><br><br>
+                        
+                        <span class="code-comment"># SECTION 3: AGENT CREATION</span><br>
+                        <span class="code-keyword">def</span> <span class="code-function">create_my_agent</span>():<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> MyCustomAgent(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name=<span class="code-string">"My Agent"</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tools=[CalculatorTool(), DatabaseTool()]<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;)<br><br>
+                        
+                        <span class="code-comment"># SECTION 4: APPLICATION ENTRY POINT</span><br>
+                        my_agent = create_my_agent()<br>
+                        app = to_a2a(agent=my_agent)
+                    </div>
+                    
+                    <div>
+                        <h3>Template Sections</h3>
+                        <p><strong>Section 1: Custom Imports</strong> - Replace with your agent-specific imports</p>
+                        <p><strong>Section 2: Configuration</strong> - Add environment variables and configuration</p>
+                        <p><strong>Section 3: Agent Creation</strong> - Implement your agent creation logic</p>
+                        <p><strong>Section 4: App Initialization</strong> - Create your agent and convert it to A2A</p>
+                        
+                        <div class="status-box warning">
+                            <p><strong>Note:</strong> The core A2A and ADK imports should not be modified as they provide the essential infrastructure.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="section-1-imports">
+                <h2>Section 1: Custom Imports</h2>
+                <p>In this section, you need to replace the placeholder imports with your actual agent-specific imports.</p>
+                
+                <div class="code-block">
+                    <span class="code-comment"># ============================================================================</span><br>
+                    <span class="code-comment"># SECTION 1: CUSTOM IMPORTS</span><br>
+                    <span class="code-comment"># ============================================================================</span><br>
+                    <span class="code-comment"># REPLACE THIS SECTION WITH YOUR AGENT-SPECIFIC IMPORTS</span><br>
+                    <span class="code-comment"># </span><br>
+                    <span class="code-comment"># Examples of what to add here:</span><br>
+                    <span class="code-comment"># - Your custom agent class import</span><br>
+                    <span class="code-comment"># - Any tools or plugins your agent uses</span><br>
+                    <span class="code-comment"># - Configuration files or environment variables</span><br>
+                    <span class="code-comment"># - Database connections or external API clients</span><br>
+                    <span class="code-comment">#</span><br>
+                    <span class="code-comment"># Example imports:</span><br>
+                    <span class="code-keyword">from</span> my_project.agents.chat_agent <span class="code-keyword">import</span> ChatAgent<br>
+                    <span class="code-keyword">from</span> my_project.tools.calculator <span class="code-keyword">import</span> CalculatorTool<br>
+                    <span class="code-keyword">from</span> my_project.config <span class="code-keyword">import</span> load_config<br>
+                    <span class="code-keyword">import</span> os<br>
+                </div>
+                
+                <div class="status-box info">
+                    <p><strong>Tip:</strong> Make sure to import all the dependencies your agent needs to function properly, including any third-party libraries.</p>
+                </div>
+            </section>
+            
+            <section id="section-2-configuration">
+                <h2>Section 2: Configuration</h2>
+                <p>This optional section is where you can set up configuration variables, environment variables, and other settings your agent needs.</p>
+                
+                <div class="code-block">
+                    <span class="code-comment"># ============================================================================</span><br>
+                    <span class="code-comment"># SECTION 2: CONFIGURATION (OPTIONAL)</span><br>
+                    <span class="code-comment"># ============================================================================</span><br>
+                    <span class="code-comment"># Add any configuration loading or environment setup here</span><br>
+                    <span class="code-comment">#</span><br>
+                    <span class="code-comment"># Examples:</span><br>
+                    CONFIG = load_config()<br>
+                    API_KEY = os.getenv(<span class="code-string">"MY_API_KEY"</span>)<br>
+                    DATABASE_URL = os.getenv(<span class="code-string">"DATABASE_URL"</span>, <span class="code-string">"sqlite:///default.db"</span>)<br>
+                </div>
+                
+                <div class="status-box warning">
+                    <p><strong>Security Note:</strong> Never hardcode sensitive information like API keys or database credentials. Always use environment variables or secure configuration files.</p>
+                </div>
+            </section>
+            
+            <section id="section-3-agent-creation">
+                <h2>Section 3: Agent Creation</h2>
+                <p>This is where you implement the logic to create and configure your custom agent.</p>
+                
+                <div class="code-block">
+                    <span class="code-comment"># ============================================================================</span><br>
+                    <span class="code-comment"># SECTION 3: AGENT CREATION AND APP INITIALIZATION</span><br>
+                    <span class="code-comment"># ============================================================================</span><br>
+                    <span class="code-comment"># This is where you create your agent instance and convert it to A2A</span><br><br>
+                    
+                    <span class="code-keyword">def</span> <span class="code-function">create_my_agent</span>() -> BaseAgent:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">"""</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">Create and configure your custom agent.</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">"""</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> ChatAgent(<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name=<span class="code-string">"My Chat Agent"</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;description=<span class="code-string">"A helpful chat assistant"</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;model=<span class="code-string">"gpt-4"</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tools=[CalculatorTool(), WebSearchTool()]<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;)<br>
+                </div>
+                
+                <div class="status-box info">
+                    <p><strong>Remember:</strong> Your agent must inherit from BaseAgent and implement all required methods. The template provides a placeholder function that you need to replace with your actual implementation.</p>
+                </div>
+            </section>
+            
+            <section id="section-4-app-initialization">
+                <h2>Section 4: Application Initialization</h2>
+                <p>In this final section, you create your agent instance and convert it to an A2A application.</p>
+                
+                <div class="code-block">
+                    <span class="code-comment"># ============================================================================</span><br>
+                    <span class="code-comment"># SECTION 4: APPLICATION ENTRY POINT</span><br>
+                    <span class="code-comment"># ============================================================================</span><br>
+                    <span class="code-comment"># This creates the final application that uvicorn will run</span><br><br>
+                    
+                    <span class="code-comment"># Create your agent instance</span><br>
+                    my_agent = create_my_agent()<br><br>
+                    
+                    <span class="code-comment"># Convert your agent to an A2A application</span><br>
+                    app = to_a2a(<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;agent=my_agent,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;host=<span class="code-string">"0.0.0.0"</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;port=<span class="code-number">8080</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;public_url=<span class="code-keyword">None</span><br>
+                    )<br>
+                </div>
+                
+                <div class="status-box success">
+                    <p><strong>Running Your Application:</strong> Once you've completed all sections, you can run your application with the command: <code>uvicorn your_module:app --host 0.0.0.0 --port 8080</code></p>
+                </div>
+            </section>
+            
+            <section id="flow-diagram">
+                <h2>Flow Diagram</h2>
+                <p>This diagram illustrates how requests flow through your A2A application:</p>
+                
+                <div class="flow-diagram">
+                    <div class="flow-box">HTTP Request</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Starlette App</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">A2A Handler</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Agent Executor</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Your Agent</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">HTTP Response</div>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Detailed Flow Explanation</div>
+                    <div class="collapsible-content">
+                        <ol>
+                            <li><strong>HTTP Request:</strong> A client sends an HTTP request to your agent's endpoint</li>
+                            <li><strong>Starlette App:</strong> The Starlette web framework receives the request</li>
+                            <li><strong>A2A Handler:</strong> The A2A-specific request handler processes the request</li>
+                            <li><strong>Agent Executor:</strong> The executor manages the agent's lifecycle and execution</li>
+                            <li><strong>Your Agent:</strong> Your custom agent processes the request and generates a response</li>
+                            <li><strong>HTTP Response:</strong> The response is sent back through the chain to the client</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="interactive-demo">
+                <h2>Interactive Demo</h2>
+                <p>Try this interactive demo to see how the template works:</p>
+                
+                <div class="demo-box">
+                    <h3>Template Configuration Demo</h3>
+                    
+                    <div class="input-box">
+                        <label for="agent-name">Agent Name:</label>
+                        <input type="text" id="agent-name" value="My Custom Agent">
+                        
+                        <label for="agent-port">Port Number:</label>
+                        <input type="number" id="agent-port" value="8080" min="1000" max="9999">
+                        
+                        <button class="button" onclick="generateCode()">Generate Code Template</button>
+                    </div>
+                    
+                    <div class="output-box">
+                        <h4>Generated Code:</h4>
+                        <pre id="generated-code">// Your generated code will appear here</pre>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="best-practices">
+                <h2>Best Practices</h2>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Error Handling</div>
+                    <div class="collapsible-content">
+                        <p>Always implement proper error handling in your agent:</p>
+                        <div class="code-block">
+                            <span class="code-keyword">try</span>:<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Your agent logic here</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;result = agent.process(request)<br>
+                            <span class="code-keyword">except</span> Exception <span class="code-keyword">as</span> e:<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;logging.error(<span class="code-string">f"Error processing request: {e}"</span>)<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> Response(<span class="code-string">"Internal Server Error"</span>, status_code=<span class="code-number">500</span>)
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Performance Optimization</div>
+                    <div class="collapsible-content">
+                        <p>For better performance:</p>
+                        <ul>
+                            <li>Use connection pooling for database connections</li>
+                            <li>Implement caching for frequently accessed data</li>
+                            <li>Consider using asynchronous operations for I/O-bound tasks</li>
+                            <li>Monitor your agent's performance with appropriate metrics</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Security Considerations</div>
+                    <div class="collapsible-content">
+                        <p>Keep these security best practices in mind:</p>
+                        <ul>
+                            <li>Validate all incoming requests</li>
+                            <li>Implement authentication and authorization</li>
+                            <li>Use HTTPS in production</li>
+                            <li>Sanitize inputs to prevent injection attacks</li>
+                            <li>Regularly update dependencies to patch vulnerabilities</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Collapsible sections functionality
+        document.querySelectorAll('.collapsible-header').forEach(header => {
+            header.addEventListener('click', () => {
+                header.classList.toggle('active');
+                const content = header.nextElementSibling;
+                content.classList.toggle('active');
+            });
+        });
+        
+        // Interactive demo functionality
+        function generateCode() {
+            const agentName = document.getElementById('agent-name').value;
+            const port = document.getElementById('agent-port').value;
+            
+            const code = `def create_my_agent() -> BaseAgent:
+    return MyCustomAgent(
+        name="${agentName}",
+        description="A custom agent created from the template",
+        tools=[CalculatorTool(), DatabaseTool()]
+    )
+
+my_agent = create_my_agent()
+app = to_a2a(agent=my_agent, host="0.0.0.0", port=${port})`;
+            
+            document.getElementById('generated-code').textContent = code;
+        }
+        
+        // Smooth scrolling for table of contents links
+        document.querySelectorAll('.toc a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                window.scrollTo({
+                    top: targetElement.offsetTop - 20,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
