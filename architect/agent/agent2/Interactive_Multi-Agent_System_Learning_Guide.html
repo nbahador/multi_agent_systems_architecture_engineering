@@ -1,443 +1,763 @@
-# ============================================================================
-# SEQUENTIAL AGENT TEMPLATE - Simple Multi-Agent Pipeline
-# ============================================================================
-# This template creates a simple pipeline where agents run one after another
-# Perfect for workflows like: Research → Process → Format → Output
-# Based on Google ADK framework with MCP tools integration
-# ============================================================================
-
-# --- IMPORTS SECTION ---
-# These libraries provide the foundation for your agent system
-
-import asyncio  # Handles running multiple tasks at the same time
-import os  # Reads environment variables from your system
-from contextlib import AsyncExitStack  # Manages cleanup when program ends
-from dotenv import load_dotenv  # Loads secrets from .env file
-from google.adk.agents.llm_agent import LlmAgent  # Creates individual AI agents
-from google.adk.agents.sequential_agent import SequentialAgent  # Runs agents one by one
-from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset  # External tools/functions
-from google.adk.tools.mcp_tool.mcp_session_manager import SseServerParams  # Tool connection config
-import logging   # Prints debug and status messages
-import nest_asyncio   # Allows async code to run in Jupyter notebooks
-from toolbox_core import ToolboxSyncClient  # Connects to toolbox databases
-
-# ============================================================================
-# ENVIRONMENT SETUP - LOADS YOUR CONFIGURATION
-# ============================================================================
-
-# Load all variables from .env file (API keys, URLs, secrets)
-load_dotenv()
-# IMPORTANT: Create a .env file in your project folder with your settings
-
-# Set up logging to see what's happening
-logging.basicConfig(level=logging.INFO)  # INFO shows important messages only
-log = logging.getLogger(__name__)  # Creates logger for this specific file
-
-# ============================================================================
-# GLOBAL VARIABLES - CONTAINERS FOR YOUR MAIN COMPONENTS
-# ============================================================================
-
-# --- Initialize main components as None (will be set up later) ---
-root_agent: LlmAgent | None = None  # Will hold your main agent system
-exit_stack: AsyncExitStack | None = None  # Will manage cleanup when program exits
-
-# ============================================================================
-# CONFIGURATION SECTION - CUSTOMIZE THESE FOR YOUR PROJECT
-# ============================================================================
-
-# --- DATABASE AND TOOLS CONFIGURATION ---
-# TODO: Set your database tools URL (where stored tools/functions live)
-DB_TOOLS_URL = os.environ.get("DB_TOOLS_URL")  # Put this in your .env file
-
-# TODO: Set your function tools URL (where live tools/APIs are hosted)  
-FUNCTION_TOOLS_URL = os.environ.get("FUNCTION_TOOLS_URL")  # Put this in your .env file
-
-# TODO: Set your public URL (how users will access your agent)
-PUBLIC_URL = os.environ.get("PUBLIC_URL")  # Put this in your .env file
-
-# Print URLs to verify they loaded correctly
-print(f"DB_TOOLS_URL: {DB_TOOLS_URL}")
-print(f"FUNCTION_TOOLS_URL: {FUNCTION_TOOLS_URL}")
-print(f"PUBLIC_URL: {PUBLIC_URL}")
-
-# ============================================================================
-# TOOL SETUP - CONFIGURE EXTERNAL FUNCTIONS YOUR AGENTS CAN USE
-# ============================================================================
-
-# --- DATABASE TOOLSET SETUP ---
-# TODO: Replace with your own database tools
-# This connects to a toolbox database containing pre-built functions
-toolbox = ToolboxSyncClient(DB_TOOLS_URL)  # Connects to your toolbox server
-
-# TODO: Change 'summoner-librarium' to your actual toolset name
-toolDB = toolbox.load_toolset('your-toolset-name')  # Loads specific toolset from database
-# EXAMPLE TOOLSET NAMES: 'user-management', 'data-processing', 'email-tools'
-
-# --- LIVE FUNCTION TOOLSET SETUP ---
-# TODO: Configure your live/external tools server
-# This connects to real-time tools like APIs, databases, external services
-toolFunction = MCPToolset(
-    connection_params=SseServerParams(
-        url=FUNCTION_TOOLS_URL,  # Your tools server URL
-        headers={}  # Add authentication headers if needed: {"Authorization": "Bearer token"}
-    )
-)
-
-# TODO: Add more toolsets if you have multiple tool servers
-# Example:
-# email_tools = MCPToolset(
-#     connection_params=SseServerParams(url=EMAIL_TOOLS_URL, headers={})
-# )
-
-# ============================================================================
-# AGENT DEFINITIONS - CREATE YOUR AI WORKERS
-# ============================================================================
-
-# --- FIRST AGENT - PRIMARY DATA COLLECTOR/PROCESSOR ---
-# TODO: Replace this with your first agent's specific job
-first_agent = LlmAgent(
-    # TODO: Choose your AI model (gemini-2.5-flash, gpt-4, claude-3, etc.)
-    model='gemini-2.5-flash',
-    
-    # TODO: Give your agent a descriptive name (appears in logs and API)
-    name='data_collector_agent',  # Change to match your agent's purpose
-    
-    # TODO: Write specific instructions for what this agent should do
-    instruction="""
-        REPLACE THIS ENTIRE INSTRUCTION WITH YOUR AGENT'S JOB
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent System Template Textbook</title>
+    <style>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
-        Your first agent typically:
-        - Receives initial user input
-        - Gathers information using tools
-        - Processes raw data
-        - Prepares data for the next agent
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #ffffff;
+        }
         
-        EXAMPLE INSTRUCTIONS (replace with your own):
-        You are a research assistant. Your job is to:
-        1. Take the topic provided by the user
-        2. Use the 'search_database' tool to find relevant information
-        3. Return only the raw search results, no commentary
-        4. If multiple results exist, pick the most relevant one
-    """,
-    
-    # TODO: Assign tools this agent can use (remove if no tools needed)
-    tools=toolDB  # This agent uses database tools
-    # Alternative: tools=[toolDB, toolFunction] if agent needs both toolsets
-)
-
-# --- SECOND AGENT - PROCESSOR/FORMATTER ---
-# TODO: Replace this with your second agent's specific job
-second_agent = LlmAgent(
-    # TODO: Choose your AI model (can be same or different from first agent)
-    model='gemini-2.5-flash',
-    
-    # TODO: Give your agent a descriptive name
-    name='formatter_agent',  # Change to match your agent's purpose
-    
-    # TODO: Write specific instructions for processing the first agent's output
-    instruction="""
-        REPLACE THIS ENTIRE INSTRUCTION WITH YOUR AGENT'S JOB
+        /* Layout */
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 100vh;
+        }
         
-        Your second agent typically:
-        - Takes output from the first agent
-        - Processes, analyzes, or transforms it
-        - Applies business logic or formatting
-        - Creates final user-facing output
+        /* Table of Contents */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-right: 1px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
         
-        EXAMPLE INSTRUCTIONS (replace with your own):
-        You are a content formatter. Your job is to:
-        1. Take the raw research data from the previous step
-        2. Use the 'format_content' tool to create a summary
-        3. Make the output engaging and user-friendly
-        4. Include key insights and actionable recommendations
-    """,
-    
-    # TODO: Choose which tools this agent needs
-    tools=[toolFunction],  # This agent uses live function tools
-    # Alternative: tools=toolDB or tools=[toolDB, toolFunction]
-)
+        .toc h2 {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .toc ul {
+            list-style: none;
+        }
+        
+        .toc li {
+            margin-bottom: 10px;
+        }
+        
+        .toc a {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s;
+            display: block;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        
+        .toc a:hover {
+            color: #2980b9;
+            background-color: #e9ecef;
+        }
+        
+        /* Main Content */
+        .content {
+            padding: 40px;
+            max-width: 1200px;
+        }
+        
+        section {
+            margin-bottom: 60px;
+            scroll-margin-top: 20px;
+        }
+        
+        /* Typography */
+        h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            color: #34495e;
+            margin-bottom: 15px;
+        }
+        
+        p {
+            margin-bottom: 15px;
+        }
+        
+        /* Code Blocks */
+        .code-block {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .code-comment {
+            color: #95a5a6;
+            font-style: italic;
+        }
+        
+        .code-keyword {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .code-string {
+            color: #4ecdc4;
+        }
+        
+        .code-number {
+            color: #f39c12;
+        }
+        
+        .code-function {
+            color: #ff6b6b;
+        }
+        
+        /* Two-column Code Explanation */
+        .code-explanation {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .code-explanation {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Demo Boxes */
+        .demo-box {
+            background-color: #f1f2f6;
+            border: 1px solid #3498db;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .input-box {
+            background-color: #ffffff;
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .output-box {
+            background-color: #fdf2f2;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        /* Flow Diagrams */
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 30px 0;
+            gap: 10px;
+        }
+        
+        .flow-box {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: #2c3e50;
+        }
+        
+        /* Status Boxes */
+        .status-box {
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid;
+            border-radius: 4px;
+        }
+        
+        .warning {
+            background-color: #fff3cd;
+            border-left-color: #f39c12;
+        }
+        
+        .info {
+            background-color: #d1ecf1;
+            border-left-color: #17a2b8;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            border-left-color: #28a745;
+        }
+        
+        /* Buttons */
+        .button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        
+        .button:hover {
+            background-color: #2980b9;
+        }
+        
+        /* Collapsible Sections */
+        .collapsible {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            cursor: pointer;
+            padding: 15px;
+            width: 100%;
+            text-align: left;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            outline: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 20px;
+            position: relative;
+        }
+        
+        .collapsible:after {
+            content: '▶';
+            font-size: 0.8rem;
+            color: #2c3e50;
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .active:after {
+            content: '▼';
+        }
+        
+        .collapsible-content {
+            padding: 0 15px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            background-color: #f8f9fa;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .toc {
+                position: static;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#overview">Template Overview</a></li>
+                <li><a href="#environment">Environment Setup</a></li>
+                <li><a href="#tools">Tool Configuration</a></li>
+                <li><a href="#agents">Agent Definitions</a></li>
+                <li><a href="#orchestration">System Orchestration</a></li>
+                <li><a href="#deployment">Deployment</a></li>
+                <li><a href="#examples">Use Case Examples</a></li>
+                <li><a href="#troubleshooting">Troubleshooting</a></li>
+                <li><a href="#interactive-demo">Interactive Demo</a></li>
+            </ul>
+        </nav>
+        
+        <main class="content">
+            <h1>Multi-Agent System Template Guide</h1>
+            
+            <section id="introduction">
+                <h2>Introduction to Multi-Agent Systems</h2>
+                <p>Multi-agent systems are a powerful AI architecture where multiple specialized AI agents work together to accomplish complex tasks. This template provides a structured approach to building such systems using the Google ADK framework with MCP tools integration.</p>
+                
+                <div class="status-box info">
+                    <p><strong>Why Use Multi-Agent Systems?</strong> They allow you to break down complex problems into smaller, manageable tasks handled by specialized agents, resulting in higher quality outputs and more reliable systems.</p>
+                </div>
+                
+                <div class="flow-diagram">
+                    <div class="flow-box">User Input</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Research Agent</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Processing Agent</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Formatting Agent</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Final Output</div>
+                </div>
+            </section>
+            
+            <section id="overview">
+                <h2>Template Overview</h2>
+                <p>The sequential agent template creates a pipeline where agents run one after another, perfect for workflows like: Research → Process → Format → Output.</p>
+                
+                <div class="code-block">
+                    <span class="code-comment"># ============================================================================</span><br>
+                    <span class="code-comment"># SEQUENTIAL AGENT TEMPLATE - Simple Multi-Agent Pipeline</span><br>
+                    <span class="code-comment"># ============================================================================</span><br>
+                    <span class="code-keyword">import</span> asyncio<br>
+                    <span class="code-keyword">import</span> os<br>
+                    <span class="code-keyword">from</span> contextlib <span class="code-keyword">import</span> AsyncExitStack<br>
+                    <span class="code-keyword">from</span> dotenv <span class="code-keyword">import</span> load_dotenv<br>
+                    <span class="code-keyword">from</span> google.adk.agents.llm_agent <span class="code-keyword">import</span> LlmAgent<br>
+                    <span class="code-keyword">from</span> google.adk.agents.sequential_agent <span class="code-keyword">import</span> SequentialAgent<br>
+                    <span class="code-keyword">from</span> google.adk.tools.mcp_tool.mcp_toolset <span class="code-keyword">import</span> MCPToolset<br>
+                    <span class="code-comment"># ... more imports</span>
+                </div>
+                
+                <button class="collapsible">Key Components</button>
+                <div class="collapsible-content">
+                    <p>The template consists of several key components:</p>
+                    <ul>
+                        <li><strong>Environment Setup</strong>: Loads configuration from .env files</li>
+                        <li><strong>Tool Configuration</strong>: Sets up external tools and functions</li>
+                        <li><strong>Agent Definitions</strong>: Creates specialized AI agents</li>
+                        <li><strong>System Orchestration</strong>: Coordinates agent workflows</li>
+                        <li><strong>Deployment</strong>: Converts the system to a web API</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="environment">
+                <h2>Environment Setup</h2>
+                <p>The environment setup section loads all configuration variables from a .env file, which keeps your API keys, URLs, and secrets secure.</p>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <span class="code-comment"># Load all variables from .env file</span><br>
+                        load_dotenv()<br>
+                        <br>
+                        <span class="code-comment"># Set up logging to see what's happening</span><br>
+                        logging.basicConfig(level=logging.INFO)<br>
+                        log = logging.getLogger(__name__)<br>
+                        <br>
+                        <span class="code-comment"># Global variables for main components</span><br>
+                        root_agent: LlmAgent | None = None<br>
+                        exit_stack: AsyncExitStack | None = None
+                    </div>
+                    <div>
+                        <h3>Explanation</h3>
+                        <p>The <code>load_dotenv()</code> function loads environment variables from a .env file in your project directory.</p>
+                        <p>Logging is configured to show important messages during execution.</p>
+                        <p>Global variables are initialized to hold your main components, which will be set up in later sections.</p>
+                        <div class="status-box warning">
+                            <p><strong>Important:</strong> Always create a .env file in your project folder with your actual configuration values. Never commit this file to version control.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="demo-box">
+                    <h3>Environment Variables Example</h3>
+                    <div class="input-box">
+                        <p>Create a file named <code>.env</code> in your project root with these variables:</p>
+                        <div class="code-block">
+                            <span class="code-comment"># Database tools server</span><br>
+                            DB_TOOLS_URL=http://your-toolbox-server.com<br>
+                            <br>
+                            <span class="code-comment"># Live function tools server</span><br>
+                            FUNCTION_TOOLS_URL=http://your-function-server.com<br>
+                            <br>
+                            <span class="code-comment"># Public URL where users can access your agent</span><br>
+                            PUBLIC_URL=http://your-agent-domain.com
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="tools">
+                <h2>Tool Configuration</h2>
+                <p>Tools are external functions that your agents can use to perform specific tasks like database queries, API calls, or custom processing.</p>
+                
+                <div class="flow-diagram">
+                    <div class="flow-box">Agent</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Tool Request</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Tool Server</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Response</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Agent</div>
+                </div>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <span class="code-comment"># Database Toolset Setup</span><br>
+                        toolbox = ToolboxSyncClient(DB_TOOLS_URL)<br>
+                        toolDB = toolbox.load_toolset('your-toolset-name')<br>
+                        <br>
+                        <span class="code-comment"># Live Function Toolset Setup</span><br>
+                        toolFunction = MCPToolset(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;connection_params=SseServerParams(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;url=FUNCTION_TOOLS_URL,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;headers={}<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;)<br>
+                        )
+                    </div>
+                    <div>
+                        <h3>Explanation</h3>
+                        <p><strong>Database Tools</strong>: Pre-built functions stored in a toolbox database. These are loaded using <code>ToolboxSyncClient</code> and <code>load_toolset()</code>.</p>
+                        <p><strong>Live Function Tools</strong>: Real-time tools like APIs and external services. These are connected via <code>MCPToolset</code> with server parameters.</p>
+                        <div class="status-box info">
+                            <p>You can add multiple toolsets if your agents need to access different servers or services. Each agent can be assigned specific tools based on their responsibilities.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="agents">
+                <h2>Agent Definitions</h2>
+                <p>Agents are specialized AI workers that perform specific tasks in your workflow. Each agent has a model, name, instructions, and assigned tools.</p>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <span class="code-comment"># First Agent - Primary Data Collector/Processor</span><br>
+                        first_agent = LlmAgent(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;model=<span class="code-string">'gemini-2.5-flash'</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;name=<span class="code-string">'data_collector_agent'</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;instruction=<span class="code-string">"""REPLACE WITH YOUR AGENT'S JOB"""</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;tools=toolDB<br>
+                        )
+                    </div>
+                    <div>
+                        <h3>Agent Components</h3>
+                        <ul>
+                            <li><strong>Model</strong>: The AI model to use (gemini-2.5-flash, gpt-4, claude-3, etc.)</li>
+                            <li><strong>Name</strong>: A descriptive identifier for the agent</li>
+                            <li><strong>Instruction</strong>: Clear directions for the agent's responsibilities</li>
+                            <li><strong>Tools</strong>: The external functions this agent can use</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <button class="collapsible">Example Agent Instructions</button>
+                <div class="collapsible-content">
+                    <div class="code-block">
+                        <span class="code-comment"># Research Agent Example</span><br>
+                        instruction=<span class="code-string">"""<br>
+You are a research assistant. Your job is to:<br>
+1. Take the topic provided by the user<br>
+2. Use the 'search_database' tool to find relevant information<br>
+3. Return only the raw search results, no commentary<br>
+4. If multiple results exist, pick the most relevant one<br>
+"""</span>
+                    </div>
+                    
+                    <div class="code-block">
+                        <span class="code-comment"># Formatter Agent Example</span><br>
+                        instruction=<span class="code-string">"""<br>
+You are a content formatter. Your job is to:<br>
+1. Take the raw research data from the previous step<br>
+2. Use the 'format_content' tool to create a summary<br>
+3. Make the output engaging and user-friendly<br>
+4. Include key insights and actionable recommendations<br>
+"""</span>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="orchestration">
+                <h2>System Orchestration</h2>
+                <p>The root agent orchestrates the entire workflow, defining how agents interact and the sequence of execution.</p>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <span class="code-comment"># Root Agent - Orchestrates the entire workflow</span><br>
+                        root_agent = SequentialAgent(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;name=<span class="code-string">'your_agent_pipeline'</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;sub_agents=[first_agent, second_agent],<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># description="Processes user input through pipeline"</span><br>
+                        )
+                    </div>
+                    <div>
+                        <h3>Orchestration Options</h3>
+                        <p><strong>SequentialAgent</strong>: Runs agents one after another in a linear pipeline.</p>
+                        <p><strong>LoopAgent</strong>: Runs agents in a loop for iterative processing.</p>
+                        <p><strong>Single LlmAgent</strong>: Uses just one agent with multiple tools for simpler tasks.</p>
+                    </div>
+                </div>
+                
+                <div class="flow-diagram">
+                    <div class="flow-box">User Input</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box" style="background-color: #3498db;">SequentialAgent</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box" style="background-color: #27ae60;">First Agent</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box" style="background-color: #27ae60;">Second Agent</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Final Output</div>
+                </div>
+            </section>
+            
+            <section id="deployment">
+                <h2>Deployment</h2>
+                <p>The deployment section converts your agent system into a web API using Uvicorn, making it accessible to users.</p>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <span class="code-keyword">if</span> __name__ == <span class="code-string">"__main__"</span>:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">import</span> uvicorn<br>
+                        <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;SERVER_PORT = 8080<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;SERVER_HOST = <span class="code-string">'0.0.0.0'</span><br>
+                        <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;a2a_app = to_a2a(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;root_agent,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;port=SERVER_PORT,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public_url=PUBLIC_URL<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;)<br>
+                        <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;uvicorn.run(a2a_app, host=SERVER_HOST, port=SERVER_PORT)
+                    </div>
+                    <div>
+                        <h3>Deployment Configuration</h3>
+                        <p><strong>SERVER_PORT</strong>: The port number your API will listen on (default: 8080).</p>
+                        <p><strong>SERVER_HOST</strong>: The host address ('0.0.0.0' accepts connections from anywhere).</p>
+                        <p><strong>public_url</strong>: The public URL where users can access your agent.</p>
+                        <div class="status-box success">
+                            <p>Once deployed, your agent system becomes a web API that can receive requests and return processed responses through the complete agent pipeline.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="examples">
+                <h2>Use Case Examples</h2>
+                <p>Here are some practical examples of how to use this template for different applications:</p>
+                
+                <button class="collapsible">Blog Post Creation System</button>
+                <div class="collapsible-content">
+                    <div class="code-block">
+                        <span class="code-comment"># 1. Research Agent</span><br>
+                        research_agent = LlmAgent(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;model=<span class="code-string">'gemini-2.5-flash'</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;name=<span class="code-string">'research_agent'</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;instruction=<span class="code-string">"""You are a research assistant for blog writing..."""</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;tools=research_tools<br>
+                        )<br>
+                        <br>
+                        <span class="code-comment"># 2. Blog Writer Agent</span><br>
+                        writer_agent = LlmAgent(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;model=<span class="code-string">'gemini-2.5-flash'</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;name=<span class="code-string">'blog_writer'</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;instruction=<span class="code-string">"""You are a professional blog writer..."""</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;tools=[writing_tools]<br>
+                        )<br>
+                        <br>
+                        <span class="code-comment"># 3. Root Agent</span><br>
+                        root_agent = SequentialAgent(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;name=<span class="code-string">'blog_creation_system'</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;sub_agents=[research_agent, writer_agent]<br>
+                        )
+                    </div>
+                </div>
+                
+                <button class="collapsible">Customer Support Pipeline</button>
+                <div class="collapsible-content">
+                    <p><strong>Agent 1</strong>: Categorizes customer inquiry using classification tools</p>
+                    <p><strong>Agent 2</strong>: Searches knowledge base and creates personalized response</p>
+                    <div class="flow-diagram">
+                        <div class="flow-box">Customer Query</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">Categorizer Agent</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">Response Agent</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">Final Reply</div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="troubleshooting">
+                <h2>Troubleshooting Guide</h2>
+                <p>Common issues and solutions when working with the multi-agent system template:</p>
+                
+                <div class="status-box warning">
+                    <p><strong>Problem:</strong> ImportError - can't import google.adk</p>
+                    <p><strong>Solution:</strong> Install Google ADK: <code>pip install google-adk</code></p>
+                </div>
+                
+                <div class="status-box warning">
+                    <p><strong>Problem:</strong> Tool connection fails</p>
+                    <p><strong>Solution:</strong> Check your .env file URLs, make sure servers are running</p>
+                </div>
+                
+                <div class="status-box warning">
+                    <p><strong>Problem:</strong> Agent gives generic responses</p>
+                    <p><strong>Solution:</strong> Make instructions more specific, add examples in instructions</p>
+                </div>
+                
+                <div class="status-box info">
+                    <p><strong>Testing Tips:</strong></p>
+                    <ul>
+                        <li>Test each agent individually before combining them</li>
+                        <li>Use print statements to debug data flow between agents</li>
+                        <li>Check tool responses are what you expect</li>
+                        <li>Verify .env variables load correctly with print statements</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="interactive-demo">
+                <h2>Interactive Demo</h2>
+                <p>Experiment with a simplified version of the agent pipeline to understand how data flows through the system:</p>
+                
+                <div class="demo-box">
+                    <h3>Blog Creation Pipeline Simulator</h3>
+                    
+                    <div class="input-box">
+                        <label for="topic-input">Enter a blog topic:</label>
+                        <input type="text" id="topic-input" value="Sustainable gardening" style="width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px;">
+                        <button class="button" onclick="runDemo()">Run Pipeline</button>
+                    </div>
+                    
+                    <div class="output-box">
+                        <h4>Pipeline Output:</h4>
+                        <div id="demo-output" style="min-height: 200px; padding: 10px; background-color: white; border-radius: 4px;">
+                            <p>Output will appear here after running the pipeline...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flow-diagram">
+                        <div class="flow-box">Input</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">Research</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">Writing</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">Output</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
 
-# TODO: Add more agents if your workflow needs them
-# Example third agent:
-# final_agent = LlmAgent(
-#     model='gemini-2.5-flash',
-#     name='quality_checker',
-#     instruction="""
-#         You are a quality checker. Review the formatted content and:
-#         1. Check for accuracy and completeness
-#         2. Ensure proper formatting and tone
-#         3. Make final corrections if needed
-#         4. Approve or request revisions
-#     """,
-#     tools=[toolFunction]
-# )
-
-# ============================================================================
-# ROOT AGENT - ORCHESTRATES THE ENTIRE WORKFLOW
-# ============================================================================
-
-# TODO: Configure your main agent system
-root_agent = SequentialAgent(
-    # TODO: Name your complete system (this becomes your API name)
-    name='your_agent_pipeline',  # Change to describe your system's purpose
-    
-    # TODO: List all agents in the order they should run
-    sub_agents=[
-        first_agent,   # Runs first
-        second_agent   # Runs after first_agent completes
-        # Add more agents here if needed
-    ],
-    
-    # TODO: Optional - add description of what your system does
-    # description="Processes user input through research and formatting pipeline"
-)
-
-# ============================================================================
-# ALTERNATIVE CONFIGURATIONS - UNCOMMENT TO USE DIFFERENT PATTERNS
-# ============================================================================
-
-# TODO: Use LoopAgent if you want agents to run multiple times
-# from google.adk.agents.loop_agent import LoopAgent
-# root_agent = LoopAgent(
-#     name='your_loop_system',
-#     sub_agents=[first_agent, second_agent],
-#     max_iterations=3,  # How many times to repeat the sequence
-#     description="Runs agents in a loop for iterative processing"
-# )
-
-# TODO: Use single LlmAgent if you only need one agent with tools
-# root_agent = LlmAgent(
-#     model='gemini-2.5-flash',
-#     name='single_agent_system',
-#     instruction="Combined instructions for a single agent...",
-#     tools=[toolDB, toolFunction]  # Can use multiple toolsets
-# )
-
-# ============================================================================
-# SERVER DEPLOYMENT - TURNS YOUR AGENTS INTO A WEB API
-# ============================================================================
-
-# Import the converter that makes your agents accessible via web API
-from agent_to_a2a import to_a2a
-
-# This section runs when you execute this file directly
-if __name__ == "__main__":
-    import uvicorn  # Fast web server for Python APIs
-    
-    # TODO: Customize your server settings
-    SERVER_PORT = 8080  # Change if you need a different port
-    SERVER_HOST = '0.0.0.0'  # '0.0.0.0' accepts connections from anywhere
-    
-    # Convert your agent system into a web API
-    a2a_app = to_a2a(
-        root_agent,        # Your main agent system from above
-        port=SERVER_PORT,  # Port number for the API
-        public_url=PUBLIC_URL  # Public URL from environment variables
-    )
-    
-    # Start the web server (your agents are now live!)
-    uvicorn.run(a2a_app, host=SERVER_HOST, port=SERVER_PORT)
-    # After this runs, users can send requests to your agent system
-
-# ============================================================================
-# ENVIRONMENT VARIABLES SETUP (.env file)
-# ============================================================================
-"""
-Create a file named '.env' in your project folder with these variables:
-(Replace the example URLs with your actual service URLs)
-
-# Database tools server (where pre-built tools are stored)
-DB_TOOLS_URL=http://your-toolbox-server.com
-
-# Live function tools server (real-time APIs and services)  
-FUNCTION_TOOLS_URL=http://your-function-server.com
-
-# Public URL where users can access your agent
-PUBLIC_URL=http://your-agent-domain.com
-
-# Add any other environment variables your project needs:
-# OPENAI_API_KEY=sk-your-openai-key-here
-# DATABASE_PASSWORD=your-db-password-here
-# SLACK_BOT_TOKEN=xoxb-your-slack-token
-"""
-
-# ============================================================================
-# STEP-BY-STEP CUSTOMIZATION GUIDE
-# ============================================================================
-"""
-FOLLOW THESE STEPS TO CUSTOMIZE THIS TEMPLATE:
-
-□ 1. BASIC SETUP
-   ✓ Create .env file with your URLs and API keys
-   ✓ Install required packages: pip install google-adk toolbox-core uvicorn
-   ✓ Test that the script runs without import errors
-
-□ 2. CONFIGURE YOUR TOOLS
-   ✓ Set up your toolbox database server (DB_TOOLS_URL)
-   ✓ Set up your function tools server (FUNCTION_TOOLS_URL)  
-   ✓ Replace 'your-toolset-name' with your actual toolset name
-   ✓ Test tool connections work correctly
-
-□ 3. DESIGN YOUR AGENTS
-   ✓ Replace first_agent with your data collector/processor
-   ✓ Replace second_agent with your formatter/finalizer
-   ✓ Write clear, specific instructions for each agent
-   ✓ Assign appropriate tools to each agent
-
-□ 4. NAME YOUR SYSTEM
-   ✓ Change 'your_agent_pipeline' to a descriptive system name
-   ✓ Update agent names to match their purposes
-   ✓ Add description if needed for documentation
-
-□ 5. TEST AND DEPLOY
-   ✓ Test each agent individually
-   ✓ Test the complete pipeline with sample data
-   ✓ Configure PORT and HOST for your deployment environment
-   ✓ Set PUBLIC_URL for external access
-
-□ 6. OPTIONAL ENHANCEMENTS
-   ✓ Add more agents if your workflow is complex
-   ✓ Switch to LoopAgent if you need iterative processing
-   ✓ Add error handling and validation
-   ✓ Implement logging for monitoring
-"""
-
-# ============================================================================
-# COMPLETE EXAMPLE - BLOG POST CREATION SYSTEM
-# ============================================================================
-"""
-Here's a real example of how to customize this template for a blog post creation system:
-
-# 1. ENVIRONMENT VARIABLES (.env file)
-DB_TOOLS_URL=http://content-tools.mycompany.com
-FUNCTION_TOOLS_URL=http://writing-tools.mycompany.com  
-PUBLIC_URL=http://blog-assistant.mycompany.com
-
-# 2. TOOL SETUP
-toolbox = ToolboxSyncClient(DB_TOOLS_URL)
-research_tools = toolbox.load_toolset('research-database')  # Tools for finding info
-writing_tools = MCPToolset(
-    connection_params=SseServerParams(url=FUNCTION_TOOLS_URL, headers={})
-)
-
-# 3. FIRST AGENT - Research Assistant
-research_agent = LlmAgent(
-    model='gemini-2.5-flash',
-    name='research_agent',
-    instruction=\"\"\"
-        You are a research assistant for blog writing. Your job is to:
-        1. Take the blog topic provided by the user
-        2. Use the 'search_content_database' tool to find relevant information
-        3. Use the 'get_trending_topics' tool to find current trends
-        4. Return a structured research summary with key points and sources
-        5. Focus on finding 3-5 main points that would make good blog sections
-    \"\"\",
-    tools=research_tools
-)
-
-# 4. SECOND AGENT - Blog Writer
-writer_agent = LlmAgent(
-    model='gemini-2.5-flash', 
-    name='blog_writer',
-    instruction=\"\"\"
-        You are a professional blog writer. Your job is to:
-        1. Take the research summary from the previous step
-        2. Use the 'generate_outline' tool to create a blog structure
-        3. Use the 'write_content' tool to create engaging blog content
-        4. Create a complete blog post with intro, body sections, and conclusion
-        5. Make it engaging, SEO-friendly, and around 800-1200 words
-        6. Include a catchy title and meta description
-    \"\"\",
-    tools=[writing_tools]
-)
-
-# 5. ROOT AGENT - Blog Creation System
-root_agent = SequentialAgent(
-    name='blog_creation_system',
-    sub_agents=[research_agent, writer_agent]
-)
-
-# 6. USAGE EXAMPLE
-# User input: "Write a blog post about sustainable gardening"
-# research_agent: Finds info about sustainable gardening practices
-# writer_agent: Creates complete blog post with title, sections, conclusion
-
-# The user gets: A full blog post ready to publish!
-"""
-
-# ============================================================================
-# MORE USE CASE EXAMPLES
-# ============================================================================
-"""
-OTHER WAYS TO USE THIS TEMPLATE:
-
-1. CUSTOMER SUPPORT PIPELINE
-   - Agent 1: Categorizes customer inquiry using classification tools
-   - Agent 2: Searches knowledge base and creates personalized response
-   
-   research_agent → response_agent → final customer reply
-
-2. DATA ANALYSIS WORKFLOW  
-   - Agent 1: Cleans and validates data using data tools
-   - Agent 2: Performs analysis and creates visualizations
-   
-   data_cleaner → data_analyzer → insights report
-
-3. SOCIAL MEDIA CONTENT CREATOR
-   - Agent 1: Researches trending topics and audience preferences  
-   - Agent 2: Creates engaging posts optimized for each platform
-   
-   trend_researcher → content_creator → social media posts
-
-4. DOCUMENT PROCESSOR
-   - Agent 1: Extracts and categorizes information from documents
-   - Agent 2: Summarizes and formats into final report
-   
-   document_parser → report_generator → formatted report
-
-5. PRODUCT RECOMMENDATION ENGINE
-   - Agent 1: Analyzes user preferences and browsing history
-   - Agent 2: Matches preferences with product catalog and creates recommendations
-   
-   preference_analyzer → recommendation_engine → personalized suggestions
-
-CUSTOMIZATION FOR EACH EXAMPLE:
-- Change agent names and instructions to match the use case
-- Configure tools for the specific data sources and APIs needed
-- Adjust the model selection based on task complexity
-- Modify the toolset names to match your available tools
-"""
-
-# ============================================================================
-# TROUBLESHOOTING GUIDE
-# ============================================================================
-"""
-COMMON ISSUES AND SOLUTIONS:
-
-PROBLEM: ImportError - can't import google.adk
-SOLUTION: Install Google ADK: pip install google-adk
-
-PROBLEM: Tool connection fails
-SOLUTION: Check your .env file URLs, make sure servers are running
-
-PROBLEM: Agent gives generic responses
-SOLUTION: Make instructions more specific, add examples in instructions
-
-PROBLEM: Agents can't access tools
-SOLUTION: Verify tools are assigned correctly in agent definition
-
-PROBLEM: Server won't start
-SOLUTION: Check if port is already in use, try different PORT number
-
-PROBLEM: .env variables not loading
-SOLUTION: Make sure .env file is in same folder as your script
-
-PROBLEM: Toolset not found
-SOLUTION: Check toolset name matches exactly what's in your database
-
-TESTING TIPS:
-- Test each agent individually before combining them
-- Use print statements to debug data flow between agents
-- Check tool responses are what you expect
-- Verify .env variables load correctly with print statements
-"""
+    <script>
+        // Collapsible sections functionality
+        const collapsibles = document.getElementsByClassName("collapsible");
+        
+        for (let i = 0; i < collapsibles.length; i++) {
+            collapsibles[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                const content = this.nextElementSibling;
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                }
+            });
+        }
+        
+        // Smooth scrolling for table of contents links
+        document.querySelectorAll('.toc a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                window.scrollTo({
+                    top: targetElement.offsetTop - 20,
+                    behavior: 'smooth'
+                });
+            });
+        });
+        
+        // Interactive demo functionality
+        function runDemo() {
+            const topic = document.getElementById('topic-input').value || 'Sustainable gardening';
+            const output = document.getElementById('demo-output');
+            
+            output.innerHTML = '<p>Running research agent...</p>';
+            
+            // Simulate agent processing with delays
+            setTimeout(() => {
+                output.innerHTML += `<p>Research agent found information about: ${topic}</p>`;
+                output.innerHTML += '<p>Running writing agent...</p>';
+                
+                setTimeout(() => {
+                    output.innerHTML += `<p>Writing agent created blog post about: ${topic}</p>`;
+                    output.innerHTML += '<p>Pipeline completed successfully!</p>';
+                    
+                    // Show final output
+                    setTimeout(() => {
+                        output.innerHTML += `
+                            <div style="margin-top: 20px; padding: 15px; background-color: #e8f5e9; border-radius: 4px;">
+                                <h4>Final Blog Post:</h4>
+                                <h3>The Ultimate Guide to ${topic}</h3>
+                                <p>Introduction: ${topic} is becoming increasingly important in today's world. In this comprehensive guide, we'll explore the key principles and practices...</p>
+                                <p>Key sections:</p>
+                                <ul>
+                                    <li>Benefits of ${topic}</li>
+                                    <li>Getting started with ${topic}</li>
+                                    <li>Advanced techniques for success</li>
+                                    <li>Common mistakes to avoid</li>
+                                </ul>
+                                <p>Conclusion: ${topic} offers numerous benefits when implemented correctly. Start your journey today!</p>
+                            </div>
+                        `;
+                    }, 1000);
+                }, 1500);
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
