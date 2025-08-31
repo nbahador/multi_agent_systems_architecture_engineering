@@ -1,0 +1,275 @@
+# =====================================
+# DATABASE TOOLBOX YAML TEMPLATE
+# =====================================
+# This YAML file configures database connections and SQL tools for MCP servers
+# Replace all PLACEHOLDER values with your actual configuration
+
+# =====================================
+# SOURCES SECTION - Database Connections
+# =====================================
+# Define your database connections here. You can have multiple databases.
+sources:
+  # REPLACE: Change "your-database-name" to a meaningful name for your database
+  your-database-name:
+    # CHOOSE ONE: Select your database type (uncomment the one you need)
+    
+    # For PostgreSQL (Google Cloud SQL or regular PostgreSQL):
+    kind: cloud-sql-postgres  # Use "postgres" for regular PostgreSQL
+    
+    # For MySQL (uncomment if using MySQL):
+    # kind: cloud-sql-mysql    # Use "mysql" for regular MySQL
+    
+    # For SQLite (uncomment if using SQLite):
+    # kind: sqlite
+    # path: "/path/to/your/database.db"  # Only needed for SQLite
+    
+    # GOOGLE CLOUD SQL SPECIFIC (remove if not using Google Cloud):
+    project: "YOUR-GOOGLE-CLOUD-PROJECT-ID"      # Replace with your GCP project ID
+    region: "YOUR-REGION"                        # Replace with your region (e.g., "us-central1", "europe-west1")
+    instance: "YOUR-INSTANCE-NAME"               # Replace with your Cloud SQL instance name
+    
+    # DATABASE CONNECTION DETAILS:
+    database: "YOUR-DATABASE-NAME"               # Replace with your actual database name
+    user: "YOUR-USERNAME"                        # Replace with your database username
+    password: "YOUR-PASSWORD"                    # Replace with your database password
+    
+    # FOR REGULAR POSTGRES/MYSQL (uncomment if not using Google Cloud):
+    # host: "localhost"                          # Database host (e.g., "localhost", "db.example.com")
+    # port: 5432                                 # Database port (5432 for PostgreSQL, 3306 for MySQL)
+
+  # ADD MORE DATABASES: Copy the pattern above for additional database connections
+  # secondary-database:
+  #   kind: postgres
+  #   host: "secondary-db.example.com"
+  #   database: "analytics_db"
+  #   user: "analytics_user"
+  #   password: "secure_password"
+
+# =====================================
+# TOOLS SECTION - Database Operations
+# =====================================
+# Define SQL queries that will be exposed as tools to AI assistants
+tools:
+  
+  # REPLACE: Create your first tool
+  your-first-tool:
+    kind: postgres-sql                           # Match the database type from sources
+    source: your-database-name                   # Must match a source name defined above
+    
+    # CUSTOMIZE: Write a clear description of what this tool does
+    description: "REPLACE: Describe what this SQL query does and when to use it"
+    
+    # DEFINE PARAMETERS: List any input parameters for your SQL query
+    parameters:
+      - name: parameter_name                     # REPLACE: Name of your parameter
+        type: string                             # CHOOSE: string, integer, number, boolean
+        description: "REPLACE: Explain what this parameter is for"
+      
+      # ADD MORE PARAMETERS: Copy the pattern above for additional parameters
+      # - name: another_parameter
+      #   type: integer
+      #   description: "Another parameter description"
+    
+    # WRITE YOUR SQL: Replace with your actual SQL query
+    statement: |
+      SELECT column1, column2 
+      FROM your_table 
+      WHERE your_column = $1;
+      -- $1, $2, $3... correspond to parameters in order
+      -- Use proper SQL syntax for your database type
+
+  # REPLACE: Create your second tool
+  your-second-tool:
+    kind: postgres-sql
+    source: your-database-name
+    description: "REPLACE: Another tool description"
+    parameters:
+      - name: param1
+        type: string
+        description: "Parameter 1 description"
+      - name: param2
+        type: integer
+        description: "Parameter 2 description"
+    statement: |
+      UPDATE your_table 
+      SET column1 = $1 
+      WHERE id = $2;
+
+  # ADD MORE TOOLS: Copy the pattern above for additional SQL tools
+  # your-third-tool:
+  #   kind: postgres-sql
+  #   source: your-database-name
+  #   description: "Third tool description"
+  #   parameters: []  # No parameters needed
+  #   statement: |
+  #     SELECT COUNT(*) as total_records FROM your_table;
+
+# =====================================
+# TOOLSETS SECTION - Group Related Tools
+# =====================================
+# Group your tools into logical sets for organization
+toolsets:
+  # REPLACE: Change "your-toolset-name" to describe your tool group
+  your-toolset-name:
+    # LIST YOUR TOOLS: Include all tools that belong to this group
+    - your-first-tool
+    - your-second-tool
+    # - your-third-tool
+  
+  # ADD MORE TOOLSETS: Create additional groups if needed
+  # admin-tools:
+  #   - create-user-tool
+  #   - delete-user-tool
+  # reporting-tools:
+  #   - generate-report-tool
+  #   - export-data-tool
+
+# =====================================
+# PARAMETER TYPES REFERENCE
+# =====================================
+# Use these parameter types in your tool definitions:
+# - string: Text values (e.g., names, descriptions)
+# - integer: Whole numbers (e.g., IDs, counts)
+# - number: Decimal numbers (e.g., prices, measurements)
+# - boolean: true/false values
+# - array: Lists of values (specify items type)
+
+# =====================================
+# SQL PARAMETER REFERENCE
+# =====================================
+# In your SQL statements, use these placeholders:
+# $1 - First parameter
+# $2 - Second parameter
+# $3 - Third parameter
+# And so on...
+
+# =====================================
+# COMPLETE EXAMPLE: E-COMMERCE SYSTEM
+# =====================================
+
+"""
+EXAMPLE CONFIGURATION: E-commerce Database Tools
+-----------------------------------------------
+This example shows a complete configuration for an e-commerce system:
+
+sources:
+  ecommerce-db:
+    kind: postgres
+    host: "localhost"
+    port: 5432
+    database: "online_store"
+    user: "store_admin"
+    password: "secure_password123"
+
+tools:
+  search-products:
+    kind: postgres-sql
+    source: ecommerce-db
+    description: "Searches for products by name or category"
+    parameters:
+      - name: search_term
+        type: string
+        description: "Product name or category to search for"
+    statement: |
+      SELECT product_id, product_name, price, stock_quantity, category
+      FROM products 
+      WHERE product_name ILIKE '%' || $1 || '%' 
+         OR category ILIKE '%' || $1 || '%'
+      ORDER BY product_name;
+
+  get-customer-orders:
+    kind: postgres-sql
+    source: ecommerce-db
+    description: "Retrieves all orders for a specific customer"
+    parameters:
+      - name: customer_id
+        type: integer
+        description: "The unique ID of the customer"
+    statement: |
+      SELECT o.order_id, o.order_date, o.total_amount, o.status,
+             p.product_name, oi.quantity, oi.unit_price
+      FROM orders o
+      JOIN order_items oi ON o.order_id = oi.order_id
+      JOIN products p ON oi.product_id = p.product_id
+      WHERE o.customer_id = $1
+      ORDER BY o.order_date DESC;
+
+  update-inventory:
+    kind: postgres-sql
+    source: ecommerce-db
+    description: "Updates the stock quantity for a specific product"
+    parameters:
+      - name: product_id
+        type: integer
+        description: "The unique ID of the product"
+      - name: new_quantity
+        type: integer
+        description: "The new stock quantity"
+    statement: |
+      UPDATE products 
+      SET stock_quantity = $2, last_updated = CURRENT_TIMESTAMP
+      WHERE product_id = $1
+      RETURNING product_name, stock_quantity;
+
+  sales-report:
+    kind: postgres-sql
+    source: ecommerce-db
+    description: "Generates a sales report for a specific date range"
+    parameters:
+      - name: start_date
+        type: string
+        description: "Start date in YYYY-MM-DD format"
+      - name: end_date
+        type: string
+        description: "End date in YYYY-MM-DD format"
+    statement: |
+      SELECT 
+        p.category,
+        COUNT(oi.order_item_id) as items_sold,
+        SUM(oi.quantity * oi.unit_price) as total_revenue
+      FROM orders o
+      JOIN order_items oi ON o.order_id = oi.order_id
+      JOIN products p ON oi.product_id = p.product_id
+      WHERE o.order_date BETWEEN $1 AND $2
+      GROUP BY p.category
+      ORDER BY total_revenue DESC;
+
+toolsets:
+  product-management:
+    - search-products
+    - update-inventory
+  
+  customer-service:
+    - get-customer-orders
+    - search-products
+  
+  analytics:
+    - sales-report
+    - get-customer-orders
+
+"""
+
+# =====================================
+# QUICK START CHECKLIST
+# =====================================
+"""
+1. □ Replace 'your-database-name' with your actual database identifier
+2. □ Choose and configure your database type (postgres, mysql, sqlite)
+3. □ Fill in your database connection details
+4. □ Replace example tools with your actual SQL queries
+5. □ Update tool descriptions to explain what each query does
+6. □ Define parameters for dynamic queries
+7. □ Test your SQL statements work correctly
+8. □ Group related tools into logical toolsets
+9. □ Set up environment variables if using secrets
+10. □ Deploy and test your MCP server
+
+COMMON USE CASES:
+- Customer data lookup and management
+- Inventory tracking and updates
+- Sales reporting and analytics
+- User authentication and permissions
+- Content management and search
+- Logging and audit trails
+- Data import/export operations
+"""
