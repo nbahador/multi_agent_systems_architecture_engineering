@@ -1,0 +1,189 @@
+# ============================================================================
+# GOOGLE CLOUD BUILD TEMPLATE - DOCKER TO CLOUD RUN DEPLOYMENT
+# ============================================================================
+# This template builds a Docker image and deploys it to Google Cloud Run
+# Copy this file and customize the sections marked with [CUSTOMIZE]
+
+steps:
+  # ---------------------------------------------------------------------------
+  # STEP 1: BUILD DOCKER IMAGE
+  # ---------------------------------------------------------------------------
+  # This step creates a Docker image from your application code
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-app-image'                    # [CUSTOMIZE] Change this ID to match your app name
+    args: 
+      - 'build'
+      - '-t'                                 # Tag flag for naming the image
+      # [CUSTOMIZE] Replace with your image URL pattern:
+      # Format: ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/YOUR-APP-NAME:latest
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/your-app-name:latest'
+      - '.'                                  # Build context (current directory with Dockerfile)
+
+  # ---------------------------------------------------------------------------
+  # STEP 2: PUSH IMAGE TO ARTIFACT REGISTRY
+  # ---------------------------------------------------------------------------
+  # This step uploads your built image to Google Cloud's container registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-app-image'                     # [CUSTOMIZE] Change this ID to match your app name
+    waitFor: ['build-app-image']             # [CUSTOMIZE] Update to match Step 1's ID
+    args: 
+      - 'push'
+      # [CUSTOMIZE] Must match the exact image name from Step 1
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/your-app-name:latest'
+
+  # ---------------------------------------------------------------------------
+  # STEP 3: DEPLOY TO CLOUD RUN
+  # ---------------------------------------------------------------------------
+  # This step creates/updates your Cloud Run service with the new image
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-to-cloud-run'               # [CUSTOMIZE] Change this ID to match your app name
+    waitFor: ['push-app-image']             # [CUSTOMIZE] Update to match Step 2's ID
+    entrypoint: gcloud                      # Use gcloud CLI tool
+    args:
+      - 'run'                               # Cloud Run command
+      - 'deploy'                            # Deploy subcommand
+      # [CUSTOMIZE] Your Cloud Run service name (will be created if doesn't exist)
+      - 'your-service-name'
+      
+      # [CUSTOMIZE] Must match the exact image name from Steps 1 & 2
+      - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/your-app-name:latest'
+      
+      - '--region=${_REGION}'               # Deploy to the region specified in substitutions
+      - '--platform=managed'                # Use fully managed Cloud Run (recommended)
+      
+      # [CUSTOMIZE] Authentication settings:
+      # '--allow-unauthenticated' = public access (anyone can call your service)
+      # '--no-allow-unauthenticated' = requires authentication
+      - '--allow-unauthenticated'
+      
+      # [CUSTOMIZE] Add labels for organization (optional)
+      # Format: '--labels=key1=value1,key2=value2'
+      - '--labels=project=your-project,environment=production'
+      
+      # [CUSTOMIZE] How to start your application:
+      # Option A: For Python apps, specify the command and module
+      - '--command=python'
+      - '--args=-m,your_app.main'           # Replace with your Python module path
+      
+      # Option B: For other apps, you might use different commands:
+      # - '--command=node'
+      # - '--args=server.js'
+      # 
+      # Option C: If your Dockerfile already has CMD/ENTRYPOINT, remove these lines
+      
+      # [CUSTOMIZE] Scaling settings:
+      - '--min-instances=1'                 # Keep at least 1 instance running (0 for cost savings)
+      # - '--max-instances=100'             # Uncomment and set max instances if needed
+      
+      # [CUSTOMIZE] Environment variables for your application
+      # Format: KEY1=value1,KEY2=${_SUBSTITUTION_VAR}
+      - '--set-env-vars=DATABASE_URL=${_DATABASE_URL},API_KEY=${_API_KEY},ENVIRONMENT=production'
+
+# =============================================================================
+# SUBSTITUTION VARIABLES
+# =============================================================================
+# These variables are replaced during build time
+# [CUSTOMIZE] Add/remove/modify these based on your needs
+
+substitutions:
+  # [REQUIRED] Google Cloud region where resources will be deployed
+  # Common options: us-central1, us-east1, europe-west1, asia-southeast1
+  _REGION: "us-central1"
+  
+  # [REQUIRED] Artifact Registry repository name where Docker images are stored
+  # Must already exist in your project - create it first if needed
+  _REPO_NAME: "my-docker-repo"
+  
+  # [CUSTOMIZE] Your application-specific variables
+  # Add any environment variables your app needs here
+  
+  # Database connection string
+  _DATABASE_URL: "postgresql://user:pass@host:5432/dbname"
+  
+  # API keys and secrets (use Secret Manager for production)
+  _API_KEY: "your-api-key-here"
+  
+  # External service URLs
+  _EXTERNAL_SERVICE_URL: "https://api.example.com"
+  
+  # Custom domain or base URL for your service
+  _BASE_URL: "-example.run.app"             # Will become: https://your-service-name-example.run.app
+  
+  # [OPTIONAL] Override default project ID if needed
+  # _PROJECT_ID: "your-project-id"
+
+# =============================================================================
+# HOW TO USE THIS TEMPLATE:
+# =============================================================================
+# 1. Copy this file to your project root as 'cloudbuild.yaml'
+# 2. Replace all [CUSTOMIZE] sections with your specific values
+# 3. Ensure you have a Dockerfile in your project root
+# 4. Create an Artifact Registry repository: 
+#    gcloud artifacts repositories create REPO_NAME --repository-format=docker --location=REGION
+# 5. Enable required APIs:
+#    gcloud services enable cloudbuild.googleapis.com run.googleapis.com artifactregistry.googleapis.com
+# 6. Run the build:
+#    gcloud builds submit --config=cloudbuild.yaml
+
+# =============================================================================
+# COMMON CUSTOMIZATION PATTERNS:
+# =============================================================================
+
+# FOR NODE.JS APPS:
+# Replace the command/args section with:
+# - '--command=node'
+# - '--args=server.js'
+
+# FOR JAVA APPS:
+# Replace the command/args section with:
+# - '--command=java'
+# - '--args=-jar,app.jar'
+
+# FOR GO APPS:
+# Usually no command needed if your Dockerfile sets the right ENTRYPOINT
+# Remove the --command and --args lines
+
+# FOR MULTIPLE ENVIRONMENTS:
+# Create separate substitution files:
+# - substitutions-dev.yaml
+# - substitutions-prod.yaml
+# Use with: gcloud builds submit --substitutions-from-file=substitutions-dev.yaml
+
+# =============================================================================
+# EXAMPLE: COMPLETE CONFIGURATION FOR A SIMPLE WEB API
+# =============================================================================
+# Here's how this template would look when filled out for a real project:
+#
+# steps:
+#   - name: 'gcr.io/cloud-builders/docker'
+#     id: 'build-weather-api'
+#     args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/weather-api:latest', '.']
+#
+#   - name: 'gcr.io/cloud-builders/docker'
+#     id: 'push-weather-api'
+#     waitFor: ['build-weather-api']
+#     args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/weather-api:latest']
+#
+#   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+#     id: 'deploy-weather-api'
+#     waitFor: ['push-weather-api']
+#     entrypoint: gcloud
+#     args:
+#       - 'run'
+#       - 'deploy'
+#       - 'weather-api-service'
+#       - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/weather-api:latest'
+#       - '--region=${_REGION}'
+#       - '--platform=managed'
+#       - '--allow-unauthenticated'
+#       - '--labels=app=weather,version=v1'
+#       - '--command=python'
+#       - '--args=-m,weather_api.server'
+#       - '--min-instances=0'
+#       - '--max-instances=50'
+#       - '--set-env-vars=WEATHER_API_KEY=${_WEATHER_API_KEY},PORT=8080'
+#
+# substitutions:
+#   _REGION: "us-east1"
+#   _REPO_NAME: "weather-apps"
+#   _WEATHER_API_KEY: "abc123xyz789"
