@@ -1,0 +1,305 @@
+# =============================================================================
+# GOOGLE CLOUD BUILD TEMPLATE FOR MULTI-CONTAINER DEPLOYMENT
+# =============================================================================
+# 
+# PURPOSE: This template builds, pushes, and deploys multiple Docker containers
+# to Google Cloud Run in parallel for better performance.
+#
+# WHAT YOU NEED BEFORE USING:
+# 1. A Google Cloud Project with Cloud Build API enabled
+# 2. Docker repositories created in Google Artifact Registry
+# 3. Separate folders for each service containing Dockerfiles
+# 4. Cloud Build trigger or manual execution setup
+#
+# HOW TO CUSTOMIZE: 
+# 1. Replace all PLACEHOLDER values with your actual values
+# 2. Modify the number of services (add/remove build-push-deploy blocks)
+# 3. Update service names, folder paths, and deployment configurations
+# 4. Set your environment variables in the substitutions section
+#
+# =============================================================================
+
+steps:
+# =============================================================================
+# BUILD PHASE: Create Docker Images for Each Service
+# =============================================================================
+# This section builds Docker containers from your source code
+# Add one build step for each service you want to deploy
+
+# --- BUILD SERVICE 1 ---
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'build-SERVICE_1_NAME'                    # PLACEHOLDER: Replace with descriptive name (e.g., 'build-user-api')
+  args: 
+    - 'build'                                   # Docker build command
+    - '-t'                                      # Tag flag for naming the image
+    - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/SERVICE_1_IMAGE_NAME:${_IMAGE_TAG}'  
+    # PLACEHOLDER: Replace SERVICE_1_IMAGE_NAME with your image name (e.g., 'user-api')
+    - './SERVICE_1_FOLDER_PATH'                 # PLACEHOLDER: Replace with folder containing Dockerfile (e.g., './backend/api')
+
+# --- BUILD SERVICE 2 ---
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'build-SERVICE_2_NAME'                    # PLACEHOLDER: Replace with descriptive name (e.g., 'build-frontend')
+  args:
+    - 'build'
+    - '-t'
+    - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/SERVICE_2_IMAGE_NAME:${_IMAGE_TAG}'
+    # PLACEHOLDER: Replace SERVICE_2_IMAGE_NAME with your image name (e.g., 'frontend-app')
+    - './SERVICE_2_FOLDER_PATH'                 # PLACEHOLDER: Replace with folder path (e.g., './frontend')
+
+# --- ADD MORE BUILD STEPS HERE ---
+# Copy the pattern above for additional services
+# Remember to:
+# - Use unique 'id' values
+# - Update SERVICE_X_NAME, SERVICE_X_IMAGE_NAME, and SERVICE_X_FOLDER_PATH
+# - Ensure each folder contains a valid Dockerfile
+
+# =============================================================================
+# PUSH PHASE: Upload Images to Container Registry
+# =============================================================================
+# This section pushes your built images to Google Artifact Registry
+# Add one push step for each service (matches build steps above)
+
+# --- PUSH SERVICE 1 ---
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'push-SERVICE_1_NAME'                     # PLACEHOLDER: Match the SERVICE_1_NAME from build step
+  waitFor: ['build-SERVICE_1_NAME']             # PLACEHOLDER: Wait for corresponding build step to complete
+  args:
+    - 'push'                                    # Docker push command
+    - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/SERVICE_1_IMAGE_NAME:${_IMAGE_TAG}'
+    # PLACEHOLDER: Must exactly match the image name from build step
+
+# --- PUSH SERVICE 2 ---
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'push-SERVICE_2_NAME'                     # PLACEHOLDER: Match the SERVICE_2_NAME from build step
+  waitFor: ['build-SERVICE_2_NAME']             # PLACEHOLDER: Wait for corresponding build step to complete
+  args:
+    - 'push'
+    - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/SERVICE_2_IMAGE_NAME:${_IMAGE_TAG}'
+
+# --- ADD MORE PUSH STEPS HERE ---
+# Follow the same pattern for additional services
+
+# =============================================================================
+# DEPLOY PHASE: Deploy to Google Cloud Run
+# =============================================================================
+# This section deploys your pushed images to Cloud Run services
+# Add one deploy step for each service
+
+# --- DEPLOY SERVICE 1 ---
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  id: 'deploy-SERVICE_1_NAME'                   # PLACEHOLDER: Match SERVICE_1_NAME from previous steps
+  waitFor: ['push-SERVICE_1_NAME']              # PLACEHOLDER: Wait for corresponding push step
+  entrypoint: gcloud                            # Use gcloud CLI tool
+  args:
+    - 'run'                                     # Cloud Run command
+    - 'deploy'                                  # Deploy subcommand
+    - 'SERVICE_1_CLOUD_RUN_NAME'                # PLACEHOLDER: Name of your Cloud Run service (e.g., 'user-api-service')
+    - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/SERVICE_1_IMAGE_NAME:${_IMAGE_TAG}'
+    - '--region=${_REGION}'                     # Deploy to specified region
+    - '--platform=managed'                     # Use fully managed Cloud Run
+    - '--labels=PROJECT_LABEL_KEY=PROJECT_LABEL_VALUE'  # PLACEHOLDER: Replace with your project labels (e.g., 'app=myproject')
+    - '--allow-unauthenticated'                 # CUSTOMIZE: Remove this line if you want authentication required
+    - '--set-env-vars=ENV_VAR_1=${_ENV_VAR_1},ENV_VAR_2=${_ENV_VAR_2}'  # PLACEHOLDER: Add your environment variables
+    - '--min-instances=MIN_INSTANCE_COUNT'      # PLACEHOLDER: Set minimum instances (e.g., '0' for cost savings, '1' for no cold starts)
+    - '--max-instances=MAX_INSTANCE_COUNT'      # PLACEHOLDER: Set maximum instances (e.g., '10')
+    - '--memory=MEMORY_ALLOCATION'              # PLACEHOLDER: Set memory (e.g., '512Mi', '1Gi', '2Gi')
+    - '--cpu=CPU_ALLOCATION'                    # PLACEHOLDER: Set CPU (e.g., '1', '2', '4')
+
+# --- DEPLOY SERVICE 2 ---
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  id: 'deploy-SERVICE_2_NAME'                   # PLACEHOLDER: Match SERVICE_2_NAME from previous steps
+  waitFor: ['push-SERVICE_2_NAME']              # PLACEHOLDER: Wait for corresponding push step
+  entrypoint: gcloud
+  args:
+    - 'run'
+    - 'deploy'
+    - 'SERVICE_2_CLOUD_RUN_NAME'                # PLACEHOLDER: Name of your Cloud Run service (e.g., 'frontend-service')
+    - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/SERVICE_2_IMAGE_NAME:${_IMAGE_TAG}'
+    - '--region=${_REGION}'
+    - '--platform=managed'
+    - '--labels=PROJECT_LABEL_KEY=PROJECT_LABEL_VALUE'
+    - '--allow-unauthenticated'                 # CUSTOMIZE: Remove if authentication needed
+    - '--set-env-vars=ENV_VAR_3=${_ENV_VAR_3}'  # PLACEHOLDER: Add environment variables specific to this service
+    - '--min-instances=MIN_INSTANCE_COUNT'      # PLACEHOLDER: Set minimum instances
+    - '--max-instances=MAX_INSTANCE_COUNT'      # PLACEHOLDER: Set maximum instances
+    - '--memory=MEMORY_ALLOCATION'              # PLACEHOLDER: Set memory allocation
+    - '--cpu=CPU_ALLOCATION'                    # PLACEHOLDER: Set CPU allocation
+
+# --- ADD MORE DEPLOY STEPS HERE ---
+# Follow the same pattern for additional services
+
+# =============================================================================
+# CONFIGURATION VARIABLES
+# =============================================================================
+# These variables are used throughout the build process
+# Customize these values for your specific project
+
+substitutions:
+  # --- INFRASTRUCTURE SETTINGS ---
+  _REGION: "YOUR_REGION"                        # PLACEHOLDER: Your preferred region (e.g., "us-central1", "europe-west1")
+  _REPO_NAME: "YOUR_REPOSITORY_NAME"            # PLACEHOLDER: Your Artifact Registry repository name (e.g., "my-app-repo")
+  _IMAGE_TAG: "latest"                          # CUSTOMIZE: Image tag (e.g., "latest", "v1.0", "$COMMIT_SHA")
+  
+  # --- ENVIRONMENT VARIABLES ---
+  # Add all environment variables your services need
+  _ENV_VAR_1: "VALUE_1"                         # PLACEHOLDER: Replace with actual env var name and value (e.g., "_DATABASE_URL: 'postgres://...'")
+  _ENV_VAR_2: "VALUE_2"                         # PLACEHOLDER: Add more as needed (e.g., "_API_KEY: '${_SECRET_API_KEY}'")
+  _ENV_VAR_3: "VALUE_3"                         # PLACEHOLDER: Service-specific variables
+  
+  # --- ADDITIONAL CUSTOM VARIABLES ---
+  # Add any other variables your deployment needs
+  # _CUSTOM_VAR: "CUSTOM_VALUE"                 # PLACEHOLDER: Add custom variables as needed
+
+# =============================================================================
+# OPTIONAL CONFIGURATIONS
+# =============================================================================
+
+# --- Build Options (uncomment and customize if needed) ---
+# options:
+#   machineType: 'E2_HIGHCPU_8'                # CUSTOMIZE: Build machine type for faster builds
+#   substitutionOption: 'ALLOW_LOOSE'          # Allow undefined substitution variables
+#   logging: 'CLOUD_LOGGING_ONLY'              # Log to Cloud Logging only
+
+# --- Timeout (uncomment if builds take longer than 10 minutes) ---
+# timeout: '1200s'                             # CUSTOMIZE: Set build timeout (default: 600s)
+
+# =============================================================================
+# TEMPLATE USAGE GUIDE
+# =============================================================================
+#
+# STEP 1: PROJECT SETUP
+# - Replace all PLACEHOLDER values with your actual project details
+# - Ensure your Google Cloud Project has necessary APIs enabled:
+#   * Cloud Build API
+#   * Cloud Run API  
+#   * Artifact Registry API
+#
+# STEP 2: FOLDER STRUCTURE
+# Your project should look like this:
+# project-root/
+# ├── cloudbuild.yaml (this file)
+# ├── SERVICE_1_FOLDER_PATH/
+# │   ├── Dockerfile
+# │   └── (your service 1 code)
+# ├── SERVICE_2_FOLDER_PATH/
+# │   ├── Dockerfile
+# │   └── (your service 2 code)
+# └── (other folders as needed)
+#
+# STEP 3: ARTIFACT REGISTRY SETUP
+# Create your repository: 
+# gcloud artifacts repositories create YOUR_REPOSITORY_NAME \
+#   --repository-format=docker \
+#   --location=YOUR_REGION
+#
+# STEP 4: EXECUTE BUILD
+# Option A - Manual trigger:
+# gcloud builds submit --config cloudbuild.yaml
+#
+# Option B - Set up automatic triggers in Cloud Build console
+#
+# =============================================================================
+
+# =============================================================================
+# SIMPLE EXAMPLE: E-COMMERCE APPLICATION
+# =============================================================================
+# Here's how this template would look when filled out for a real project:
+#
+# steps:
+# # Build Phase
+# - name: 'gcr.io/cloud-builders/docker'
+#   id: 'build-user-api'
+#   args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/user-api:latest', './backend/users']
+#
+# - name: 'gcr.io/cloud-builders/docker'
+#   id: 'build-product-api'
+#   args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/product-api:latest', './backend/products']
+#
+# - name: 'gcr.io/cloud-builders/docker'
+#   id: 'build-frontend'
+#   args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/web-frontend:latest', './frontend']
+#
+# # Push Phase
+# - name: 'gcr.io/cloud-builders/docker'
+#   id: 'push-user-api'
+#   waitFor: ['build-user-api']
+#   args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/user-api:latest']
+#
+# - name: 'gcr.io/cloud-builders/docker'
+#   id: 'push-product-api'
+#   waitFor: ['build-product-api']
+#   args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/product-api:latest']
+#
+# - name: 'gcr.io/cloud-builders/docker'
+#   id: 'push-frontend'
+#   waitFor: ['build-frontend']
+#   args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/web-frontend:latest']
+#
+# # Deploy Phase
+# - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+#   id: 'deploy-user-api'
+#   waitFor: ['push-user-api']
+#   entrypoint: gcloud
+#   args:
+#     - 'run'
+#     - 'deploy'
+#     - 'ecommerce-user-api'
+#     - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/user-api:latest'
+#     - '--region=${_REGION}'
+#     - '--platform=managed'
+#     - '--labels=app=ecommerce,service=users'
+#     - '--allow-unauthenticated'
+#     - '--set-env-vars=DATABASE_URL=${_DATABASE_URL},JWT_SECRET=${_JWT_SECRET}'
+#     - '--min-instances=1'
+#     - '--max-instances=5'
+#     - '--memory=1Gi'
+#     - '--cpu=1'
+#
+# - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+#   id: 'deploy-product-api'
+#   waitFor: ['push-product-api']
+#   entrypoint: gcloud
+#   args:
+#     - 'run'
+#     - 'deploy'
+#     - 'ecommerce-product-api'
+#     - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/product-api:latest'
+#     - '--region=${_REGION}'
+#     - '--platform=managed'
+#     - '--labels=app=ecommerce,service=products'
+#     - '--allow-unauthenticated'
+#     - '--set-env-vars=DATABASE_URL=${_DATABASE_URL},REDIS_URL=${_REDIS_URL}'
+#     - '--min-instances=0'
+#     - '--max-instances=10'
+#     - '--memory=512Mi'
+#     - '--cpu=1'
+#
+# - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+#   id: 'deploy-frontend'
+#   waitFor: ['push-frontend']
+#   entrypoint: gcloud
+#   args:
+#     - 'run'
+#     - 'deploy'
+#     - 'ecommerce-frontend'
+#     - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/web-frontend:latest'
+#     - '--region=${_REGION}'
+#     - '--platform=managed'
+#     - '--labels=app=ecommerce,service=frontend'
+#     - '--allow-unauthenticated'
+#     - '--set-env-vars=API_BASE_URL=${_API_BASE_URL}'
+#     - '--min-instances=1'
+#     - '--max-instances=3'
+#     - '--memory=512Mi'
+#     - '--cpu=1'
+#
+# substitutions:
+#   _REGION: "us-central1"
+#   _REPO_NAME: "ecommerce-containers"
+#   _IMAGE_TAG: "latest"
+#   _DATABASE_URL: "postgresql://user:pass@db.example.com/ecommerce"
+#   _JWT_SECRET: "your-super-secret-jwt-key-here"
+#   _REDIS_URL: "redis://redis.example.com:6379"
+#   _API_BASE_URL: "https://ecommerce-product-api-xyz.a.run.app"
+#
+# =============================================================================
