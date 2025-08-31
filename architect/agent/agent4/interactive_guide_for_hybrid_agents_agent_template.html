@@ -1,1 +1,844 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parallel-Sequential Agent System Textbook</title>
+    <style>
+        /* Base styles and reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #ffffff;
+        }
+        
+        /* Layout */
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 100vh;
+        }
+        
+        /* Table of Contents */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-right: 1px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .toc h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .toc ul {
+            list-style-type: none;
+        }
+        
+        .toc li {
+            margin-bottom: 10px;
+        }
+        
+        .toc a {
+            color: #3498db;
+            text-decoration: none;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .toc a:hover {
+            background-color: #e9ecef;
+            color: #2980b9;
+        }
+        
+        /* Main Content */
+        .content {
+            padding: 40px;
+            max-width: 1200px;
+        }
+        
+        section {
+            margin-bottom: 60px;
+            scroll-margin-top: 20px;
+        }
+        
+        /* Typography */
+        h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin: 40px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            color: #34495e;
+            margin: 30px 0 15px;
+        }
+        
+        p {
+            margin-bottom: 15px;
+        }
+        
+        /* Code blocks */
+        .code-block {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .code-comment {
+            color: #95a5a6;
+            font-style: italic;
+        }
+        
+        .code-keyword {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .code-string {
+            color: #4ecdc4;
+        }
+        
+        .code-number {
+            color: #f39c12;
+        }
+        
+        .code-python {
+            color: #ff6b6b;
+        }
+        
+        /* Code explanation blocks */
+        .code-explanation {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        /* UI Components */
+        .button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        
+        .button:hover {
+            background-color: #2980b9;
+        }
+        
+        .collapsible {
+            background-color: #f8f9fa;
+            border-radius: 8px 8px 0 0;
+            margin: 20px 0 0;
+        }
+        
+        .collapsible-header {
+            background-color: #e9ecef;
+            padding: 15px 20px;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .collapsible-header::after {
+            content: '▶';
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+        }
+        
+        .collapsible-header.active::after {
+            transform: rotate(90deg);
+        }
+        
+        .collapsible-content {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+        }
+        
+        .collapsible-content.active {
+            padding: 20px;
+            max-height: 1000px;
+        }
+        
+        /* Demo boxes */
+        .demo-box {
+            background-color: #f1f2f6;
+            border: 1px solid #3498db;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .input-box {
+            background-color: white;
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .output-box {
+            background-color: #fdf2f2;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        /* Status boxes */
+        .status-box {
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid;
+            border-radius: 4px;
+        }
+        
+        .warning {
+            background-color: #fff3cd;
+            border-left-color: #f39c12;
+        }
+        
+        .info {
+            background-color: #d1ecf1;
+            border-left-color: #17a2b8;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            border-left-color: #28a745;
+        }
+        
+        /* Flow diagrams */
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .flow-box {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px;
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        .flow-arrow {
+            font-size: 1.5rem;
+            margin: 0 10px;
+            color: #2c3e50;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .toc {
+                position: static;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+            }
+            
+            .code-explanation {
+                grid-template-columns: 1fr;
+            }
+            
+            .flow-diagram {
+                flex-direction: column;
+            }
+            
+            .flow-arrow {
+                transform: rotate(90deg);
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#architecture">System Architecture</a></li>
+                <li><a href="#setup">Environment Setup</a></li>
+                <li><a href="#configuration">Configuration</a></li>
+                <li><a href="#parallel-agents">Parallel Agents</a></li>
+                <li><a href="#sequential-processing">Sequential Processing</a></li>
+                <li><a href="#deployment">Deployment</a></li>
+                <li><a href="#examples">Use Cases & Examples</a></li>
+                <li><a href="#interactive-demo">Interactive Demo</a></li>
+            </ul>
+        </nav>
+        
+        <main class="content">
+            <h1>Parallel-Sequential Agent System Template</h1>
+            
+            <section id="introduction">
+                <h2>Introduction</h2>
+                <p>This interactive textbook teaches you how to use the parallel-sequential multi-agent system template. This architecture creates a hybrid system where agents run in parallel, then results are processed sequentially.</p>
+                
+                <div class="status-box info">
+                    <p><strong>Ideal for:</strong> Research → Merge, Data Collection → Analysis, Multi-source → Synthesis workflows</p>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        Key Benefits of This Architecture
+                    </div>
+                    <div class="collapsible-content">
+                        <ul>
+                            <li><strong>Performance:</strong> Parallel execution reduces total processing time</li>
+                            <li><strong>Specialization:</strong> Each agent can focus on a specific task</li>
+                            <li><strong>Scalability:</strong> Easy to add more parallel agents as needed</li>
+                            <li><strong>Modularity:</strong> Components can be developed and tested independently</li>
+                            <li><strong>Robustness:</strong> Failure in one agent doesn't necessarily break the entire system</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="architecture">
+                <h2>System Architecture</h2>
+                <p>The parallel-sequential system follows a specific workflow where multiple agents process data simultaneously, followed by a sequential processing step to synthesize results.</p>
+                
+                <div class="flow-diagram">
+                    <div class="flow-box">User Input</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Parallel Agents</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Sequential Processor</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Final Output</div>
+                </div>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <span class="code-comment"># High-level architecture overview</span><br>
+                        <span class="code-keyword">root_agent</span> = <span class="code-python">SequentialAgent</span>(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">name</span>=<span class="code-string">"parallel_processing_system"</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">sub_agents</span>=[<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Step 1: Run multiple agents simultaneously</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parallel_group,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Step 2: Process all parallel results together</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;results_processor<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;]<br>
+                        )
+                    </div>
+                    <div>
+                        <h3>Architecture Explanation</h3>
+                        <p>The system uses a <strong>SequentialAgent</strong> as the root container that orchestrates the workflow:</p>
+                        <ol>
+                            <li><strong>Parallel Group:</strong> Contains agents that execute simultaneously</li>
+                            <li><strong>Results Processor:</strong> Synthesizes outputs from all parallel agents</li>
+                        </ol>
+                        <p>This design allows for both concurrency (for performance) and sequential processing (for synthesis).</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="setup">
+                <h2>Environment Setup</h2>
+                <p>Proper setup is crucial for the multi-agent system to function correctly. This involves importing dependencies and configuring environment variables.</p>
+                
+                <div class="code-block">
+                    <span class="code-comment"># --- IMPORTS SECTION ---</span><br>
+                    <span class="code-keyword">import</span> asyncio<br>
+                    <span class="code-keyword">import</span> os<br>
+                    <span class="code-keyword">from</span> contextlib <span class="code-keyword">import</span> AsyncExitStack<br>
+                    <span class="code-keyword">from</span> dotenv <span class="code-keyword">import</span> load_dotenv<br>
+                    <span class="code-keyword">from</span> google.adk.agents.llm_agent <span class="code-keyword">import</span> LlmAgent<br>
+                    <span class="code-keyword">from</span> google.adk.agents.parallel_agent <span class="code-keyword">import</span> ParallelAgent<br>
+                    <span class="code-keyword">from</span> google.adk.agents.sequential_agent <span class="code-keyword">import</span> SequentialAgent<br>
+                    <span class="code-keyword">from</span> google.adk.tools.mcp_tool.mcp_toolset <span class="code-keyword">import</span> MCPToolset<br>
+                    <span class="code-keyword">from</span> google.adk.tools.mcp_tool.mcp_session_manager <span class="code-keyword">import</span> SseServerParams<br>
+                    <span class="code-keyword">import</span> logging<br>
+                    <span class="code-keyword">import</span> nest_asyncio<br>
+                    <span class="code-keyword">from</span> toolbox_core <span class="code-keyword">import</span> ToolboxSyncClient<br>
+                    <br>
+                    <span class="code-comment"># Load environment variables from .env file</span><br>
+                    load_dotenv()<br>
+                    <br>
+                    <span class="code-comment"># Configure logging</span><br>
+                    logging.basicConfig(level=logging.INFO)<br>
+                    log = logging.getLogger(__name__)
+                </div>
+                
+                <div class="status-box warning">
+                    <p><strong>Important:</strong> The <code>load_dotenv()</code> function must be called before accessing any environment variables with <code>os.environ.get()</code>.</p>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        Environment Variables File (.env) Setup
+                    </div>
+                    <div class="collapsible-content">
+                        <p>Create a <code>.env</code> file in your project root with the following variables:</p>
+                        <div class="code-block">
+                            <span class="code-comment"># First tool server (typically API-based tools)</span><br>
+                            API_TOOLS_URL=http://api-tools.example.com<br>
+                            <br>
+                            <span class="code-comment"># Second tool server (typically computation tools)</span><br>
+                            FUNCTION_TOOLS_URL=http://function-tools.example.com<br>
+                            <br>
+                            <span class="code-comment"># Public URL where users access your system</span><br>
+                            PUBLIC_URL=http://your-agent-system.example.com<br>
+                            <br>
+                            <span class="code-comment"># Additional variables as needed</span><br>
+                            DATABASE_URL=postgresql://user:pass@localhost:5432/db<br>
+                            API_KEY=your-secret-api-key-here
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="configuration">
+                <h2>Configuration</h2>
+                <p>Configure your tool servers and global variables that will be used throughout the system.</p>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <span class="code-comment"># --- TOOL SERVER CONFIGURATION ---</span><br>
+                        API_TOOLS_URL = os.environ.get(<span class="code-string">"API_TOOLS_URL"</span>)<br>
+                        FUNCTION_TOOLS_URL = os.environ.get(<span class="code-string">"FUNCTION_TOOLS_URL"</span>)<br>
+                        PUBLIC_URL = os.environ.get(<span class="code-string">"PUBLIC_URL"</span>)<br>
+                        <br>
+                        <span class="code-comment"># Print URLs to verify they loaded correctly</span><br>
+                        print(<span class="code-string">f"API_TOOLS_URL: {API_TOOLS_URL}"</span>)<br>
+                        print(<span class="code-string">f"FUNCTION_TOOLS_URL: {FUNCTION_TOOLS_URL}"</span>)<br>
+                        print(<span class="code-string">f"PUBLIC_URL: {PUBLIC_URL}"</span>)<br>
+                        <br>
+                        <span class="code-comment"># --- FIRST TOOLSET - API-based tools ---</span><br>
+                        toolFAPI = MCPToolset(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;connection_params=SseServerParams(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;url=API_TOOLS_URL,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;headers={}<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;)<br>
+                        )<br>
+                        <br>
+                        <span class="code-comment"># --- SECOND TOOLSET - Function/compute tools ---</span><br>
+                        toolFunction = MCPToolset(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;connection_params=SseServerParams(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;url=FUNCTION_TOOLS_URL,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;headers={}<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;)<br>
+                        )
+                    </div>
+                    <div>
+                        <h3>Configuration Details</h3>
+                        <p>The configuration section sets up:</p>
+                        <ul>
+                            <li><strong>Environment Variables:</strong> Loaded from the .env file</li>
+                            <li><strong>Tool Servers:</strong> Configure connections to external services</li>
+                            <li><strong>Verification:</strong> Print statements confirm successful loading</li>
+                        </ul>
+                        <div class="status-box info">
+                            <p>You can add authentication headers to the tool connections if needed:</p>
+                            <div class="code-block">
+                                headers={<span class="code-string">"Authorization"</span>: <span class="code-string">"Bearer your-token-here"</span>}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="parallel-agents">
+                <h2>Parallel Agents</h2>
+                <p>Parallel agents execute simultaneously, allowing for concurrent processing of independent tasks.</p>
+                
+                <div class="flow-diagram">
+                    <div class="flow-box">Input</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box" style="display: flex; flex-direction: column;">
+                        <div style="background: #3498db; color: white; padding: 10px; margin: 5px; border-radius: 4px;">Agent 1</div>
+                        <div style="background: #3498db; color: white; padding: 10px; margin: 5px; border-radius: 4px;">Agent 2</div>
+                        <div style="background: #3498db; color: white; padding: 10px; margin: 5px; border-radius: 4px;">Agent 3</div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Combined Output</div>
+                </div>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <span class="code-comment"># --- FIRST PARALLEL AGENT ---</span><br>
+                        first_parallel_agent = LlmAgent(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;model=<span class="code-string">'gemini-2.5-flash'</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;name=<span class="code-string">'data_collector_1'</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;instruction=<span class="code-string">"""<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;You are a data collector specializing in source A.<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Your job is to gather data using the search_api_source tool.<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Return the raw data results clearly and concisely.<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"""</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;tools=[toolFAPI]<br>
+                        )<br>
+                        <br>
+                        <span class="code-comment"># --- SECOND PARALLEL AGENT ---</span><br>
+                        second_parallel_agent = LlmAgent(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;model=<span class="code-string">'gemini-2.5-flash'</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;name=<span class="code-string">'data_collector_2'</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;instruction=<span class="code-string">"""<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;You are a data collector specializing in source B.<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Your job is to generate numerical analysis using calculate_metrics.<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;You MUST call the tool with a 'base_value' of 20.<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"""</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;tools=[toolFunction]<br>
+                        )
+                    </div>
+                    <div>
+                        <h3>Parallel Agent Design</h3>
+                        <p>When designing parallel agents:</p>
+                        <ul>
+                            <li>Each agent should have a distinct, specialized role</li>
+                            <li>Agents should work on independent tasks that don't require coordination</li>
+                            <li>Assign appropriate tools based on each agent's responsibilities</li>
+                            <li>Provide clear, specific instructions for each agent</li>
+                        </ul>
+                        <div class="status-box warning">
+                            <p>Parallel agents receive the same input but process it differently based on their instructions and tools.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3>Parallel Coordination</h3>
+                <p>The ParallelAgent class coordinates the simultaneous execution of multiple agents.</p>
+                
+                <div class="code-block">
+                    <span class="code-comment"># --- PARALLEL COORDINATION ---</span><br>
+                    parallel_group = ParallelAgent(<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;name=<span class="code-string">'parallel_data_collectors'</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;sub_agents=[<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;first_parallel_agent,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;second_parallel_agent<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Add more parallel agents here</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;]<br>
+                    )
+                </div>
+            </section>
+            
+            <section id="sequential-processing">
+                <h2>Sequential Processing</h2>
+                <p>After parallel execution, a sequential processor synthesizes the results into a coherent output.</p>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <span class="code-comment"># --- RESULTS PROCESSOR ---</span><br>
+                        results_processor = LlmAgent(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;model=<span class="code-string">'gemini-2.5-flash'</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;name=<span class="code-string">'results_synthesizer'</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;instruction=<span class="code-string">"""<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;You are a results synthesizer. Your job is to:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1. Analyze the complete text from parallel processing<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2. Extract all important data points<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3. Calculate results (sum, average, etc.)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4. Create a comprehensive summary<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5. Format output clearly<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"""</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;tools=[toolFunction]<br>
+                        )
+                    </div>
+                    <div>
+                        <h3>Sequential Processor Role</h3>
+                        <p>The sequential processor:</p>
+                        <ul>
+                            <li>Receives outputs from all parallel agents</li>
+                            <li>Synthesizes information into a coherent whole</li>
+                            <li>Applies additional processing or analysis</li>
+                            <li>Formats the final output for the user</li>
+                        </ul>
+                        <div class="status-box info">
+                            <p>This is where the "magic" happens - transforming multiple parallel outputs into a single, valuable result.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3>Complete System Architecture</h3>
+                <p>The root agent orchestrates the entire parallel-sequential workflow.</p>
+                
+                <div class="code-block">
+                    <span class="code-comment"># --- ROOT AGENT - ORCHESTRATES WORKFLOW ---</span><br>
+                    root_agent = SequentialAgent(<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;name=<span class="code-string">"parallel_processing_system"</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;sub_agents=[<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parallel_group,      <span class="code-comment"># Step 1: Parallel execution</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;results_processor    <span class="code-comment"># Step 2: Sequential processing</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;],<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;description=<span class="code-string">"Runs parallel data collection followed by sequential result synthesis"</span><br>
+                    )
+                </div>
+            </section>
+            
+            <section id="deployment">
+                <h2>Deployment</h2>
+                <p>Deploy your parallel-sequential system as a web API for production use.</p>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <span class="code-comment"># --- SERVER DEPLOYMENT ---</span><br>
+                        <span class="code-keyword">if</span> __name__ == <span class="code-string">"__main__"</span>:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">import</span> uvicorn<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">from</span> agent_to_a2a <span class="code-keyword">import</span> to_a2a<br>
+                        <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;SERVER_PORT = <span class="code-number">8080</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;SERVER_HOST = <span class="code-string">'0.0.0.0'</span><br>
+                        <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Convert agent to web API</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;a2a_app = to_a2a(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;root_agent,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;port=SERVER_PORT,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public_url=PUBLIC_URL<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;)<br>
+                        <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Start web server</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;uvicorn.run(a2a_app, host=SERVER_HOST, port=SERVER_PORT)
+                    </div>
+                    <div>
+                        <h3>Deployment Options</h3>
+                        <p>Your system can be deployed as:</p>
+                        <ul>
+                            <li><strong>Web API:</strong> Using uvicorn as shown above</li>
+                            <li><strong>Cloud Function:</strong> Deploy to serverless platforms</li>
+                            <li><strong>Containerized App:</strong> Using Docker for portability</li>
+                            <li><strong>Local Service:</strong> For development and testing</li>
+                        </ul>
+                        <div class="status-box info">
+                            <p>The <code>to_a2a()</code> function converts your agent system into a web API that can handle HTTP requests.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="examples">
+                <h2>Use Cases & Examples</h2>
+                <p>The parallel-sequential architecture is ideal for various scenarios requiring both concurrency and synthesis.</p>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        Market Research Analysis System
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="code-block">
+                            <span class="code-comment"># Parallel Agents</span><br>
+                            competitor_researcher = LlmAgent(<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;model=<span class="code-string">'gemini-2.5-flash'</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;name=<span class="code-string">'competitor_analyst'</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;instruction=<span class="code-string">"""Analyze competitors and market share..."""</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;tools=[api_tools]<br>
+                            )<br>
+                            <br>
+                            social_researcher = LlmAgent(<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;model=<span class="code-string">'gemini-2.5-flash'</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;name=<span class="code-string">'social_media_analyst'</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;instruction=<span class="code-string">"""Analyze social sentiment with sample_size=1000..."""</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;tools=[analysis_tools]<br>
+                            )<br>
+                            <br>
+                            <span class="code-comment"># Parallel Group</span><br>
+                            research_team = ParallelAgent(<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;name=<span class="code-string">'market_research_team'</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;sub_agents=[competitor_researcher, social_researcher]<br>
+                            )<br>
+                            <br>
+                            <span class="code-comment"># Sequential Processor</span><br>
+                            market_synthesizer = LlmAgent(<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;model=<span class="code-string">'gemini-2.5-flash'</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;name=<span class="code-string">'market_report_generator'</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;instruction=<span class="code-string">"""Synthesize research into comprehensive report..."""</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;tools=[analysis_tools]<br>
+                            )<br>
+                            <br>
+                            <span class="code-comment"># Root System</span><br>
+                            root_agent = SequentialAgent(<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;name=<span class="code-string">"market_research_system"</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;sub_agents=[research_team, market_synthesizer]<br>
+                            )
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="status-box success">
+                    <p><strong>Other Ideal Use Cases:</strong></p>
+                    <ul>
+                        <li>Multi-source data gathering (APIs, databases, files)</li>
+                        <li>Concurrent analysis tasks (text, image, audio processing)</li>
+                        <li>Distributed research from multiple sources</li>
+                        <li>Performance optimization testing</li>
+                        <li>Content creation pipelines</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="interactive-demo">
+                <h2>Interactive Demo</h2>
+                <p>Experiment with a simplified version of the parallel-sequential system to understand how it works.</p>
+                
+                <div class="demo-box">
+                    <h3>Parallel Processing Simulator</h3>
+                    <p>Enter a query to see how parallel agents would process it:</p>
+                    
+                    <div class="input-box">
+                        <input type="text" id="demo-input" placeholder="Enter your research query..." style="width: 70%; padding: 8px;">
+                        <button class="button" onclick="runDemo()">Run Simulation</button>
+                    </div>
+                    
+                    <div id="demo-output" class="output-box" style="display: none;">
+                        <h4>Simulation Results:</h4>
+                        <div id="parallel-results"></div>
+                        <div id="sequential-results" style="margin-top: 20px;"></div>
+                    </div>
+                </div>
+                
+                <div class="status-box info">
+                    <p>This demo simulates the parallel-sequential workflow without making actual API calls. In a real implementation, each agent would connect to actual tool servers.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Toggle collapsible sections
+        function toggleCollapsible(element) {
+            element.classList.toggle("active");
+            const content = element.nextElementSibling;
+            content.classList.toggle("active");
+        }
+        
+        // Interactive demo simulation
+        function runDemo() {
+            const input = document.getElementById('demo-input').value;
+            if (!input) {
+                alert('Please enter a query first');
+                return;
+            }
+            
+            // Show output area
+            document.getElementById('demo-output').style.display = 'block';
+            
+            // Clear previous results
+            document.getElementById('parallel-results').innerHTML = '';
+            document.getElementById('sequential-results').innerHTML = '';
+            
+            // Simulate parallel processing
+            const agents = [
+                { name: 'Data Collector 1', specialty: 'API Data', color: '#3498db' },
+                { name: 'Data Collector 2', specialty: 'Numerical Analysis', color: '#2ecc71' },
+                { name: 'Data Collector 3', specialty: 'Text Processing', color: '#9b59b6' }
+            ];
+            
+            let parallelResults = [];
+            
+            // Display parallel processing
+            agents.forEach((agent, index) => {
+                const agentResult = `<div style="margin: 10px 0; padding: 10px; border-left: 4px solid ${agent.color}; background: #f8f9fa;">
+                    <strong>${agent.name}</strong> (${agent.specialty}):<br>
+                    Processing "${input}"...<br>
+                    <span id="agent-${index}-result" style="font-style: italic;">Working...</span>
+                </div>`;
+                
+                document.getElementById('parallel-results').innerHTML += agentResult;
+                
+                // Simulate async processing with different delays
+                setTimeout(() => {
+                    const results = [
+                        `Found 45 relevant items from API source`,
+                        `Calculated metrics: score=87, confidence=92%`,
+                        `Identified 3 key themes: innovation, efficiency, scalability`
+                    ];
+                    
+                    document.getElementById(`agent-${index}-result`).textContent = results[index];
+                    parallelResults.push(results[index]);
+                    
+                    // When all agents complete, show sequential processing
+                    if (parallelResults.length === agents.length) {
+                        simulateSequentialProcessing(parallelResults);
+                    }
+                }, 1000 + (index * 800));
+            });
+        }
+        
+        function simulateSequentialProcessing(parallelResults) {
+            document.getElementById('sequential-results').innerHTML = `
+                <div style="margin: 10px 0; padding: 10px; border-left: 4px solid #f39c12; background: #fff3cd;">
+                    <strong>Sequential Processor</strong>:<br>
+                    Analyzing results from all parallel agents...<br>
+                    <span id="sequential-result" style="font-style: italic;">Synthesizing...</span>
+                </div>
+            `;
+            
+            // Simulate sequential processing delay
+            setTimeout(() => {
+                const summary = `
+                Based on analysis of all parallel results:
+                - Multiple data sources consulted
+                - Comprehensive metrics calculated
+                - Key themes identified
+                - Recommendation: Proceed with implementation, high confidence (92%)
+                `;
+                
+                document.getElementById('sequential-result').textContent = summary;
+            }, 2000);
+        }
+        
+        // Smooth scrolling for table of contents links
+        document.querySelectorAll('.toc a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                window.scrollTo({
+                    top: targetElement.offsetTop - 20,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
