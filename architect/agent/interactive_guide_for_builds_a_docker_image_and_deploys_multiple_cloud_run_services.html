@@ -1,1 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Cloud Build Multi-Service Template Guide</title>
+    <style>
+        /* Base Styles */
+        :root {
+            --primary-blue: #3498db;
+            --dark-blue-1: #2c3e50;
+            --dark-blue-2: #34495e;
+            --light-grey: #f8f9fa;
+            --off-white: #f1f2f6;
+            --pure-white: #ffffff;
+            --border-color: #e9ecef;
+            --border-color-2: #ddd;
+            --text-dark: #333;
+            --text-medium: #7f8c8d;
+            --warning-bg: #fff3cd;
+            --warning-border: #f39c12;
+            --info-bg: #d1ecf1;
+            --info-border: #17a2b8;
+            --success-bg: #d4edda;
+            --success-border: #28a745;
+            --code-bg: #2d3748;
+            --code-text: #e2e8f0;
+            --python-color: #ff6b6b;
+            --string-color: #4ecdc4;
+            --comment-color: #95a5a6;
+            --keyword-color: #e74c3c;
+            --number-color: #f39c12;
+            --block-color: #e74c3c;
+            --allow-color: #27ae60;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background-color: var(--pure-white);
+            display: grid;
+            grid-template-columns: 300px 1fr;
+        }
+
+        /* Header Styles */
+        header {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 2rem;
+            border-bottom: 3px solid var(--primary-blue);
+            background-color: var(--pure-white);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--dark-blue-1);
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: var(--dark-blue-1);
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 0.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: var(--dark-blue-2);
+            margin: 1.5rem 0 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        /* Table of Contents */
+        .toc {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            background-color: var(--light-grey);
+            padding: 1.5rem;
+            border-right: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .toc h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .toc ul {
+            list-style-type: none;
+        }
+
+        .toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        .toc a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .toc a:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+
+        /* Main Content */
+        .content {
+            padding: 2rem;
+            max-width: 1200px;
+        }
+
+        section {
+            margin-bottom: 3rem;
+        }
+
+        /* Code Blocks */
+        .code-explanation {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+
+        .code-block {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+        }
+
+        .explanation {
+            padding: 1.5rem;
+            background-color: var(--light-grey);
+        }
+
+        .code-comment {
+            color: var(--comment-color);
+            font-style: italic;
+        }
+
+        .code-keyword {
+            color: var(--keyword-color);
+            font-weight: bold;
+        }
+
+        .code-string {
+            color: var(--string-color);
+        }
+
+        .code-number {
+            color: var(--number-color);
+        }
+
+        .code-python {
+            color: var(--python-color);
+        }
+
+        /* UI Components */
+        .collapsible {
+            margin-bottom: 1rem;
+        }
+
+        .collapsible-header {
+            background-color: var(--light-grey);
+            padding: 1rem;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .collapsible-header::after {
+            content: '▶';
+            font-size: 0.8rem;
+        }
+
+        .collapsible-header.active::after {
+            content: '▼';
+        }
+
+        .collapsible-content {
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            display: none;
+        }
+
+        .collapsible-content.active {
+            display: block;
+        }
+
+        .demo-box {
+            background-color: var(--off-white);
+            border: 1px solid var(--primary-blue);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .input-box {
+            background-color: var(--pure-white);
+            border-left: 4px solid var(--allow-color);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .output-box {
+            background-color: #fdf2f2;
+            border-left: 4px solid var(--block-color);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+            gap: 0.5rem;
+        }
+
+        .flow-box {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .arrow {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--dark-blue-2);
+        }
+
+        .status-box {
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 4px solid;
+            border-radius: 4px;
+        }
+
+        .warning {
+            background-color: var(--warning-bg);
+            border-left-color: var(--warning-border);
+        }
+
+        .info {
+            background-color: var(--info-bg);
+            border-left-color: var(--info-border);
+        }
+
+        .success {
+            background-color: var(--success-bg);
+            border-left-color: var(--success-border);
+        }
+
+        .button {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Interactive Demo */
+        .interactive-demo {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .demo-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .demo-control {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        input, select {
+            padding: 0.7rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .demo-output {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: var(--light-grey);
+            border-radius: 4px;
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                grid-template-columns: 1fr;
+            }
+
+            .toc {
+                position: static;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .code-explanation {
+                grid-template-columns: 1fr;
+            }
+
+            .demo-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Google Cloud Build Multi-Service Template Guide</h1>
+        <p>A comprehensive guide to deploying multiple Cloud Run services from a single codebase</p>
+    </header>
+
+    <nav class="toc">
+        <h2>Table of Contents</h2>
+        <ul>
+            <li><a href="#introduction">Introduction</a></li>
+            <li><a href="#overview">Template Overview</a></li>
+            <li><a href="#architecture">System Architecture</a></li>
+            <li><a href="#step-by-step">Step-by-Step Explanation</a>
+                <ul>
+                    <li><a href="#step1">Step 1: Build Docker Image</a></li>
+                    <li><a href="#step2">Step 2: Push to Artifact Registry</a></li>
+                    <li><a href="#step3">Step 3: Deploy Services</a></li>
+                </ul>
+            </li>
+            <li><a href="#substitutions">Substitution Variables</a></li>
+            <li><a href="#customization">Customization Guide</a></li>
+            <li><a href="#demo">Interactive Demo</a></li>
+            <li><a href="#best-practices">Best Practices</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+        <section id="introduction">
+            <h2>Introduction</h2>
+            <p>This guide explains how to use the Google Cloud Build template for deploying multiple Cloud Run services from a single codebase. This approach is ideal for microservices architectures where different components need to be deployed as separate services but share common code and dependencies.</p>
+            
+            <div class="status-box info">
+                <p><strong>When to use this template:</strong> When you have a single codebase that contains multiple services or components that should be deployed as separate Cloud Run services with different configurations.</p>
+            </div>
+        </section>
+
+        <section id="overview">
+            <h2>Template Overview</h2>
+            <p>The Google Cloud Build multi-service template automates the process of building a Docker image and deploying multiple Cloud Run services from that image. Each service can run different commands or modules from your application with unique configurations.</p>
+            
+            <div class="code-explanation">
+                <div class="code-block">
+                    <pre><code><span class="code-comment"># WHAT THIS TEMPLATE DOES:</span>
+<span class="code-comment"># 1. Builds a single Docker image from your project</span>
+<span class="code-comment"># 2. Pushes the image to Google Artifact Registry</span>
+<span class="code-comment"># 3. Deploys multiple Cloud Run services using the same image</span>
+<span class="code-comment"># 4. Each service runs different modules/commands from your application</span></code></pre>
+                </div>
+                <div class="explanation">
+                    <p>The template follows a four-step process that allows you to build once and deploy multiple services with different configurations.</p>
+                    <p>This approach ensures consistency across services while allowing for customization of runtime behavior.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="architecture">
+            <h2>System Architecture</h2>
+            <p>The following diagram illustrates the deployment architecture and workflow:</p>
+            
+            <div class="flow-diagram">
+                <div class="flow-box">Source Code</div>
+                <div class="arrow">→</div>
+                <div class="flow-box">Cloud Build</div>
+                <div class="arrow">→</div>
+                <div class="flow-box">Docker Image</div>
+                <div class="arrow">→</div>
+                <div class="flow-box">Artifact Registry</div>
+            </div>
+            
+            <div class="flow-diagram">
+                <div class="flow-box" style="background-color: var(--allow-color);">Service 1</div>
+                <div class="flow-box" style="background-color: var(--primary-blue);">Service 2</div>
+                <div class="flow-box" style="background-color: var(--warning-border);">Service 3</div>
+                <div class="arrow">←</div>
+                <div class="flow-box">Artifact Registry</div>
+            </div>
+            
+            <p>All services are deployed from the same Docker image but run with different commands, arguments, and environment variables.</p>
+        </section>
+
+        <section id="step-by-step">
+            <h2>Step-by-Step Explanation</h2>
+            
+            <div id="step1" class="collapsible">
+                <div class="collapsible-header">Step 1: Build Docker Image</div>
+                <div class="collapsible-content">
+                    <p>This step builds your Docker image from the Dockerfile in your project root.</p>
+                    
+                    <div class="code-explanation">
+                        <div class="code-block">
+                            <pre><code>- <span class="code-keyword">name</span>: <span class="code-string">'gcr.io/cloud-builders/docker'</span>
+  <span class="code-keyword">id</span>: <span class="code-string">'build-base-image'</span>
+  <span class="code-keyword">args</span>: 
+    - <span class="code-string">'build'</span>
+    - <span class="code-string">'-t'</span>
+    <span class="code-comment"># IMAGE TAG FORMAT: REGION-docker.pkg.dev/PROJECT_ID/REPO_NAME/IMAGE_NAME:TAG</span>
+    - <span class="code-string">'${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'</span>
+    - <span class="code-string">'.'</span></code></pre>
+                        </div>
+                        <div class="explanation">
+                            <p>The build step uses the Cloud Build Docker builder to create a Docker image with the specified tag.</p>
+                            <p><strong>Customization points:</strong></p>
+                            <ul>
+                                <li>Change the ID to match your project name</li>
+                                <li>Update the image name in the substitutions section</li>
+                                <li>Change the build context path if your Dockerfile is not in the root directory</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="step2" class="collapsible">
+                <div class="collapsible-header">Step 2: Push to Artifact Registry</div>
+                <div class="collapsible-content">
+                    <p>This step uploads your built image to Google Artifact Registry for storage and distribution.</p>
+                    
+                    <div class="code-explanation">
+                        <div class="code-block">
+                            <pre><code>- <span class="code-keyword">name</span>: <span class="code-string">'gcr.io/cloud-builders/docker'</span>
+  <span class="code-keyword">id</span>: <span class="code-string">'push-base-image'</span>
+  <span class="code-keyword">waitFor</span>: [<span class="code-string">'build-base-image'</span>]
+  <span class="code-keyword">args</span>: 
+    - <span class="code-string">'push'</span>
+    - <span class="code-string">'${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'</span></code></pre>
+                        </div>
+                        <div class="explanation">
+                            <p>The push step uses the same Docker builder to upload the image to Artifact Registry.</p>
+                            <p><strong>Key points:</strong></p>
+                            <ul>
+                                <li>The <code>waitFor</code> field ensures this step runs only after the build completes</li>
+                                <li>The image tag must match exactly with the build step</li>
+                                <li>Artifact Registry must be enabled in your Google Cloud project</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="step3" class="collapsible">
+                <div class="collapsible-header">Step 3: Deploy Services</div>
+                <div class="collapsible-content">
+                    <p>These steps deploy multiple Cloud Run services from the same Docker image with different configurations.</p>
+                    
+                    <div class="code-explanation">
+                        <div class="code-block">
+                            <pre><code>- <span class="code-keyword">name</span>: <span class="code-string">'gcr.io/google.com/cloudsdktool/cloud-sdk'</span>
+  <span class="code-keyword">id</span>: <span class="code-string">'deploy-service-one'</span>
+  <span class="code-keyword">waitFor</span>: [<span class="code-string">'push-base-image'</span>]
+  <span class="code-keyword">entrypoint</span>: gcloud
+  <span class="code-keyword">args</span>:
+    - <span class="code-string">'run'</span>
+    - <span class="code-string">'deploy'</span>
+    - <span class="code-string">'${_SERVICE_ONE_NAME}'</span>
+    - <span class="code-string">'--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'</span>
+    - <span class="code-string">'--region=${_REGION}'</span>
+    - <span class="code-string">'--platform=managed'</span>
+    - <span class="code-string">'--allow-unauthenticated'</span>
+    - <span class="code-string">'--command=${_SERVICE_ONE_COMMAND}'</span>
+    - <span class="code-string">'--args=${_SERVICE_ONE_ARGS}'</span>
+    - <span class="code-string">'--set-env-vars=${_SERVICE_ONE_ENV_VARS}'</span></code></pre>
+                        </div>
+                        <div class="explanation">
+                            <p>Each service deployment uses the gcloud command to deploy a Cloud Run service with specific configurations.</p>
+                            <p><strong>Customization points:</strong></p>
+                            <ul>
+                                <li>Service name, command, and arguments for each service</li>
+                                <li>Environment variables specific to each service</li>
+                                <li>Authentication settings (allow unauthenticated or require authentication)</li>
+                                <li>Resource allocation (CPU, memory)</li>
+                                <li>Minimum instance count</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="status-box info">
+                        <p><strong>Note:</strong> All service deployments wait for the image push to complete but can run in parallel with each other, speeding up the deployment process.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="substitutions">
+            <h2>Substitution Variables</h2>
+            <p>Substitution variables allow you to parameterize your build configuration. These variables are replaced with actual values during build execution.</p>
+            
+            <div class="code-explanation">
+                <div class="code-block">
+                    <pre><code><span class="code-keyword">substitutions</span>:
+  <span class="code-comment"># REQUIRED: Google Cloud Configuration</span>
+  <span class="code-keyword">_PROJECT_ID</span>: <span class="code-string">""</span>
+  <span class="code-keyword">_REGION</span>: <span class="code-string">"us-central1"</span>
+  
+  <span class="code-comment"># REQUIRED: Artifact Registry Configuration</span>
+  <span class="code-keyword">_REPO_NAME</span>: <span class="code-string">""</span>
+  <span class="code-keyword">_IMAGE_NAME</span>: <span class="code-string">""</span>
+  
+  <span class="code-comment"># REQUIRED: Service Names</span>
+  <span class="code-keyword">_SERVICE_ONE_NAME</span>: <span class="code-string">""</span>
+  <span class="code-keyword">_SERVICE_TWO_NAME</span>: <span class="code-string">""</span>
+  <span class="code-keyword">_SERVICE_THREE_NAME</span>: <span class="code-string">""</span>
+  
+  <span class="code-comment"># REQUIRED: Service Commands and Arguments</span>
+  <span class="code-keyword">_SERVICE_ONE_COMMAND</span>: <span class="code-string">"python"</span>
+  <span class="code-keyword">_SERVICE_ONE_ARGS</span>: <span class="code-string">"-m,app.main"</span></code></pre>
+                </div>
+                <div class="explanation">
+                    <p>Substitution variables are defined in the <code>substitutions</code> section of the cloudbuild.yaml file.</p>
+                    <p><strong>Usage tips:</strong></p>
+                    <ul>
+                        <li>Variables are referenced using <code>${_VARIABLE_NAME}</code> syntax</li>
+                        <li>You can override these values when triggering the build</li>
+                        <li>Use clear, descriptive names for your variables</li>
+                        <li>Group related variables together with comments</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="customization">
+            <h2>Customization Guide</h2>
+            <p>This template is designed to be flexible and adaptable to various use cases. Here are some common customization scenarios:</p>
+            
+            <div class="collapsible">
+                <div class="collapsible-header">Adding Additional Services</div>
+                <div class="collapsible-content">
+                    <p>To add more services, copy one of the existing deployment steps and customize it:</p>
+                    
+                    <div class="code-block">
+                        <pre><code><span class="code-comment"># ADD MORE SERVICES HERE</span>
+- <span class="code-keyword">name</span>: <span class="code-string">'gcr.io/google.com/cloudsdktool/cloud-sdk'</span>
+  <span class="code-keyword">id</span>: <span class="code-string">'deploy-service-four'</span>
+  <span class="code-keyword">waitFor</span>: [<span class="code-string">'push-base-image'</span>]
+  <span class="code-keyword">entrypoint</span>: gcloud
+  <span class="code-keyword">args</span>:
+    - <span class="code-string">'run'</span>
+    - <span class="code-string">'deploy'</span>
+    - <span class="code-string">'${_SERVICE_FOUR_NAME}'</span>
+    - <span class="code-string">'--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'</span>
+    <span class="code-comment"># ... additional arguments</span></code></pre>
+                    </div>
+                    
+                    <p>Remember to add the corresponding substitution variables for the new service.</p>
+                </div>
+            </div>
+            
+            <div class="collapsible">
+                <div class="collapsible-header">Customizing Environment Variables</div>
+                <div class="collapsible-content">
+                    <p>Each service can have its own set of environment variables:</p>
+                    
+                    <div class="code-block">
+                        <pre><code><span class="code-keyword">_SERVICE_ONE_ENV_VARS</span>: <span class="code-string">"PORT=8080,ENV=production,DB_HOST=my-database"</span>
+<span class="code-keyword">_SERVICE_TWO_ENV_VARS</span>: <span class="code-string">"WORKER_COUNT=5,QUEUE_NAME=my-queue,LOG_LEVEL=debug"</span></code></pre>
+                    </div>
+                    
+                    <p>Environment variables are specified as comma-separated key=value pairs without spaces.</p>
+                </div>
+            </div>
+            
+            <div class="collapsible">
+                <div class="collapsible-header">Configuring Resource Allocation</div>
+                <div class="collapsible-content">
+                    <p>You can customize CPU, memory, and other resource settings for each service:</p>
+                    
+                    <div class="code-block">
+                        <pre><code><span class="code-comment"># Add these arguments to your deployment steps</span>
+- <span class="code-string">'--cpu=2'</span>
+- <span class="code-string">'--memory=4Gi'</span>
+- <span class="code-string">'--max-instances=10'</span>
+- <span class="code-string">'--concurrency=80'</span></code></pre>
+                    </div>
+                    
+                    <p>These settings can be different for each service based on its requirements.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="demo">
+            <h2>Interactive Demo</h2>
+            <p>Use this interactive demo to generate a customized cloudbuild.yaml file for your project:</p>
+            
+            <div class="interactive-demo">
+                <div class="demo-controls">
+                    <div class="demo-control">
+                        <label for="projectId">Project ID</label>
+                        <input type="text" id="projectId" placeholder="my-project-123">
+                    </div>
+                    <div class="demo-control">
+                        <label for="region">Region</label>
+                        <select id="region">
+                            <option value="us-central1">us-central1</option>
+                            <option value="us-east1">us-east1</option>
+                            <option value="europe-west1">europe-west1</option>
+                            <option value="asia-northeast1">asia-northeast1</option>
+                        </select>
+                    </div>
+                    <div class="demo-control">
+                        <label for="repoName">Artifact Registry Repo Name</label>
+                        <input type="text" id="repoName" placeholder="my-repo">
+                    </div>
+                    <div class="demo-control">
+                        <label for="imageName">Image Name</label>
+                        <input type="text" id="imageName" placeholder="my-app">
+                    </div>
+                </div>
+                
+                <h3>Services</h3>
+                
+                <div class="demo-controls">
+                    <div class="demo-control">
+                        <label for="service1Name">Service 1 Name</label>
+                        <input type="text" id="service1Name" placeholder="api-service">
+                    </div>
+                    <div class="demo-control">
+                        <label for="service1Command">Service 1 Command</label>
+                        <input type="text" id="service1Command" placeholder="python" value="python">
+                    </div>
+                    <div class="demo-control">
+                        <label for="service1Args">Service 1 Arguments</label>
+                        <input type="text" id="service1Args" placeholder="-m,app.main">
+                    </div>
+                </div>
+                
+                <div class="demo-controls">
+                    <div class="demo-control">
+                        <label for="service2Name">Service 2 Name</label>
+                        <input type="text" id="service2Name" placeholder="worker-service">
+                    </div>
+                    <div class="demo-control">
+                        <label for="service2Command">Service 2 Command</label>
+                        <input type="text" id="service2Command" placeholder="python" value="python">
+                    </div>
+                    <div class="demo-control">
+                        <label for="service2Args">Service 2 Arguments</label>
+                        <input type="text" id="service2Args" placeholder="-m,app.worker">
+                    </div>
+                </div>
+                
+                <div class="demo-controls">
+                    <div class="demo-control">
+                        <label for="service3Name">Service 3 Name</label>
+                        <input type="text" id="service3Name" placeholder="scheduler">
+                    </div>
+                    <div class="demo-control">
+                        <label for="service3Command">Service 3 Command</label>
+                        <input type="text" id="service3Command" placeholder="python" value="python">
+                    </div>
+                    <div class="demo-control">
+                        <label for="service3Args">Service 3 Arguments</label>
+                        <input type="text" id="service3Args" placeholder="-m,app.scheduler">
+                    </div>
+                </div>
+                
+                <button class="button" id="generateBtn">Generate cloudbuild.yaml</button>
+                
+                <div class="demo-output" id="output">
+                    <p>Your customized cloudbuild.yaml will appear here.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="best-practices">
+            <h2>Best Practices</h2>
+            
+            <div class="status-box success">
+                <p><strong>Use descriptive names:</strong> Choose clear, descriptive names for your services and images to make management easier.</p>
+            </div>
+            
+            <div class="status-box info">
+                <p><strong>Environment-specific configurations:</strong> Use different substitution values for development, staging, and production environments.</p>
+            </div>
+            
+            <div class="status-box warning">
+                <p><strong>Security considerations:</strong> Be cautious with environment variables containing sensitive data. Consider using Secret Manager for secrets.</p>
+            </div>
+            
+            <div class="status-box info">
+                <p><strong>Monitoring and logging:</strong> Implement proper logging and monitoring for each service to track performance and errors.</p>
+            </div>
+            
+            <div class="status-box success">
+                <p><strong>Versioning:</strong> Use semantic versioning for your images instead of always using "latest" in production environments.</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Collapsible sections functionality
+        document.querySelectorAll('.collapsible-header').forEach(header => {
+            header.addEventListener('click', () => {
+                header.classList.toggle('active');
+                header.nextElementSibling.classList.toggle('active');
+            });
+        });
+
+        // Interactive demo functionality
+        document.getElementById('generateBtn').addEventListener('click', () => {
+            const projectId = document.getElementById('projectId').value || 'my-project-123';
+            const region = document.getElementById('region').value;
+            const repoName = document.getElementById('repoName').value || 'my-repo';
+            const imageName = document.getElementById('imageName').value || 'my-app';
+            
+            const service1Name = document.getElementById('service1Name').value || 'api-service';
+            const service1Command = document.getElementById('service1Command').value || 'python';
+            const service1Args = document.getElementById('service1Args').value || '-m,app.main';
+            
+            const service2Name = document.getElementById('service2Name').value || 'worker-service';
+            const service2Command = document.getElementById('service2Command').value || 'python';
+            const service2Args = document.getElementById('service2Args').value || '-m,app.worker';
+            
+            const service3Name = document.getElementById('service3Name').value || 'scheduler';
+            const service3Command = document.getElementById('service3Command').value || 'python';
+            const service3Args = document.getElementById('service3Args').value || '-m,app.scheduler';
+            
+            const output = `# =============================================================================
+# GOOGLE CLOUD BUILD TEMPLATE - MULTI-SERVICE DEPLOYMENT
+# =============================================================================
+# Generated using the Interactive Guide
+# =============================================================================
+
+steps:
+  # Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-base-image'
+    args: 
+      - 'build'
+      - '-t'
+      - '${region}-docker.pkg.dev/${projectId}/${repoName}/${imageName}:latest'
+      - '.'
+
+  # Push image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-base-image'
+    waitFor: ['build-base-image']
+    args: 
+      - 'push'
+      - '${region}-docker.pkg.dev/${projectId}/${repoName}/${imageName}:latest'
+
+  # Deploy Service 1: ${service1Name}
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-${service1Name}'
+    waitFor: ['push-base-image']
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${service1Name}'
+      - '--image=${region}-docker.pkg.dev/${projectId}/${repoName}/${imageName}:latest'
+      - '--region=${region}'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--command=${service1Command}'
+      - '--args=${service1Args}'
+      - '--min-instances=1'
+
+  # Deploy Service 2: ${service2Name}
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-${service2Name}'
+    waitFor: ['push-base-image']
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${service2Name}'
+      - '--image=${region}-docker.pkg.dev/${projectId}/${repoName}/${imageName}:latest'
+      - '--region=${region}'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--command=${service2Command}'
+      - '--args=${service2Args}'
+      - '--min-instances=1'
+
+  # Deploy Service 3: ${service3Name}
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-${service3Name}'
+    waitFor: ['push-base-image']
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${service3Name}'
+      - '--image=${region}-docker.pkg.dev/${projectId}/${repoName}/${imageName}:latest'
+      - '--region=${region}'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--command=${service3Command}'
+      - '--args=${service3Args}'
+      - '--min-instances=0'
+
+# =============================================================================
+# SUBSTITUTION VARIABLES
+# =============================================================================
+substitutions:
+  _PROJECT_ID: "${projectId}"
+  _REGION: "${region}"
+  _REPO_NAME: "${repoName}"
+  _IMAGE_NAME: "${imageName}"
+  _SERVICE_ONE_NAME: "${service1Name}"
+  _SERVICE_TWO_NAME: "${service2Name}"
+  _SERVICE_THREE_NAME: "${service3Name}"
+  _SERVICE_ONE_COMMAND: "${service1Command}"
+  _SERVICE_ONE_ARGS: "${service1Args}"
+  _SERVICE_TWO_COMMAND: "${service2Command}"
+  _SERVICE_TWO_ARGS: "${service2Args}"
+  _SERVICE_THREE_COMMAND: "${service3Command}"
+  _SERVICE_THREE_ARGS: "${service3Args}"
+  _SERVICE_ONE_ENV_VARS: ""
+  _SERVICE_TWO_ENV_VARS: ""
+  _SERVICE_THREE_ENV_VARS: ""
+  _LABELS: "app=myapp"
+  _MIN_INSTANCES: "1"
+
+options:
+  machineType: 'E2_HIGHCPU_8'`;
+            
+            document.getElementById('output').textContent = output;
+        });
+    </script>
+</body>
+</html>
