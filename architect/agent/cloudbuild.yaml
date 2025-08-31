@@ -1,0 +1,220 @@
+# =============================================================================
+# GOOGLE CLOUD BUILD TEMPLATE - MULTI-SERVICE DEPLOYMENT
+# =============================================================================
+# This template builds a Docker image and deploys multiple Cloud Run services
+# from the same image with different configurations.
+#
+# WHAT THIS TEMPLATE DOES:
+# 1. Builds a single Docker image from your project
+# 2. Pushes the image to Google Artifact Registry
+# 3. Deploys multiple Cloud Run services using the same image
+# 4. Each service runs different modules/commands from your application
+#
+# HOW TO USE:
+# 1. Fill in all the substitution variables at the bottom
+# 2. Modify the services section to match your application structure
+# 3. Update environment variables for each service as needed
+# 4. Run: gcloud builds submit --config=cloudbuild.yaml
+# =============================================================================
+
+steps:
+  # ==========================================================================
+  # STEP 1: BUILD DOCKER IMAGE
+  # ==========================================================================
+  # This step builds your Docker image from the Dockerfile in your project root
+  
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-base-image'  # CUSTOMIZE: Change this ID to match your project name
+    args: 
+      - 'build'
+      - '-t'
+      # IMAGE TAG FORMAT: REGION-docker.pkg.dev/PROJECT_ID/REPO_NAME/IMAGE_NAME:TAG
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'
+      - '.'  # CUSTOMIZE: Change if your Dockerfile is in a different directory
+    
+    # WHAT TO CUSTOMIZE:
+    # - Change 'build-base-image' to a descriptive name for your image
+    # - Change '${_IMAGE_NAME}' in substitutions to your desired image name
+    # - If Dockerfile is not in root, change '.' to the correct path
+
+  # ==========================================================================
+  # STEP 2: PUSH IMAGE TO ARTIFACT REGISTRY
+  # ==========================================================================
+  # This step uploads your built image to Google Artifact Registry for storage
+  
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-base-image'  # CUSTOMIZE: Match the name from build step
+    waitFor: ['build-base-image']  # CUSTOMIZE: Match the build step ID
+    args: 
+      - 'push'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'
+
+  # ==========================================================================
+  # STEP 3: DEPLOY CLOUD RUN SERVICES
+  # ==========================================================================
+  # These steps deploy multiple Cloud Run services from the same Docker image
+  # Each service can run different commands/modules from your application
+  
+  # SERVICE 1 DEPLOYMENT
+  # CUSTOMIZE: Replace 'service-one' with your actual service name
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-service-one'  # CUSTOMIZE: Descriptive service deployment name
+    waitFor: ['push-base-image']  # Wait for image to be pushed first
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_ONE_NAME}'  # CUSTOMIZE: Your first service name
+      - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--labels=${_LABELS}'  # CUSTOMIZE: Add your labels
+      - '--allow-unauthenticated'  # CUSTOMIZE: Change to --no-allow-unauthenticated if auth needed
+      - '--command=${_SERVICE_ONE_COMMAND}'  # CUSTOMIZE: Command to run (e.g., python, node, etc.)
+      - '--args=${_SERVICE_ONE_ARGS}'  # CUSTOMIZE: Arguments for your command
+      - '--min-instances=${_MIN_INSTANCES}'  # CUSTOMIZE: Minimum running instances
+      - '--set-env-vars=${_SERVICE_ONE_ENV_VARS}'  # CUSTOMIZE: Environment variables
+
+  # SERVICE 2 DEPLOYMENT  
+  # CUSTOMIZE: Replace 'service-two' with your actual service name
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-service-two'  # CUSTOMIZE: Descriptive service deployment name
+    waitFor: ['push-base-image']  # Parallel deployment - all wait for image push
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_TWO_NAME}'  # CUSTOMIZE: Your second service name
+      - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--labels=${_LABELS}'
+      - '--allow-unauthenticated'  # CUSTOMIZE: Change if auth needed
+      - '--command=${_SERVICE_TWO_COMMAND}'  # CUSTOMIZE: Command to run
+      - '--args=${_SERVICE_TWO_ARGS}'  # CUSTOMIZE: Arguments for your command
+      - '--min-instances=${_MIN_INSTANCES}'
+      - '--set-env-vars=${_SERVICE_TWO_ENV_VARS}'  # CUSTOMIZE: Environment variables
+
+  # SERVICE 3 DEPLOYMENT
+  # CUSTOMIZE: Replace 'service-three' with your actual service name
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-service-three'  # CUSTOMIZE: Descriptive service deployment name
+    waitFor: ['push-base-image']  # Parallel deployment
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_THREE_NAME}'  # CUSTOMIZE: Your third service name
+      - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:latest'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--labels=${_LABELS}'
+      - '--allow-unauthenticated'  # CUSTOMIZE: Change if auth needed
+      - '--command=${_SERVICE_THREE_COMMAND}'  # CUSTOMIZE: Command to run
+      - '--args=${_SERVICE_THREE_ARGS}'  # CUSTOMIZE: Arguments for your command
+      - '--min-instances=${_MIN_INSTANCES}'
+      - '--set-env-vars=${_SERVICE_THREE_ENV_VARS}'  # CUSTOMIZE: Environment variables
+
+  # ==========================================================================
+  # ADD MORE SERVICES HERE
+  # ==========================================================================
+  # Copy the service deployment template above and customize:
+  # 1. Change the 'id' to a unique name
+  # 2. Update the service name variable
+  # 3. Set appropriate command and arguments
+  # 4. Configure environment variables
+  # 5. Add the new service variables to substitutions below
+
+# =============================================================================
+# SUBSTITUTION VARIABLES - FILL THESE OUT FOR YOUR PROJECT
+# =============================================================================
+# These variables are replaced during build time with actual values
+# You can override these when running the build command or set them here
+
+substitutions:
+  # REQUIRED: Google Cloud Configuration
+  _PROJECT_ID: ""           # FILL: Your Google Cloud Project ID (e.g., "my-project-123")
+  _REGION: "us-central1"    # FILL: Your preferred region (e.g., "us-east1", "europe-west1")
+  
+  # REQUIRED: Artifact Registry Configuration  
+  _REPO_NAME: ""           # FILL: Your Artifact Registry repository name (e.g., "my-app-repo")
+  _IMAGE_NAME: ""          # FILL: Name for your Docker image (e.g., "my-app", "backend")
+  
+  # REQUIRED: Service Names (what your Cloud Run services will be called)
+  _SERVICE_ONE_NAME: ""    # FILL: First service name (e.g., "api-service", "auth-service")
+  _SERVICE_TWO_NAME: ""    # FILL: Second service name (e.g., "worker-service", "processor")
+  _SERVICE_THREE_NAME: ""  # FILL: Third service name (e.g., "scheduler", "notifier")
+  
+  # REQUIRED: Service Commands and Arguments
+  _SERVICE_ONE_COMMAND: "python"     # FILL: Command to run your app (python, node, java, etc.)
+  _SERVICE_ONE_ARGS: "-m,app.main"   # FILL: Arguments for command (comma-separated, no spaces)
+  
+  _SERVICE_TWO_COMMAND: "python"     # FILL: Command for second service
+  _SERVICE_TWO_ARGS: "-m,app.worker" # FILL: Arguments for second service
+  
+  _SERVICE_THREE_COMMAND: "python"       # FILL: Command for third service
+  _SERVICE_THREE_ARGS: "-m,app.scheduler" # FILL: Arguments for third service
+  
+  # REQUIRED: Environment Variables (KEY=VALUE,KEY2=VALUE2 format)
+  _SERVICE_ONE_ENV_VARS: ""    # FILL: Env vars for service 1 (e.g., "PORT=8080,ENV=prod")
+  _SERVICE_TWO_ENV_VARS: ""    # FILL: Env vars for service 2
+  _SERVICE_THREE_ENV_VARS: ""  # FILL: Env vars for service 3
+  
+  # OPTIONAL: Additional Configuration
+  _LABELS: "app=myapp"         # FILL: Labels for your services (for organization)
+  _MIN_INSTANCES: "1"          # FILL: Minimum instances to keep running (0-1000)
+  
+  # OPTIONAL: External Service URLs (if your services communicate with other APIs)
+  _API_SERVER_URL: ""          # FILL: URL of external API server (if applicable)
+  _DATABASE_URL: ""            # FILL: Database connection URL (if applicable)
+  _EXTERNAL_SERVICE_URL: ""    # FILL: Any other external service URLs
+
+# =============================================================================
+# BUILD OPTIONS
+# =============================================================================
+# Configure the build environment and resources
+
+options:
+  machineType: 'E2_HIGHCPU_8'  # CUSTOMIZE: Build machine type
+  # Available options: E2_HIGHCPU_8, E2_HIGHCPU_32, N1_HIGHCPU_8, N1_HIGHCPU_32
+  # Choose based on your build complexity and speed requirements
+
+# =============================================================================
+# EXAMPLE USAGE - COMPLETE FILLED TEMPLATE
+# =============================================================================
+# 
+# Here's how this template would look when filled out for a real project:
+#
+# substitutions:
+#   _PROJECT_ID: "my-ecommerce-app-123456"
+#   _REGION: "us-central1" 
+#   _REPO_NAME: "ecommerce-services"
+#   _IMAGE_NAME: "backend-services"
+#   
+#   _SERVICE_ONE_NAME: "product-api"
+#   _SERVICE_TWO_NAME: "order-processor"  
+#   _SERVICE_THREE_NAME: "notification-service"
+#   
+#   _SERVICE_ONE_COMMAND: "python"
+#   _SERVICE_ONE_ARGS: "-m,api.products"
+#   _SERVICE_TWO_COMMAND: "python"
+#   _SERVICE_TWO_ARGS: "-m,workers.orders"
+#   _SERVICE_THREE_COMMAND: "node"
+#   _SERVICE_THREE_ARGS: "dist/notifications/index.js"
+#   
+#   _SERVICE_ONE_ENV_VARS: "PORT=8080,DB_HOST=localhost,REDIS_URL=redis://localhost:6379"
+#   _SERVICE_TWO_ENV_VARS: "QUEUE_URL=redis://localhost:6379,MAX_WORKERS=5"
+#   _SERVICE_THREE_ENV_VARS: "SMTP_HOST=smtp.gmail.com,SMTP_PORT=587"
+#   
+#   _LABELS: "app=ecommerce,env=production"
+#   _MIN_INSTANCES: "2"
+#   _API_SERVER_URL: "https://api.myecommerce.com"
+#   _DATABASE_URL: "postgresql://user:pass@db.example.com:5432/ecommerce"
+#
+# To deploy this example:
+# 1. Save this file as cloudbuild.yaml
+# 2. Run: gcloud builds submit --config=cloudbuild.yaml
+# 3. Your services will be available at:
+#    - https://product-api-[hash]-uc.a.run.app
+#    - https://order-processor-[hash]-uc.a.run.app  
+#    - https://notification-service-[hash]-uc.a.run.app
