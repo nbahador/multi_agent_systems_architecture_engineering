@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Agent System Template Guide</title>
+    <title>Google Cloud Build Template - Docker to Cloud Run Deployment</title>
     <style>
         /* Base Styles */
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
         
         body {
@@ -38,6 +38,7 @@
         }
         
         .toc h2 {
+            font-size: 1.2rem;
             color: #2c3e50;
             margin-bottom: 20px;
             padding-bottom: 10px;
@@ -55,23 +56,25 @@
         .toc a {
             color: #3498db;
             text-decoration: none;
-            font-size: 1.1rem;
-            transition: color 0.3s;
+            font-size: 0.9rem;
+            display: block;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
         }
         
         .toc a:hover {
+            background-color: #e9ecef;
             color: #2980b9;
         }
         
         /* Main Content */
         .content {
             padding: 40px;
+            max-width: 1200px;
         }
         
-        section {
-            margin-bottom: 60px;
-        }
-        
+        /* Headings */
         h1 {
             font-size: 2.5rem;
             color: #2c3e50;
@@ -84,7 +87,7 @@
         h2 {
             font-size: 2rem;
             color: #2c3e50;
-            margin-bottom: 20px;
+            margin: 40px 0 20px;
             padding-bottom: 10px;
             border-bottom: 1px solid #ecf0f1;
         }
@@ -92,43 +95,71 @@
         h3 {
             font-size: 1.5rem;
             color: #34495e;
-            margin-bottom: 15px;
+            margin: 30px 0 15px;
         }
         
+        /* Text Elements */
         p {
             margin-bottom: 15px;
         }
         
-        /* Code-Explanation Blocks */
-        .code-explanation {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            overflow: hidden;
-            margin: 20px 0;
-        }
-        
+        /* Code Blocks */
         .code-block {
             background-color: #2d3748;
             color: #e2e8f0;
             padding: 20px;
+            border-radius: 8px;
             overflow-x: auto;
+            margin: 20px 0;
             font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .code-comment {
+            color: #95a5a6;
+            font-style: italic;
+        }
+        
+        .code-keyword {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .code-string {
+            color: #4ecdc4;
+        }
+        
+        .code-number {
+            color: #f39c12;
+        }
+        
+        .code-highlight {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid #f39c12;
+            padding-left: 5px;
+        }
+        
+        /* Two-column Code Explanation */
+        .code-explanation {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .code-explanation .code-block {
+            margin: 0;
+            border-radius: 0;
         }
         
         .explanation {
             padding: 20px;
             background-color: #f8f9fa;
         }
-        
-        /* Syntax Highlighting */
-        .python { color: #ff6b6b; }
-        .string { color: #4ecdc4; }
-        .comment { color: #95a5a6; font-style: italic; }
-        .keyword { color: #e74c3c; font-weight: bold; }
-        .number { color: #f39c12; }
         
         /* Demo Boxes */
         .demo-box {
@@ -153,37 +184,12 @@
             margin: 15px 0;
         }
         
-        /* Flow Diagrams */
-        .flow-diagram {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 30px 0;
-            flex-wrap: wrap;
-        }
-        
-        .flow-box {
-            background-color: #3498db;
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 0 10px;
-            text-align: center;
-            min-width: 120px;
-        }
-        
-        .flow-arrow {
-            font-size: 1.5rem;
-            color: #2c3e50;
-            margin: 0 5px;
-        }
-        
         /* Status Boxes */
         .status-box {
             padding: 15px;
             margin: 20px 0;
-            border-left: 4px solid;
             border-radius: 4px;
+            border-left: 4px solid;
         }
         
         .warning {
@@ -201,6 +207,30 @@
             border-left-color: #28a745;
         }
         
+        /* Flow Diagram */
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 30px 0;
+            gap: 10px;
+        }
+        
+        .flow-box {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: #34495e;
+        }
+        
         /* Buttons */
         .button {
             background-color: #3498db;
@@ -210,7 +240,7 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 1rem;
-            transition: background-color 0.3s;
+            transition: background-color 0.2s;
         }
         
         .button:hover {
@@ -219,42 +249,71 @@
         
         /* Collapsible Sections */
         .collapsible {
+            margin: 20px 0;
+        }
+        
+        .collapsible-header {
             background-color: #f8f9fa;
-            cursor: pointer;
             padding: 15px;
-            width: 100%;
-            text-align: left;
-            border: none;
-            border-radius: 8px 8px 0 0;
-            outline: none;
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin-top: 20px;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e9ecef;
         }
         
-        .active, .collapsible:hover {
-            background-color: #e9ecef;
-        }
-        
-        .collapsible:after {
-            content: '\25B6';
-            color: #2c3e50;
-            float: right;
-            margin-left: 5px;
+        .collapsible-header::after {
+            content: '▶';
+            font-size: 0.8rem;
             transition: transform 0.3s;
         }
         
-        .active:after {
+        .collapsible-header.active::after {
             transform: rotate(90deg);
         }
         
         .collapsible-content {
-            padding: 0 18px;
+            padding: 0;
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.2s ease-out;
+            transition: max-height 0.3s ease-out;
+            border-left: 1px solid #e9ecef;
+            border-right: 1px solid #e9ecef;
+            border-bottom: 1px solid #e9ecef;
+            border-radius: 0 0 6px 6px;
+        }
+        
+        .collapsible-content.active {
+            max-height: 2000px;
+            padding: 15px;
+        }
+        
+        /* Interactive Demo */
+        .interactive-demo {
+            margin: 40px 0;
+            padding: 20px;
             background-color: #f8f9fa;
-            border-radius: 0 0 8px 8px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .demo-controls {
+            margin: 20px 0;
+        }
+        
+        .demo-controls label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .demo-controls input, .demo-controls select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
         
         /* Responsive Design */
@@ -291,268 +350,575 @@
             <h2>Table of Contents</h2>
             <ul>
                 <li><a href="#introduction">Introduction</a></li>
-                <li><a href="#architecture">System Architecture</a></li>
-                <li><a href="#setup">Setup & Installation</a></li>
-                <li><a href="#configuration">Configuration</a></li>
-                <li><a href="#agents">Creating Agents</a></li>
-                <li><a href="#communication">Agent Communication</a></li>
-                <li><a href="#deployment">Deployment</a></li>
-                <li><a href="#examples">Examples & Use Cases</a></li>
-                <li><a href="#troubleshooting">Troubleshooting</a></li>
+                <li><a href="#overview">Template Overview</a></li>
+                <li><a href="#step1">Step 1: Build Docker Image</a></li>
+                <li><a href="#step2">Step 2: Push to Artifact Registry</a></li>
+                <li><a href="#step3">Step 3: Deploy to Cloud Run</a></li>
+                <li><a href="#substitutions">Substitution Variables</a></li>
+                <li><a href="#usage">How to Use This Template</a></li>
+                <li><a href="#customization">Common Customization Patterns</a></li>
+                <li><a href="#example">Complete Example</a></li>
+                <li><a href="#interactive-demo">Interactive Demo</a></li>
             </ul>
         </nav>
         
         <main class="content">
+            <h1>Google Cloud Build Template: Docker to Cloud Run Deployment</h1>
+            
             <section id="introduction">
-                <h1>Multi-Agent System Template Guide</h1>
-                <p>Welcome to the comprehensive guide for using the Multi-Agent System Template. This resource will help you understand, implement, and deploy multi-agent systems efficiently.</p>
+                <h2>Introduction</h2>
+                <p>This guide will teach you how to use the Google Cloud Build template to automate the process of building Docker images and deploying them to Google Cloud Run. This template provides a robust foundation for continuous deployment of containerized applications.</p>
                 
                 <div class="status-box info">
-                    <h3>What is a Multi-Agent System?</h3>
-                    <p>A multi-agent system (MAS) is a computerized system composed of multiple interacting intelligent agents within an environment. These agents can solve problems that are difficult or impossible for an individual agent to solve.</p>
-                </div>
-                
-                <button class="collapsible">Key Benefits of Multi-Agent Systems</button>
-                <div class="collapsible-content">
-                    <ul>
-                        <li>Distributed problem solving</li>
-                        <li>Increased efficiency through parallel processing</li>
-                        <li>Robustness and fault tolerance</li>
-                        <li>Scalability</li>
-                        <li>Flexibility and adaptability</li>
-                    </ul>
+                    <p><strong>Prerequisites:</strong> Before using this template, you should have a Google Cloud Platform account, a project set up, and the necessary APIs enabled (Cloud Build, Cloud Run, and Artifact Registry).</p>
                 </div>
             </section>
             
-            <section id="architecture">
-                <h2>System Architecture</h2>
-                <p>The multi-agent system template follows a modular architecture that allows for flexible implementation of various agent types and communication patterns.</p>
+            <section id="overview">
+                <h2>Template Overview</h2>
+                <p>The template consists of three main steps that execute in sequence:</p>
                 
                 <div class="flow-diagram">
-                    <div class="flow-box">User Interface</div>
+                    <div class="flow-box">Build Docker Image</div>
                     <div class="flow-arrow">→</div>
-                    <div class="flow-box">Orchestrator Agent</div>
+                    <div class="flow-box">Push to Artifact Registry</div>
                     <div class="flow-arrow">→</div>
-                    <div class="flow-box">Specialized Agents</div>
-                    <div class="flow-arrow">→</div>
-                    <div class="flow-box">External Services</div>
+                    <div class="flow-box">Deploy to Cloud Run</div>
                 </div>
+                
+                <p>Each step has a specific purpose and can be customized to fit your application's requirements. Let's examine each step in detail.</p>
+            </section>
+            
+            <section id="step1">
+                <h2>Step 1: Build Docker Image</h2>
+                <p>The first step builds your Docker image from the source code in the current directory.</p>
                 
                 <div class="code-explanation">
                     <div class="code-block">
-                        <pre><code><span class="comment"># Example of system architecture initialization</span>
-<span class="keyword">from</span> <span class="python">mas_template</span> <span class="keyword">import</span> <span class="python">MultiAgentSystem, Agent</span>
-
-<span class="comment"># Initialize the multi-agent system</span>
-<span class="python">mas</span> = <span class="python">MultiAgentSystem</span>(<span class="string">'my-mas'</span>)
-
-<span class="comment"># Create different types of agents</span>
-<span class="python">orchestrator</span> = <span class="python">mas</span>.create_agent(<span class="string">'orchestrator'</span>, <span class="string">'OrchestratorAgent'</span>)
-<span class="python">processor</span> = <span class="python">mas</span>.create_agent(<span class="string">'processor'</span>, <span class="string">'ProcessingAgent'</span>)
-<span class="python">database</span> = <span class="python">mas</span>.create_agent(<span class="string">'database'</span>, <span class="string">'DatabaseAgent'</span>)
-
-<span class="comment"># Connect agents in the system</span>
-<span class="python">mas</span>.connect_agents(<span class="python">orchestrator</span>, <span class="python">processor</span>)
-<span class="python">mas</span>.connect_agents(<span class="python">orchestrator</span>, <span class="python">database</span>)
-
-<span class="comment"># Start the system</span>
-<span class="python">mas</span>.start()</code></pre>
+                        <pre><code># ---------------------------------------------------------------------------
+# STEP 1: BUILD DOCKER IMAGE
+# ---------------------------------------------------------------------------
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'build-app-image'                    <span class="code-comment"># [CUSTOMIZE] Change this ID to match your app name</span>
+  args: 
+    - 'build'
+    - '-t'                                 <span class="code-comment"># Tag flag for naming the image</span>
+    <span class="code-comment"># [CUSTOMIZE] Replace with your image URL pattern:</span>
+    <span class="code-comment"># Format: ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/YOUR-APP-NAME:latest</span>
+    - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/your-app-name:latest'
+    - '.'                                  <span class="code-comment"># Build context (current directory with Dockerfile)</span></code></pre>
                     </div>
                     <div class="explanation">
-                        <h3>Architecture Explanation</h3>
-                        <p>The code demonstrates how to initialize a multi-agent system with different agent types. The system consists of:</p>
+                        <h3>Explanation</h3>
+                        <p>This step uses the official Docker builder image to build your application container.</p>
                         <ul>
-                            <li>An <strong>Orchestrator Agent</strong> that coordinates tasks</li>
-                            <li>A <strong>Processing Agent</strong> that handles data transformation</li>
-                            <li>A <strong>Database Agent</strong> that manages data storage and retrieval</li>
+                            <li><strong>name:</strong> Specifies the builder image to use</li>
+                            <li><strong>id:</strong> A unique identifier for this step (customize this)</li>
+                            <li><strong>args:</strong> The arguments passed to the docker build command
+                                <ul>
+                                    <li><code>-t</code>: Tags the image with a name</li>
+                                    <li>The image name follows Artifact Registry naming conventions</li>
+                                    <li><code>.</code>: Specifies the build context (current directory)</li>
+                                </ul>
+                            </li>
                         </ul>
-                        <p>Agents are connected to enable communication and collaboration.</p>
+                        <div class="status-box warning">
+                            <p>Remember to customize the image name to match your project, repository, and application name.</p>
+                        </div>
                     </div>
                 </div>
             </section>
             
-            <section id="setup">
-                <h2>Setup & Installation</h2>
-                <p>Follow these steps to set up the multi-agent system template in your environment.</p>
+            <section id="step2">
+                <h2>Step 2: Push to Artifact Registry</h2>
+                <p>The second step pushes the built image to Google Cloud's Artifact Registry.</p>
                 
-                <div class="demo-box">
-                    <h3>Interactive Setup Demo</h3>
-                    <div class="input-box">
-                        <label for="os-select">Select your operating system:</label>
-                        <select id="os-select">
-                            <option value="windows">Windows</option>
-                            <option value="macos">macOS</option>
-                            <option value="linux">Linux</option>
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <pre><code># ---------------------------------------------------------------------------
+# STEP 2: PUSH IMAGE TO ARTIFACT REGISTRY
+# ---------------------------------------------------------------------------
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'push-app-image'                     <span class="code-comment"># [CUSTOMIZE] Change this ID to match your app name</span>
+  waitFor: ['build-app-image']             <span class="code-comment"># [CUSTOMIZE] Update to match Step 1's ID</span>
+  args: 
+    - 'push'
+    <span class="code-comment"># [CUSTOMIZE] Must match the exact image name from Step 1</span>
+    - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/your-app-name:latest'</code></pre>
+                    </div>
+                    <div class="explanation">
+                        <h3>Explanation</h3>
+                        <p>This step uses the same Docker builder to push the image to your Artifact Registry repository.</p>
+                        <ul>
+                            <li><strong>waitFor:</strong> Ensures this step only runs after the build step completes</li>
+                            <li><strong>args:</strong> The arguments passed to the docker push command
+                                <ul>
+                                    <li><code>push</code>: The docker command to push an image</li>
+                                    <li>The image name must exactly match the one from Step 1</li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <div class="status-box info">
+                            <p>Make sure the Artifact Registry repository exists before running this build. You can create it with: <code>gcloud artifacts repositories create REPO_NAME --repository-format=docker --location=REGION</code></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="step3">
+                <h2>Step 3: Deploy to Cloud Run</h2>
+                <p>The third step deploys the container image to Google Cloud Run.</p>
+                
+                <div class="code-explanation">
+                    <div class="code-block">
+                        <pre><code># ---------------------------------------------------------------------------
+# STEP 3: DEPLOY TO CLOUD RUN
+# ---------------------------------------------------------------------------
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  id: 'deploy-to-cloud-run'               <span class="code-comment"># [CUSTOMIZE] Change this ID to match your app name</span>
+  waitFor: ['push-app-image']             <span class="code-comment"># [CUSTOMIZE] Update to match Step 2's ID</span>
+  entrypoint: gcloud                      <span class="code-comment"># Use gcloud CLI tool</span>
+  args:
+    - 'run'                               <span class="code-comment"># Cloud Run command</span>
+    - 'deploy'                            <span class="code-comment"># Deploy subcommand</span>
+    <span class="code-comment"># [CUSTOMIZE] Your Cloud Run service name (will be created if doesn't exist)</span>
+    - 'your-service-name'
+    
+    <span class="code-comment"># [CUSTOMIZE] Must match the exact image name from Steps 1 & 2</span>
+    - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/your-app-name:latest'
+    
+    - '--region=${_REGION}'               <span class="code-comment"># Deploy to the region specified in substitutions</span>
+    - '--platform=managed'                <span class="code-comment"># Use fully managed Cloud Run (recommended)</span>
+    
+    <span class="code-comment"># [CUSTOMIZE] Authentication settings:</span>
+    <span class="code-comment"># '--allow-unauthenticated' = public access (anyone can call your service)</span>
+    <span class="code-comment"># '--no-allow-unauthenticated' = requires authentication</span>
+    - '--allow-unauthenticated'
+    
+    <span class="code-comment"># [CUSTOMIZE] Add labels for organization (optional)</span>
+    <span class="code-comment"># Format: '--labels=key1=value1,key2=value2'</span>
+    - '--labels=project=your-project,environment=production'
+    
+    <span class="code-comment"># [CUSTOMIZE] How to start your application:</span>
+    <span class="code-comment"># Option A: For Python apps, specify the command and module</span>
+    - '--command=python'
+    - '--args=-m,your_app.main'           <span class="code-comment"># Replace with your Python module path</span>
+    
+    <span class="code-comment"># [CUSTOMIZE] Scaling settings:</span>
+    - '--min-instances=1'                 <span class="code-comment"># Keep at least 1 instance running (0 for cost savings)</span>
+    <span class="code-comment"># - '--max-instances=100'             # Uncomment and set max instances if needed</span>
+    
+    <span class="code-comment"># [CUSTOMIZE] Environment variables for your application</span>
+    <span class="code-comment"># Format: KEY1=value1,KEY2=${_SUBSTITUTION_VAR}</span>
+    - '--set-env-vars=DATABASE_URL=${_DATABASE_URL},API_KEY=${_API_KEY},ENVIRONMENT=production'</code></pre>
+                    </div>
+                    <div class="explanation">
+                        <h3>Explanation</h3>
+                        <p>This step uses the gcloud SDK to deploy your container to Cloud Run with various configuration options.</p>
+                        <ul>
+                            <li><strong>name:</strong> Uses the cloud-sdk image with gcloud tools</li>
+                            <li><strong>entrypoint:</strong> Specifies gcloud as the command to run</li>
+                            <li><strong>args:</strong> Various configuration options for Cloud Run deployment
+                                <ul>
+                                    <li>Service name and image reference</li>
+                                    <li>Region and platform settings</li>
+                                    <li>Authentication and access control</li>
+                                    <li>Resource allocation and scaling</li>
+                                    <li>Environment variables</li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <div class="status-box warning">
+                            <p>Be careful with authentication settings. Use <code>--allow-unauthenticated</code> for public services and <code>--no-allow-unauthenticated</code> for private services.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="substitutions">
+                <h2>Substitution Variables</h2>
+                <p>Substitution variables allow you to parameterize your build configuration for different environments.</p>
+                
+                <div class="code-block">
+                    <pre><code># =============================================================================
+# SUBSTITUTION VARIABLES
+# =============================================================================
+# These variables are replaced during build time
+# [CUSTOMIZE] Add/remove/modify these based on your needs
+
+substitutions:
+  # [REQUIRED] Google Cloud region where resources will be deployed
+  # Common options: us-central1, us-east1, europe-west1, asia-southeast1
+  _REGION: "us-central1"
+  
+  # [REQUIRED] Artifact Registry repository name where Docker images are stored
+  # Must already exist in your project - create it first if needed
+  _REPO_NAME: "my-docker-repo"
+  
+  # [CUSTOMIZE] Your application-specific variables
+  # Add any environment variables your app needs here
+  
+  # Database connection string
+  _DATABASE_URL: "postgresql://user:pass@host:5432/dbname"
+  
+  # API keys and secrets (use Secret Manager for production)
+  _API_KEY: "your-api-key-here"
+  
+  # External service URLs
+  _EXTERNAL_SERVICE_URL: "https://api.example.com"
+  
+  # Custom domain or base URL for your service
+  _BASE_URL: "-example.run.app"             # Will become: https://your-service-name-example.run.app
+  
+  # [OPTIONAL] Override default project ID if needed
+  # _PROJECT_ID: "your-project-id"</code></pre>
+                </div>
+                
+                <div class="status-box info">
+                    <p>Substitution variables are referenced in the template using <code>${_VARIABLE_NAME}</code> syntax. They can be overridden at build time for different environments.</p>
+                </div>
+            </section>
+            
+            <section id="usage">
+                <h2>How to Use This Template</h2>
+                <p>Follow these steps to implement this template for your project:</p>
+                
+                <div class="code-block">
+                    <pre><code># =============================================================================
+# HOW TO USE THIS TEMPLATE:
+# =============================================================================
+# 1. Copy this file to your project root as 'cloudbuild.yaml'
+# 2. Replace all [CUSTOMIZE] sections with your specific values
+# 3. Ensure you have a Dockerfile in your project root
+# 4. Create an Artifact Registry repository: 
+#    gcloud artifacts repositories create REPO_NAME --repository-format=docker --location=REGION
+# 5. Enable required APIs:
+#    gcloud services enable cloudbuild.googleapis.com run.googleapis.com artifactregistry.googleapis.com
+# 6. Run the build:
+#    gcloud builds submit --config=cloudbuild.yaml</code></pre>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Detailed Setup Instructions</div>
+                    <div class="collapsible-content">
+                        <ol>
+                            <li>Save the template as <code>cloudbuild.yaml</code> in your project root directory</li>
+                            <li>Customize all sections marked with <code>[CUSTOMIZE]</code> comments</li>
+                            <li>Ensure you have a valid <code>Dockerfile</code> in your project root</li>
+                            <li>Create an Artifact Registry repository:
+                                <div class="code-block">
+                                    <pre><code>gcloud artifacts repositories create ${_REPO_NAME} \
+  --repository-format=docker \
+  --location=${_REGION} \
+  --description="Docker repository for my application"</code></pre>
+                                </div>
+                            </li>
+                            <li>Enable the required Google Cloud APIs:
+                                <div class="code-block">
+                                    <pre><code>gcloud services enable cloudbuild.googleapis.com
+gcloud services enable run.googleapis.com
+gcloud services enable artifactregistry.googleapis.com</code></pre>
+                                </div>
+                            </li>
+                            <li>Run the build:
+                                <div class="code-block">
+                                    <pre><code>gcloud builds submit --config=cloudbuild.yaml</code></pre>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="customization">
+                <h2>Common Customization Patterns</h2>
+                <p>Here are some common patterns for customizing this template for different types of applications:</p>
+                
+                <div class="code-block">
+                    <pre><code># =============================================================================
+# COMMON CUSTOMIZATION PATTERNS:
+# =============================================================================
+
+# FOR NODE.JS APPS:
+# Replace the command/args section with:
+# - '--command=node'
+# - '--args=server.js'
+
+# FOR JAVA APPS:
+# Replace the command/args section with:
+# - '--command=java'
+# - '--args=-jar,app.jar'
+
+# FOR GO APPS:
+# Usually no command needed if your Dockerfile sets the right ENTRYPOINT
+# Remove the --command and --args lines
+
+# FOR MULTIPLE ENVIRONMENTS:
+# Create separate substitution files:
+# - substitutions-dev.yaml
+# - substitutions-prod.yaml
+# Use with: gcloud builds submit --substitutions-from-file=substitutions-dev.yaml</code></pre>
+                </div>
+                
+                <div class="collapsible">
+                    <div class="collapsible-header">Environment-Specific Configuration Examples</div>
+                    <div class="collapsible-content">
+                        <h3>Development Environment (substitutions-dev.yaml)</h3>
+                        <div class="code-block">
+                            <pre><code>_REGION: "us-central1"
+_REPO_NAME: "my-app-dev"
+_DATABASE_URL: "postgresql://dev-user:dev-pass@dev-host:5432/dev-db"
+_API_KEY: "dev-api-key"
+_ENVIRONMENT: "development"</code></pre>
+                        </div>
+                        
+                        <h3>Production Environment (substitutions-prod.yaml)</h3>
+                        <div class="code-block">
+                            <pre><code>_REGION: "us-east1"
+_REPO_NAME: "my-app-prod"
+_DATABASE_URL: "postgresql://prod-user:prod-pass@prod-host:5432/prod-db"
+_API_KEY: "prod-api-key"
+_ENVIRONMENT: "production"</code></pre>
+                        </div>
+                        
+                        <h3>Running with Environment-Specific Substitutions</h3>
+                        <div class="code-block">
+                            <pre><code># For development
+gcloud builds submit --config=cloudbuild.yaml --substitutions-from-file=substitutions-dev.yaml
+
+# For production
+gcloud builds submit --config=cloudbuild.yaml --substitutions-from-file=substitutions-prod.yaml</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="example">
+                <h2>Complete Example</h2>
+                <p>Here's how this template would look when filled out for a real project:</p>
+                
+                <div class="code-block">
+                    <pre><code># =============================================================================
+# EXAMPLE: COMPLETE CONFIGURATION FOR A SIMPLE WEB API
+# =============================================================================
+# Here's how this template would look when filled out for a real project:
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-weather-api'
+    args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/weather-api:latest', '.']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-weather-api'
+    waitFor: ['build-weather-api']
+    args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/weather-api:latest']
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-weather-api'
+    waitFor: ['push-weather-api']
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'weather-api-service'
+      - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/weather-api:latest'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--labels=app=weather,version=v1'
+      - '--command=python'
+      - '--args=-m,weather_api.server'
+      - '--min-instances=0'
+      - '--max-instances=50'
+      - '--set-env-vars=WEATHER_API_KEY=${_WEATHER_API_KEY},PORT=8080'
+
+substitutions:
+  _REGION: "us-east1"
+  _REPO_NAME: "weather-apps"
+  _WEATHER_API_KEY: "abc123xyz789"</code></pre>
+                </div>
+            </section>
+            
+            <section id="interactive-demo">
+                <h2>Interactive Demo</h2>
+                <p>Use this interactive demo to generate a customized cloudbuild.yaml file for your project:</p>
+                
+                <div class="interactive-demo">
+                    <div class="demo-controls">
+                        <label for="app-name">Application Name:</label>
+                        <input type="text" id="app-name" placeholder="my-app">
+                        
+                        <label for="service-name">Cloud Run Service Name:</label>
+                        <input type="text" id="service-name" placeholder="my-service">
+                        
+                        <label for="region">Region:</label>
+                        <select id="region">
+                            <option value="us-central1">us-central1</option>
+                            <option value="us-east1">us-east1</option>
+                            <option value="europe-west1">europe-west1</option>
+                            <option value="asia-southeast1">asia-southeast1</option>
                         </select>
-                        <button class="button" onclick="showInstallation()">Show Installation Instructions</button>
+                        
+                        <label for="repo-name">Artifact Registry Repository Name:</label>
+                        <input type="text" id="repo-name" placeholder="my-repo">
+                        
+                        <label for="runtime">Runtime Environment:</label>
+                        <select id="runtime">
+                            <option value="python">Python</option>
+                            <option value="node">Node.js</option>
+                            <option value="java">Java</option>
+                            <option value="go">Go</option>
+                            <option value="other">Other (Custom Dockerfile)</option>
+                        </select>
+                        
+                        <div id="runtime-specific">
+                            <label for="command">Command:</label>
+                            <input type="text" id="command" placeholder="python">
+                            
+                            <label for="args">Arguments:</label>
+                            <input type="text" id="args" placeholder="-m,myapp.main">
+                        </div>
+                        
+                        <label for="authentication">Authentication:</label>
+                        <select id="authentication">
+                            <option value="public">Public (--allow-unauthenticated)</option>
+                            <option value="private">Private (--no-allow-unauthenticated)</option>
+                        </select>
+                        
+                        <button class="button" id="generate-btn">Generate Configuration</button>
                     </div>
-                    <div class="output-box" id="installation-output">
-                        <p>Instructions will appear here based on your selection.</p>
-                    </div>
-                </div>
-                
-                <div class="status-box warning">
-                    <h3>Prerequisites</h3>
-                    <p>Before installing the multi-agent system template, ensure you have:</p>
-                    <ul>
-                        <li>Python 3.8 or higher</li>
-                        <li>pip (Python package manager)</li>
-                        <li>Git</li>
-                        <li>Required system dependencies for your OS</li>
-                    </ul>
-                </div>
-            </section>
-            
-            <section id="configuration">
-                <h2>Configuration</h2>
-                <p>Learn how to configure your multi-agent system for different environments and use cases.</p>
-                
-                <div class="code-explanation">
-                    <div class="code-block">
-                        <pre><code><span class="comment"># config/mas_config.yaml</span>
-<span class="python">system</span>:
-  <span class="python">name</span>: <span class="string">"customer-support-mas"</span>
-  <span class="python">version</span>: <span class="string">"1.0.0"</span>
-  <span class="python">environment</span>: <span class="string">"production"</span>
-
-<span class="python">agents</span>:
-  <span class="python">orchestrator</span>:
-    <span class="python">type</span>: <span class="string">"OrchestratorAgent"</span>
-    <span class="python">config</span>:
-      <span class="python">timeout</span>: <span class="number">30</span>
-      <span class="python">max_retries</span>: <span class="number">3</span>
-  
-  <span class="python">nlp_processor</span>:
-    <span class="python">type</span>: <span class="string">"NLPAgent"</span>
-    <span class="python">config</span>:
-      <span class="python">model</span>: <span class="string">"gpt-4"</span>
-      <span class="python">temperature</span>: <span class="number">0.7</span>
-  
-  <span class="python">database</span>:
-    <span class="python">type</span>: <span class="string">"DatabaseAgent"</span>
-    <span class="python">config</span>:
-      <span class="python">connection_string</span>: <span class="string">"${DATABASE_URL}"</span>
-      <span class="python">timeout</span>: <span class="number">10</span>
-
-<span class="python">communication</span>:
-  <span class="python">protocol</span>: <span class="string">"http"</span>
-  <span class="python">message_format</span>: <span class="string">"json"</span>
-  <span class="python">timeout</span>: <span class="number">30</span></code></pre>
-                    </div>
-                    <div class="explanation">
-                        <h3>Configuration Explained</h3>
-                        <p>The configuration file defines:</p>
-                        <ul>
-                            <li><strong>System settings</strong>: Name, version, and environment</li>
-                            <li><strong>Agent specifications</strong>: Types and individual configurations</li>
-                            <li><strong>Communication protocols</strong>: How agents communicate with each other</li>
-                        </ul>
-                        <p>Environment variables (like ${DATABASE_URL}) can be used for sensitive information.</p>
+                    
+                    <div class="output-box" id="output" style="display: none;">
+                        <h3>Your Custom cloudbuild.yaml</h3>
+                        <pre id="generated-config"></pre>
+                        <button class="button" id="download-btn">Download Configuration</button>
                     </div>
                 </div>
-            </section>
-            
-            <!-- Additional sections would continue here with similar structure -->
-            
-            <section id="agents">
-                <h2>Creating Agents</h2>
-                <p>Learn how to create custom agents for your multi-agent system.</p>
-                <!-- Content for creating agents -->
-            </section>
-            
-            <section id="communication">
-                <h2>Agent Communication</h2>
-                <p>Understand how agents communicate and exchange information.</p>
-                <!-- Content for agent communication -->
-            </section>
-            
-            <section id="deployment">
-                <h2>Deployment</h2>
-                <p>Deploy your multi-agent system to various environments.</p>
-                <!-- Content for deployment -->
-            </section>
-            
-            <section id="examples">
-                <h2>Examples & Use Cases</h2>
-                <p>Explore practical examples and use cases for multi-agent systems.</p>
-                <!-- Content for examples -->
-            </section>
-            
-            <section id="troubleshooting">
-                <h2>Troubleshooting</h2>
-                <p>Common issues and how to resolve them.</p>
-                <!-- Content for troubleshooting -->
             </section>
         </main>
     </div>
 
     <script>
-        // Collapsible sections
-        const collapsibles = document.getElementsByClassName("collapsible");
-        
-        for (let i = 0; i < collapsibles.length; i++) {
-            collapsibles[i].addEventListener("click", function() {
-                this.classList.toggle("active");
-                const content = this.nextElementSibling;
-                if (content.style.maxHeight) {
-                    content.style.maxHeight = null;
-                } else {
-                    content.style.maxHeight = content.scrollHeight + "px";
-                }
-            });
-        }
-        
-        // Interactive installation instructions
-        function showInstallation() {
-            const os = document.getElementById("os-select").value;
-            const output = document.getElementById("installation-output");
-            
-            const instructions = {
-                windows: `
-                    <h4>Windows Installation</h4>
-                    <ol>
-                        <li>Open PowerShell as Administrator</li>
-                        <li>Run: <code>choco install python git</code></li>
-                        <li>Run: <code>pip install mas-template</code></li>
-                        <li>Verify: <code>mas-template --version</code></li>
-                    </ol>
-                `,
-                macos: `
-                    <h4>macOS Installation</h4>
-                    <ol>
-                        <li>Install Homebrew if not already installed</li>
-                        <li>Run: <code>brew install python git</code></li>
-                        <li>Run: <code>pip3 install mas-template</code></li>
-                        <li>Verify: <code>mas-template --version</code></li>
-                    </ol>
-                `,
-                linux: `
-                    <h4>Linux Installation</h4>
-                    <ol>
-                        <li>Update package list: <code>sudo apt update</code></li>
-                        <li>Install dependencies: <code>sudo apt install python3 python3-pip git</code></li>
-                        <li>Run: <code>pip3 install mas-template</code></li>
-                        <li>Verify: <code>mas-template --version</code></li>
-                    </ol>
-                `
-            };
-            
-            output.innerHTML = instructions[os];
-        }
-        
-        // Smooth scrolling for table of contents links
-        document.querySelectorAll('.toc a').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                const targetElement = document.querySelector(targetId);
-                
-                window.scrollTo({
-                    top: targetElement.offsetTop - 20,
-                    behavior: 'smooth'
-                });
+        // Collapsible sections functionality
+        document.querySelectorAll('.collapsible-header').forEach(header => {
+            header.addEventListener('click', () => {
+                header.classList.toggle('active');
+                const content = header.nextElementSibling;
+                content.classList.toggle('active');
             });
         });
+        
+        // Interactive demo functionality
+        const runtimeSelect = document.getElementById('runtime');
+        const runtimeSpecific = document.getElementById('runtime-specific');
+        const generateBtn = document.getElementById('generate-btn');
+        const output = document.getElementById('output');
+        const generatedConfig = document.getElementById('generated-config');
+        const downloadBtn = document.getElementById('download-btn');
+        
+        // Show/hide runtime-specific fields
+        runtimeSelect.addEventListener('change', () => {
+            if (runtimeSelect.value === 'other') {
+                runtimeSpecific.style.display = 'none';
+            } else {
+                runtimeSpecific.style.display = 'block';
+                
+                // Set default values based on runtime
+                switch(runtimeSelect.value) {
+                    case 'python':
+                        document.getElementById('command').value = 'python';
+                        document.getElementById('args').value = '-m,app.main';
+                        break;
+                    case 'node':
+                        document.getElementById('command').value = 'node';
+                        document.getElementById('args').value = 'server.js';
+                        break;
+                    case 'java':
+                        document.getElementById('command').value = 'java';
+                        document.getElementById('args').value = '-jar,app.jar';
+                        break;
+                    case 'go':
+                        document.getElementById('command').value = '';
+                        document.getElementById('args').value = '';
+                        break;
+                }
+            }
+        });
+        
+        // Generate configuration
+        generateBtn.addEventListener('click', () => {
+            const appName = document.getElementById('app-name').value || 'my-app';
+            const serviceName = document.getElementById('service-name').value || 'my-service';
+            const region = document.getElementById('region').value;
+            const repoName = document.getElementById('repo-name').value || 'my-repo';
+            const runtime = document.getElementById('runtime').value;
+            const command = document.getElementById('command').value;
+            const args = document.getElementById('args').value;
+            const authentication = document.getElementById('authentication').value;
+            
+            let config = `steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-${appName}'
+    args: ['build', '-t', '${region}-docker.pkg.dev/$PROJECT_ID/${repoName}/${appName}:latest', '.']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-${appName}'
+    waitFor: ['build-${appName}']
+    args: ['push', '${region}-docker.pkg.dev/$PROJECT_ID/${repoName}/${appName}:latest']
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-${appName}'
+    waitFor: ['push-${appName}']
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${serviceName}'
+      - '--image=${region}-docker.pkg.dev/$PROJECT_ID/${repoName}/${appName}:latest'
+      - '--region=${region}'
+      - '--platform=managed'
+      - '--${authentication === 'public' ? 'allow' : 'no-allow'}-unauthenticated'
+      - '--labels=app=${appName},environment=production'`;
+            
+            if (runtime !== 'other' && command) {
+                config += `
+      - '--command=${command}'`;
+                
+                if (args) {
+                    config += `
+      - '--args=${args}'`;
+                }
+            }
+            
+            config += `
+      - '--min-instances=1'
+      - '--set-env-vars=ENVIRONMENT=production'
+
+substitutions:
+  _REGION: "${region}"
+  _REPO_NAME: "${repoName}"`;
+            
+            generatedConfig.textContent = config;
+            output.style.display = 'block';
+        });
+        
+        // Download configuration
+        downloadBtn.addEventListener('click', () => {
+            const config = generatedConfig.textContent;
+            const blob = new Blob([config], { type: 'application/yaml' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'cloudbuild.yaml';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+        
+        // Initialize runtime-specific fields
+        runtimeSelect.dispatchEvent(new Event('change'));
     </script>
 </body>
 </html>
