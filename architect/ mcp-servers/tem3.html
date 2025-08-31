@@ -774,3 +774,601 @@
                                 <option value="us-west1">us-west1</option>
                                 <option value="europe-west1">europe-west1</option>
                                 <option value="asia-northeast1">asia-northeast1</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-control">
+                            <label for="repoName">Artifact Registry Repository</label>
+                            <input type="text" id="repoName" placeholder="my-app-repo" />
+                        </div>
+                        <div class="form-control">
+                            <label for="imageName">Base Image Name</label>
+                            <input type="text" id="imageName" placeholder="multi-service-app" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="builder-section">
+                    <h3>Services Configuration</h3>
+                    <div id="services-container">
+                        <div class="service-config" data-service="1">
+                            <h4>Service 1</h4>
+                            <div class="form-group">
+                                <div class="form-control">
+                                    <label>Service Name</label>
+                                    <input type="text" class="service-name" placeholder="api-service" />
+                                </div>
+                                <div class="form-control">
+                                    <label>Folder Path</label>
+                                    <input type="text" class="service-folder" placeholder="./backend/api" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="form-control">
+                                    <label>Memory Allocation</label>
+                                    <select class="service-memory">
+                                        <option value="512Mi">512Mi</option>
+                                        <option value="1Gi">1Gi</option>
+                                        <option value="2Gi">2Gi</option>
+                                        <option value="4Gi">4Gi</option>
+                                    </select>
+                                </div>
+                                <div class="form-control">
+                                    <label>CPU Allocation</label>
+                                    <select class="service-cpu">
+                                        <option value="1">1 CPU</option>
+                                        <option value="2">2 CPU</option>
+                                        <option value="4">4 CPU</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="button button-secondary" onclick="addService()">Add Another Service</button>
+                    <button class="button button-secondary" onclick="removeService()">Remove Last Service</button>
+                </div>
+
+                <div class="builder-section">
+                    <h3>Environment Variables</h3>
+                    <div id="env-vars-container">
+                        <div class="form-group">
+                            <div class="form-control">
+                                <label>Variable Name</label>
+                                <input type="text" class="env-name" placeholder="DATABASE_URL" />
+                            </div>
+                            <div class="form-control">
+                                <label>Variable Value</label>
+                                <input type="text" class="env-value" placeholder="postgres://..." />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="button button-secondary" onclick="addEnvVar()">Add Environment Variable</button>
+                </div>
+
+                <div class="builder-section">
+                    <button class="button" onclick="generateTemplate()">Generate Cloud Build Template</button>
+                    <button class="button button-secondary" onclick="resetBuilder()">Reset Form</button>
+                </div>
+            </div>
+
+            <div id="generated-template" class="output-container" style="display: none;">
+                <!-- Generated template will appear here -->
+            </div>
+        </section>
+
+        <section id="quiz">
+            <h2>Knowledge Quiz</h2>
+            
+            <div class="quiz-container">
+                <div class="quiz-question">
+                    What is the purpose of the "waitFor" parameter in Cloud Build steps?
+                </div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-correct="false">To specify how long to wait before starting</div>
+                    <div class="quiz-option" data-correct="true">To ensure steps run in the correct order by waiting for dependencies</div>
+                    <div class="quiz-option" data-correct="false">To set a timeout for the step</div>
+                    <div class="quiz-option" data-correct="false">To wait for user confirmation</div>
+                </div>
+                <div class="quiz-feedback">
+                    <p><strong>Correct!</strong> The "waitFor" parameter ensures that steps execute in the proper sequence by waiting for specified step IDs to complete first.</p>
+                </div>
+            </div>
+
+            <div class="quiz-container">
+                <div class="quiz-question">
+                    Which Google Cloud service is used to store Docker images in this template?
+                </div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-correct="false">Cloud Storage</div>
+                    <div class="quiz-option" data-correct="true">Artifact Registry</div>
+                    <div class="quiz-option" data-correct="false">Container Registry</div>
+                    <div class="quiz-option" data-correct="false">Cloud Run</div>
+                </div>
+                <div class="quiz-feedback">
+                    <p><strong>Correct!</strong> Artifact Registry is Google Cloud's recommended service for storing Docker images and other build artifacts.</p>
+                </div>
+            </div>
+
+            <div class="quiz-container">
+                <div class="quiz-question">
+                    What does the substitution variable syntax "${_REGION}" represent?
+                </div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-correct="false">A hardcoded region name</div>
+                    <div class="quiz-option" data-correct="true">A customizable variable that gets replaced during build</div>
+                    <div class="quiz-option" data-correct="false">An environment variable from the build machine</div>
+                    <div class="quiz-option" data-correct="false">A Google Cloud built-in variable</div>
+                </div>
+                <div class="quiz-feedback">
+                    <p><strong>Correct!</strong> Substitution variables like "${_REGION}" are placeholders that get replaced with actual values from the substitutions section, making templates reusable.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="examples">
+            <h2>Real-World Examples</h2>
+            
+            <div class="tabs">
+                <div class="tab active" data-tab="ecommerce">E-commerce App</div>
+                <div class="tab" data-tab="microservices">Microservices</div>
+                <div class="tab" data-tab="fullstack">Full-Stack App</div>
+            </div>
+
+            <div id="ecommerce" class="tab-content active">
+                <h3>E-commerce Application</h3>
+                <p>A complete e-commerce system with API, frontend, and worker services:</p>
+                
+                <div class="interactive-code">
+                    <button class="copy-button" onclick="copyCode()">Copy Code</button>
+                    <div class="code-line">
+                        <span class="code-keyword">steps</span>:
+                    </div>
+                    <div class="code-line">
+                        <span class="code-comment"># Build user management API</span>
+                    </div>
+                    <div class="code-line">
+                        - <span class="code-keyword">name</span>: <span class="code-string">'gcr.io/cloud-builders/docker'</span>
+                    </div>
+                    <div class="code-line">
+                        &nbsp;&nbsp;<span class="code-keyword">id</span>: <span class="code-string">'build-user-api'</span>
+                    </div>
+                    <div class="code-line">
+                        &nbsp;&nbsp;<span class="code-keyword">args</span>: [<span class="code-string">'build'</span>, <span class="code-string">'-t'</span>, <span class="code-string">'${_REGION}-docker.pkg.dev/$PROJECT_ID/ecommerce/user-api:latest'</span>, <span class="code-string">'./backend/users'</span>]
+                    </div>
+                    <div class="code-line">
+                        <span class="code-comment"># Build product catalog API</span>
+                    </div>
+                    <div class="code-line">
+                        - <span class="code-keyword">name</span>: <span class="code-string">'gcr.io/cloud-builders/docker'</span>
+                    </div>
+                    <div class="code-line">
+                        &nbsp;&nbsp;<span class="code-keyword">id</span>: <span class="code-string">'build-product-api'</span>
+                    </div>
+                    <div class="code-line">
+                        &nbsp;&nbsp;<span class="code-keyword">args</span>: [<span class="code-string">'build'</span>, <span class="code-string">'-t'</span>, <span class="code-string">'${_REGION}-docker.pkg.dev/$PROJECT_ID/ecommerce/product-api:latest'</span>, <span class="code-string">'./backend/products'</span>]
+                    </div>
+                </div>
+            </div>
+
+            <div id="microservices" class="tab-content">
+                <h3>Microservices Architecture</h3>
+                <p>Independent services that can scale separately:</p>
+                
+                <div class="interactive-code">
+                    <button class="copy-button" onclick="copyCode()">Copy Code</button>
+                    <div class="code-line">
+                        <span class="code-keyword">substitutions</span>:
+                    </div>
+                    <div class="code-line">
+                        &nbsp;&nbsp;<span class="code-keyword">_REGION</span>: <span class="code-string">"us-central1"</span>
+                    </div>
+                    <div class="code-line">
+                        &nbsp;&nbsp;<span class="code-keyword">_AUTH_SERVICE</span>: <span class="code-string">"auth-microservice"</span>
+                    </div>
+                    <div class="code-line">
+                        &nbsp;&nbsp;<span class="code-keyword">_PAYMENT_SERVICE</span>: <span class="code-string">"payment-microservice"</span>
+                    </div>
+                    <div class="code-line">
+                        &nbsp;&nbsp;<span class="code-keyword">_NOTIFICATION_SERVICE</span>: <span class="code-string">"notification-microservice"</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="fullstack" class="tab-content">
+                <h3>Full-Stack Application</h3>
+                <p>Complete application with frontend, backend, and database:</p>
+                
+                <div class="interactive-code">
+                    <button class="copy-button" onclick="copyCode()">Copy Code</button>
+                    <div class="code-line">
+                        <span class="code-comment"># Deploy with database connection</span>
+                    </div>
+                    <div class="code-line">
+                        <span class="code-string">'--set-env-vars=DATABASE_URL=${_DATABASE_URL},API_KEY=${_API_KEY}'</span>
+                    </div>
+                    <div class="code-line">
+                        <span class="code-string">'--set-cloudsql-instances=${_SQL_INSTANCE}'</span>
+                    </div>
+                    <div class="code-line">
+                        <span class="code-string">'--memory=2Gi'</span>
+                    </div>
+                    <div class="code-line">
+                        <span class="code-string">'--cpu=2'</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="troubleshooting">
+            <h2>Common Issues & Solutions</h2>
+            
+            <div class="status-box warning">
+                <h4>Build Failed: Permission Denied</h4>
+                <p><strong>Solution:</strong> Ensure Cloud Build service account has necessary IAM roles: Cloud Build Editor, Cloud Run Admin, Artifact Registry Writer.</p>
+            </div>
+
+            <div class="status-box info">
+                <h4>Images Not Found</h4>
+                <p><strong>Solution:</strong> Verify your Artifact Registry repository exists and the image names in substitutions match exactly.</p>
+            </div>
+
+            <div class="status-box warning">
+                <h4>Deployment Timeout</h4>
+                <p><strong>Solution:</strong> Increase timeout in build options or optimize your Docker images for faster startup.</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // =====================================
+        // INTERACTIVE CODE EXPLANATIONS
+        // =====================================
+        
+        const explanations = {
+            'header': {
+                title: 'Template Header',
+                content: `
+                    <h4>Template Documentation</h4>
+                    <p>The header comments provide essential information about:</p>
+                    <ul>
+                        <li><strong>Purpose:</strong> What this template accomplishes</li>
+                        <li><strong>Prerequisites:</strong> What you need before using it</li>
+                        <li><strong>Customization:</strong> How to adapt it for your project</li>
+                    </ul>
+                    <p>Always include clear documentation in your templates for team collaboration.</p>
+                `
+            },
+            'steps-intro': {
+                title: 'Steps Section',
+                content: `
+                    <h4>Build Steps Array</h4>
+                    <p>The <code>steps</code> section defines the sequence of operations:</p>
+                    <ul>
+                        <li><strong>Sequential:</strong> Steps run one after another by default</li>
+                        <li><strong>Parallel:</strong> Steps without dependencies can run simultaneously</li>
+                        <li><strong>Ordered:</strong> Use <code>waitFor</code> to control execution order</li>
+                    </ul>
+                    <p>Each step represents a single build operation like building, pushing, or deploying.</p>
+                `
+            },
+            'build-step': {
+                title: 'Docker Build Step',
+                content: `
+                    <h4>Building Docker Images</h4>
+                    <p>This step creates a Docker image from your source code:</p>
+                    <ul>
+                        <li><strong>Builder:</strong> <code>gcr.io/cloud-builders/docker</code> provides Docker CLI</li>
+                        <li><strong>ID:</strong> Unique identifier for referencing in other steps</li>
+                        <li><strong>Args:</strong> Docker build command arguments</li>
+                        <li><strong>Tag:</strong> Image name and location in Artifact Registry</li>
+                    </ul>
+                    <p>The build context (<code>.</code>) includes all files in the current directory.</p>
+                `
+            },
+            'push-step': {
+                title: 'Image Push Step',
+                content: `
+                    <h4>Pushing to Artifact Registry</h4>
+                    <p>This step uploads your built image to Google's container registry:</p>
+                    <ul>
+                        <li><strong>WaitFor:</strong> Ensures build completes before pushing</li>
+                        <li><strong>Registry:</strong> Uses Artifact Registry for secure storage</li>
+                        <li><strong>Versioning:</strong> Images are tagged for version control</li>
+                    </ul>
+                    <p>Pushed images are available for deployment across multiple services.</p>
+                `
+            },
+            'deploy-step': {
+                title: 'Cloud Run Deployment',
+                content: `
+                    <h4>Deploying to Cloud Run</h4>
+                    <p>This step deploys your container to a managed serverless platform:</p>
+                    <ul>
+                        <li><strong>Service Name:</strong> The Cloud Run service identifier</li>
+                        <li><strong>Region:</strong> Geographic location for deployment</li>
+                        <li><strong>Scaling:</strong> Automatic scaling based on traffic</li>
+                        <li><strong>Authentication:</strong> Configure public or private access</li>
+                    </ul>
+                    <p>Cloud Run automatically handles HTTPS, load balancing, and scaling.</p>
+                `
+            },
+            'substitutions': {
+                title: 'Substitution Variables',
+                content: `
+                    <h4>Template Variables</h4>
+                    <p>Substitutions make templates reusable across environments:</p>
+                    <ul>
+                        <li><strong>Reusability:</strong> Same template, different configurations</li>
+                        <li><strong>Security:</strong> Avoid hardcoding sensitive values</li>
+                        <li><strong>Flexibility:</strong> Easy environment switching</li>
+                        <li><strong>Maintenance:</strong> Update values in one place</li>
+                    </ul>
+                    <p>Variables can be overridden when triggering builds manually or via triggers.</p>
+                `
+            }
+        };
+
+        // Handle code line clicks
+        document.querySelectorAll('.code-line[data-explanation]').forEach(line => {
+            line.addEventListener('click', function() {
+                const explanationType = this.dataset.explanation;
+                const explanation = explanations[explanationType];
+                
+                if (explanation) {
+                    // Remove previous highlights
+                    document.querySelectorAll('.code-line.highlighted').forEach(el => {
+                        el.classList.remove('highlighted');
+                    });
+                    
+                    // Highlight clicked lines with same explanation
+                    document.querySelectorAll(`[data-explanation="${explanationType}"]`).forEach(el => {
+                        el.classList.add('highlighted');
+                    });
+                    
+                    // Show explanation
+                    const panel = document.getElementById('explanation-display');
+                    panel.innerHTML = `
+                        <h4>${explanation.title}</h4>
+                        ${explanation.content}
+                    `;
+                    panel.classList.add('active');
+                }
+            });
+        });
+
+        // =====================================
+        // COMPONENT EXPLANATION SYSTEM
+        // =====================================
+        
+        const componentExplanations = {
+            'steps': {
+                beginner: `
+                    <h4>Steps: The Heart of Cloud Build</h4>
+                    <p>Think of steps like a recipe - they tell Cloud Build exactly what to do and in what order.</p>
+                    <p><strong>Basic Structure:</strong></p>
+                    <ul>
+                        <li>Each step is a single task (build, push, deploy)</li>
+                        <li>Steps run one after another unless you specify otherwise</li>
+                        <li>Every step needs a "name" (which tool to use) and "args" (what to do)</li>
+                    </ul>
+                    <p><strong>Example:</strong> Like cooking, you can't frost a cake before baking it!</p>
+                `,
+                intermediate: `
+                    <h4>Steps: Advanced Orchestration</h4>
+                    <p>Steps are build operations that can run sequentially or in parallel for optimized performance.</p>
+                    <p><strong>Key Features:</strong></p>
+                    <ul>
+                        <li><strong>Dependencies:</strong> Use waitFor to control execution order</li>
+                        <li><strong>Parallel Execution:</strong> Independent steps run simultaneously</li>
+                        <li><strong>Error Handling:</strong> Failed steps stop the entire build</li>
+                        <li><strong>Resource Sharing:</strong> Steps share the build workspace</li>
+                    </ul>
+                    <p><strong>Best Practice:</strong> Group related operations and minimize dependencies for faster builds.</p>
+                `,
+                advanced: `
+                    <h4>Steps: Enterprise Build Orchestration</h4>
+                    <p>Advanced step configuration for complex enterprise deployments.</p>
+                    <p><strong>Advanced Patterns:</strong></p>
+                    <ul>
+                        <li><strong>Conditional Steps:</strong> Use branch/tag conditions</li>
+                        <li><strong>Matrix Builds:</strong> Build multiple variants simultaneously</li>
+                        <li><strong>Custom Builders:</strong> Create specialized build containers</li>
+                        <li><strong>Secret Management:</strong> Secure handling of credentials</li>
+                    </ul>
+                    <p><strong>Performance:</strong> Optimize with multi-stage builds and caching strategies.</p>
+                `
+            },
+            'docker-build': {
+                beginner: `
+                    <h4>Docker Build: Creating Container Images</h4>
+                    <p>Docker build turns your code into a portable container that can run anywhere.</p>
+                    <p><strong>What Happens:</strong></p>
+                    <ul>
+                        <li>Cloud Build reads your Dockerfile</li>
+                        <li>Installs dependencies and copies your code</li>
+                        <li>Creates a ready-to-run container image</li>
+                        <li>Tags it with a name for easy identification</li>
+                    </ul>
+                    <p><strong>Think of it as:</strong> Packaging your app with everything it needs to run.</p>
+                `,
+                intermediate: `
+                    <h4>Docker Build: Optimization Strategies</h4>
+                    <p>Efficient Docker builds reduce deployment time and costs.</p>
+                    <p><strong>Optimization Techniques:</strong></p>
+                    <ul>
+                        <li><strong>Layer Caching:</strong> Reuse unchanged layers between builds</li>
+                        <li><strong>Multi-stage Builds:</strong> Separate build and runtime environments</li>
+                        <li><strong>.dockerignore:</strong> Exclude unnecessary files from build context</li>
+                        <li><strong>Base Image Selection:</strong> Choose minimal, secure base images</li>
+                    </ul>
+                    <p><strong>Security:</strong> Scan images for vulnerabilities and use distroless images when possible.</p>
+                `,
+                advanced: `
+                    <h4>Docker Build: Enterprise Patterns</h4>
+                    <p>Advanced Docker building for enterprise-scale applications.</p>
+                    <p><strong>Enterprise Features:</strong></p>
+                    <ul>
+                        <li><strong>BuildKit:</strong> Enhanced build performance and features</li>
+                        <li><strong>Build Arguments:</strong> Dynamic configuration during build</li>
+                        <li><strong>Cross-platform Builds:</strong> Support multiple architectures</li>
+                        <li><strong>Registry Mirroring:</strong> Reduce external dependencies</li>
+                    </ul>
+                    <p><strong>Compliance:</strong> Implement signing, scanning, and audit trails for images.</p>
+                `
+            },
+            'artifact-push': {
+                beginner: `
+                    <h4>Artifact Registry: Storing Your Images</h4>
+                    <p>After building, your images need to be stored securely for deployment.</p>
+                    <p><strong>What Artifact Registry Does:</strong></p>
+                    <ul>
+                        <li>Stores Docker images securely in Google Cloud</li>
+                        <li>Provides version control for your container images</li>
+                        <li>Integrates with Cloud Run for seamless deployment</li>
+                        <li>Scans images for security vulnerabilities</li>
+                    </ul>
+                    <p><strong>Benefits:</strong> Reliable, secure, and fast image distribution.</p>
+                `,
+                intermediate: `
+                    <h4>Artifact Registry: Advanced Management</h4>
+                    <p>Strategic container image management for production environments.</p>
+                    <p><strong>Management Features:</strong></p>
+                    <ul>
+                        <li><strong>Repository Organization:</strong> Group related images logically</li>
+                        <li><strong>Access Control:</strong> Fine-grained permissions per repository</li>
+                        <li><strong>Cleanup Policies:</strong> Automatic deletion of old images</li>
+                        <li><strong>Vulnerability Scanning:</strong> Automated security assessments</li>
+                    </ul>
+                    <p><strong>Cost Optimization:</strong> Implement lifecycle policies to manage storage costs.</p>
+                `,
+                advanced: `
+                    <h4>Artifact Registry: Enterprise Integration</h4>
+                    <p>Enterprise-grade container registry management and governance.</p>
+                    <p><strong>Enterprise Capabilities:</strong></p>
+                    <ul>
+                        <li><strong>Binary Authorization:</strong> Enforce deployment policies</li>
+                        <li><strong>Image Attestation:</strong> Cryptographic proof of build integrity</li>
+                        <li><strong>Multi-region Replication:</strong> Global image distribution</li>
+                        <li><strong>CMEK Integration:</strong> Customer-managed encryption keys</li>
+                    </ul>
+                    <p><strong>Compliance:</strong> Meet regulatory requirements with audit logs and governance controls.</p>
+                `
+            },
+            'cloud-run-deploy': {
+                beginner: `
+                    <h4>Cloud Run: Serverless Container Deployment</h4>
+                    <p>Cloud Run runs your containers without managing servers.</p>
+                    <p><strong>Key Benefits:</strong></p>
+                    <ul>
+                        <li><strong>Serverless:</strong> No server management required</li>
+                        <li><strong>Auto-scaling:</strong> Scales from 0 to thousands of instances</li>
+                        <li><strong>Pay-per-use:</strong> Only pay when requests are being processed</li>
+                        <li><strong>HTTPS Built-in:</strong> Automatic SSL certificates</li>
+                    </ul>
+                    <p><strong>Perfect for:</strong> APIs, web apps, and microservices that need to scale automatically.</p>
+                `,
+                intermediate: `
+                    <h4>Cloud Run: Performance Configuration</h4>
+                    <p>Optimize Cloud Run services for performance and cost efficiency.</p>
+                    <p><strong>Configuration Options:</strong></p>
+                    <ul>
+                        <li><strong>Resource Allocation:</strong> CPU and memory tuning per service</li>
+                        <li><strong>Concurrency:</strong> Requests per instance optimization</li>
+                        <li><strong>Min/Max Instances:</strong> Control scaling behavior</li>
+                        <li><strong>Request Timeout:</strong> Set appropriate timeout limits</li>
+                    </ul>
+                    <p><strong>Monitoring:</strong> Use Cloud Monitoring to track performance and costs.</p>
+                `,
+                advanced: `
+                    <h4>Cloud Run: Enterprise Deployment</h4>
+                    <p>Advanced Cloud Run patterns for enterprise production workloads.</p>
+                    <p><strong>Enterprise Features:</strong></p>
+                    <ul>
+                        <li><strong>VPC Connectivity:</strong> Private network integration</li>
+                        <li><strong>Identity-Aware Proxy:</strong> Advanced authentication</li>
+                        <li><strong>Cloud SQL Integration:</strong> Secure database connections</li>
+                        <li><strong>Canary Deployments:</strong> Traffic splitting for safe releases</li>
+                    </ul>
+                    <p><strong>Best Practices:</strong> Implement health checks, graceful shutdowns, and observability.</p>
+                `
+            },
+            'substitutions': {
+                beginner: `
+                    <h4>Substitutions: Making Templates Reusable</h4>
+                    <p>Substitutions are like variables that make your template work for different projects.</p>
+                    <p><strong>How They Work:</strong></p>
+                    <ul>
+                        <li>Define variables in the substitutions section</li>
+                        <li>Use them throughout your template with <code>\${_VARIABLE_NAME}</code></li>
+                        <li>Change values without editing the entire template</li>
+                        <li>Override them when triggering builds</li>
+                    </ul>
+                    <p><strong>Example:</strong> Use <code>\${_REGION}</code> instead of hardcoding "us-central1".</p>
+                `,
+                intermediate: `
+                    <h4>Substitutions: Dynamic Configuration</h4>
+                    <p>Advanced substitution patterns for flexible template management.</p>
+                    <p><strong>Advanced Usage:</strong></p>
+                    <ul>
+                        <li><strong>Built-in Variables:</strong> \$PROJECT_ID, \$BUILD_ID, \$COMMIT_SHA</li>
+                        <li><strong>Conditional Logic:</strong> Different values based on branch/tag</li>
+                        <li><strong>Nested Substitutions:</strong> Variables that reference other variables</li>
+                        <li><strong>Default Values:</strong> Fallbacks when variables aren't provided</li>
+                    </ul>
+                    <p><strong>Organization:</strong> Group related variables and use clear naming conventions.</p>
+                `,
+                advanced: `
+                    <h4>Substitutions: Enterprise Variable Management</h4>
+                    <p>Strategic variable management for large-scale deployment automation.</p>
+                    <p><strong>Enterprise Patterns:</strong></p>
+                    <ul>
+                        <li><strong>Secret Manager Integration:</strong> Secure credential handling</li>
+                        <li><strong>Environment Promotion:</strong> Dev → Staging → Production workflows</li>
+                        <li><strong>Template Inheritance:</strong> Shared base configurations</li>
+                        <li><strong>Validation Rules:</strong> Ensure variable consistency</li>
+                    </ul>
+                    <p><strong>Governance:</strong> Implement approval workflows for production variables.</p>
+                `
+            },
+            'waitfor': {
+                beginner: `
+                    <h4>WaitFor: Controlling Step Order</h4>
+                    <p>WaitFor ensures steps happen in the right sequence.</p>
+                    <p><strong>Why It's Important:</strong></p>
+                    <ul>
+                        <li>You can't push an image before building it</li>
+                        <li>You can't deploy before the image is available</li>
+                        <li>Some steps depend on others completing first</li>
+                    </ul>
+                    <p><strong>Usage:</strong> <code>waitFor: ['step-id-1', 'step-id-2']</code></p>
+                `,
+                intermediate: `
+                    <h4>WaitFor: Dependency Management</h4>
+                    <p>Strategic dependency management for optimized build performance.</p>
+                    <p><strong>Optimization Strategies:</strong></p>
+                    <ul>
+                        <li><strong>Parallel Execution:</strong> Independent steps run simultaneously</li>
+                        <li><strong>Critical Path:</strong> Identify and optimize the longest dependency chain</li>
+                        <li><strong>Resource Contention:</strong> Avoid too many parallel steps</li>
+                    </ul>
+                    <p><strong>Pattern:</strong> Group dependencies logically to minimize total build time.</p>
+                `,
+                advanced: `
+                    <h4>WaitFor: Complex Workflow Orchestration</h4>
+                    <p>Advanced dependency management for enterprise build pipelines.</p>
+                    <p><strong>Complex Patterns:</strong></p>
+                    <ul>
+                        <li><strong>Diamond Dependencies:</strong> Multiple paths converging</li>
+                        <li><strong>Conditional Workflows:</strong> Steps that run based on conditions</li>
+                        <li><strong>Fan-out/Fan-in:</strong> Parallel processing with synchronization</li>
+                    </ul>
+                    <p><strong>Monitoring:</strong> Track dependency performance and bottlenecks.</p>
+                `
+            },
+            'options': {
+                beginner: `
+                    <h4>Build Options: Customizing
