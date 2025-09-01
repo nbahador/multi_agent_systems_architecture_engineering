@@ -1371,4 +1371,379 @@
             },
             'options': {
                 beginner: `
-                    <h4>Build Options: Customizing
+                    <h4>Build Options: Customizing Your Build Environment</h4>
+                    <p>Build options let you customize how Cloud Build executes your template.</p>
+                    <p><strong>Common Options:</strong></p>
+                    <ul>
+                        <li><strong>Machine Type:</strong> Choose more powerful build machines for faster builds</li>
+                        <li><strong>Logging:</strong> Control where build logs are stored</li>
+                        <li><strong>Timeout:</strong> Set maximum build duration</li>
+                        <li><strong>Substitution Option:</strong> Control how missing variables are handled</li>
+                    </ul>
+                    <p><strong>Example:</strong> Use a high-CPU machine for faster Docker builds.</p>
+                `,
+                intermediate: `
+                    <h4>Build Options: Advanced Configuration</h4>
+                    <p>Advanced build configuration for optimizing performance and cost.</p>
+                    <p><strong>Advanced Options:</strong></p>
+                    <ul>
+                        <li><strong>Disk Size:</strong> Increase disk space for large builds</li>
+                        <li><strong>Worker Pool:</strong> Use private worker pools for security</li>
+                        <li><strong>Default Logs Bucket:</strong> Customize log storage location</li>
+                        <li><strong>Env Variables:</strong> Set environment variables for all steps</li>
+                    </ul>
+                    <p><strong>Cost Optimization:</strong> Choose appropriate machine types to balance speed and cost.</p>
+                `,
+                advanced: `
+                    <h4>Build Options: Enterprise Configuration</h4>
+                    <p>Enterprise-grade build configuration for compliance and security.</p>
+                    <p><strong>Enterprise Features:</strong></p>
+                    <ul>
+                        <li><strong>Service Account:</strong> Use custom service accounts with specific permissions</li>
+                        <li><strong>Network Configuration:</strong> Control network access and egress</li>
+                        <li><strong>Secret Management:</strong> Integrate with Secret Manager for credentials</li>
+                        <li><strong>Audit Logging:</strong> Comprehensive audit trails for compliance</li>
+                    </ul>
+                    <p><strong>Security:</strong> Implement least-privilege access and network isolation.</p>
+                `
+            }
+        };
+
+        // Handle component explanation
+        function explainComponent() {
+            const componentType = document.getElementById('componentSelect').value;
+            const complexity = document.getElementById('complexitySelect').value;
+            
+            if (!componentType) {
+                alert('Please select a component to explain');
+                return;
+            }
+            
+            const explanation = componentExplanations[componentType][complexity];
+            const panel = document.getElementById('component-explanation');
+            
+            if (explanation) {
+                panel.innerHTML = explanation;
+                panel.classList.add('active');
+            } else {
+                panel.innerHTML = '<p>No explanation available for this component.</p>';
+                panel.classList.add('active');
+            }
+        }
+
+        // =====================================
+        // TEMPLATE BUILDER FUNCTIONALITY
+        // =====================================
+        
+        let serviceCount = 1;
+        let envVarCount = 1;
+        
+        function addService() {
+            serviceCount++;
+            const servicesContainer = document.getElementById('services-container');
+            
+            const newService = document.createElement('div');
+            newService.className = 'service-config';
+            newService.dataset.service = serviceCount;
+            
+            newService.innerHTML = `
+                <h4>Service ${serviceCount}</h4>
+                <div class="form-group">
+                    <div class="form-control">
+                        <label>Service Name</label>
+                        <input type="text" class="service-name" placeholder="service-${serviceCount}" />
+                    </div>
+                    <div class="form-control">
+                        <label>Folder Path</label>
+                        <input type="text" class="service-folder" placeholder="./service-${serviceCount}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-control">
+                        <label>Memory Allocation</label>
+                        <select class="service-memory">
+                            <option value="512Mi">512Mi</option>
+                            <option value="1Gi">1Gi</option>
+                            <option value="2Gi">2Gi</option>
+                            <option value="4Gi">4Gi</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label>CPU Allocation</label>
+                        <select class="service-cpu">
+                            <option value="1">1 CPU</option>
+                            <option value="2">2 CPU</option>
+                            <option value="4">4 CPU</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            
+            servicesContainer.appendChild(newService);
+        }
+        
+        function removeService() {
+            if (serviceCount > 1) {
+                const servicesContainer = document.getElementById('services-container');
+                servicesContainer.removeChild(servicesContainer.lastChild);
+                serviceCount--;
+            }
+        }
+        
+        function addEnvVar() {
+            envVarCount++;
+            const envVarsContainer = document.getElementById('env-vars-container');
+            
+            const newEnvVar = document.createElement('div');
+            newEnvVar.className = 'form-group';
+            
+            newEnvVar.innerHTML = `
+                <div class="form-control">
+                    <label>Variable Name</label>
+                    <input type="text" class="env-name" placeholder="ENV_VAR_${envVarCount}" />
+                </div>
+                <div class="form-control">
+                    <label>Variable Value</label>
+                    <input type="text" class="env-value" placeholder="value_${envVarCount}" />
+                </div>
+            `;
+            
+            envVarsContainer.appendChild(newEnvVar);
+        }
+        
+        function generateTemplate() {
+            const projectId = document.getElementById('projectId').value || 'my-project-123';
+            const region = document.getElementById('region').value || 'us-central1';
+            const repoName = document.getElementById('repoName').value || 'my-app-repo';
+            const imageName = document.getElementById('imageName').value || 'multi-service-app';
+            
+            // Collect services
+            const services = [];
+            const serviceConfigs = document.querySelectorAll('.service-config');
+            
+            serviceConfigs.forEach((config, index) => {
+                const serviceName = config.querySelector('.service-name').value || `service-${index + 1}`;
+                const serviceFolder = config.querySelector('.service-folder').value || `./service-${index + 1}`;
+                const serviceMemory = config.querySelector('.service-memory').value || '512Mi';
+                const serviceCpu = config.querySelector('.service-cpu').value || '1';
+                
+                services.push({
+                    name: serviceName,
+                    folder: serviceFolder,
+                    memory: serviceMemory,
+                    cpu: serviceCpu
+                });
+            });
+            
+            // Collect environment variables
+            const envVars = {};
+            const envNames = document.querySelectorAll('.env-name');
+            const envValues = document.querySelectorAll('.env-value');
+            
+            for (let i = 0; i < envNames.length; i++) {
+                const name = envNames[i].value;
+                const value = envValues[i].value;
+                if (name && value) {
+                    envVars[name] = value;
+                }
+            }
+            
+            // Generate the YAML template
+            let yamlTemplate = `# =============================================================================
+# GENERATED CLOUD BUILD TEMPLATE
+# =============================================================================
+# This template was generated using the interactive template builder
+
+steps:\n`;
+
+            // Add build steps for each service
+            services.forEach(service => {
+                yamlTemplate += `
+# Build ${service.name}
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'build-${service.name}'
+  args:
+    - 'build'
+    - '-t'
+    - '${region}-docker.pkg.dev/${projectId}/${repoName}/${service.name}:latest'
+    - '${service.folder}'\n`;
+            });
+
+            // Add push steps for each service
+            services.forEach(service => {
+                yamlTemplate += `
+# Push ${service.name} to Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'push-${service.name}'
+  waitFor: ['build-${service.name}']
+  args:
+    - 'push'
+    - '${region}-docker.pkg.dev/${projectId}/${repoName}/${service.name}:latest'\n`;
+            });
+
+            // Add deploy steps for each service
+            services.forEach(service => {
+                yamlTemplate += `
+# Deploy ${service.name} to Cloud Run
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  id: 'deploy-${service.name}'
+  waitFor: ['push-${service.name}']
+  entrypoint: gcloud
+  args:
+    - 'run'
+    - 'deploy'
+    - '${service.name}'
+    - '--image=${region}-docker.pkg.dev/${projectId}/${repoName}/${service.name}:latest'
+    - '--region=${region}'
+    - '--platform=managed'
+    - '--memory=${service.memory}'
+    - '--cpu=${service.cpu}'
+    - '--allow-unauthenticated'\n`;
+                
+                // Add environment variables if any
+                const envVarsString = Object.entries(envVars)
+                    .map(([key, value]) => `${key}=${value}`)
+                    .join(',');
+                
+                if (envVarsString) {
+                    yamlTemplate += `    - '--set-env-vars=${envVarsString}'\n`;
+                }
+            });
+
+            yamlTemplate += `
+# Substitution Variables
+substitutions:
+  _PROJECT_ID: "${projectId}"
+  _REGION: "${region}"
+  _REPO_NAME: "${repoName}"
+  _IMAGE_NAME: "${imageName}"\n`;
+
+            // Add service names to substitutions
+            services.forEach((service, index) => {
+                yamlTemplate += `  _SERVICE_${index + 1}_NAME: "${service.name}"\n`;
+            });
+
+            // Add environment variables to substitutions
+            Object.entries(envVars).forEach(([key, value]) => {
+                yamlTemplate += `  _${key}: "${value}"\n`;
+            });
+
+            // Display the generated template
+            const outputContainer = document.getElementById('generated-template');
+            outputContainer.textContent = yamlTemplate;
+            outputContainer.style.display = 'block';
+        }
+        
+        function resetBuilder() {
+            document.getElementById('projectId').value = '';
+            document.getElementById('repoName').value = '';
+            document.getElementById('imageName').value = '';
+            
+            // Reset services to just one
+            const servicesContainer = document.getElementById('services-container');
+            while (servicesContainer.children.length > 1) {
+                servicesContainer.removeChild(servicesContainer.lastChild);
+            }
+            serviceCount = 1;
+            
+            // Reset the first service inputs
+            const firstService = servicesContainer.querySelector('.service-config');
+            firstService.querySelector('.service-name').value = '';
+            firstService.querySelector('.service-folder').value = '';
+            firstService.querySelector('.service-memory').value = '512Mi';
+            firstService.querySelector('.service-cpu').value = '1';
+            
+            // Reset environment variables
+            const envVarsContainer = document.getElementById('env-vars-container');
+            while (envVarsContainer.children.length > 1) {
+                envVarsContainer.removeChild(envVarsContainer.lastChild);
+            }
+            envVarCount = 1;
+            
+            // Reset the first env var inputs
+            const firstEnvName = envVarsContainer.querySelector('.env-name');
+            const firstEnvValue = envVarsContainer.querySelector('.env-value');
+            if (firstEnvName) firstEnvName.value = '';
+            if (firstEnvValue) firstEnvValue.value = '';
+            
+            // Hide output
+            document.getElementById('generated-template').style.display = 'none';
+        }
+
+        // =====================================
+        // QUIZ FUNCTIONALITY
+        // =====================================
+        
+        document.querySelectorAll('.quiz-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const isCorrect = this.dataset.correct === 'true';
+                const feedback = this.parentElement.nextElementSibling;
+                
+                // Remove any existing selections
+                this.parentElement.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+                
+                // Mark this option
+                this.classList.add(isCorrect ? 'correct' : 'incorrect');
+                
+                // Show feedback
+                feedback.classList.add('show');
+                
+                // If incorrect, highlight the correct answer
+                if (!isCorrect) {
+                    this.parentElement.querySelector('[data-correct="true"]').classList.add('correct');
+                }
+            });
+        });
+
+        // =====================================
+        // TAB FUNCTIONALITY
+        // =====================================
+        
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.dataset.tab;
+                
+                // Remove active class from all tabs and contents
+                this.parentElement.querySelectorAll('.tab').forEach(t => {
+                    t.classList.remove('active');
+                });
+                
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Add active class to clicked tab and corresponding content
+                this.classList.add('active');
+                document.getElementById(tabName).classList.add('active');
+            });
+        });
+
+        // =====================================
+        // COPY CODE FUNCTIONALITY
+        // =====================================
+        
+        function copyCode() {
+            const codeElement = this.parentElement;
+            const textToCopy = codeElement.textContent;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const originalText = this.textContent;
+                this.textContent = 'Copied!';
+                
+                setTimeout(() => {
+                    this.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+        
+        // Attach copy functionality to all copy buttons
+        document.querySelectorAll('.copy-button').forEach(button => {
+            button.addEventListener('click', copyCode);
+        });
+    </script>
+</body>
+</html>
