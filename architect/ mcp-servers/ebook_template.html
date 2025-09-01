@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical eBook Template</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #fff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Left Sidebar - Table of Contents */
+        .sidebar {
+            width: 300px;
+            background: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .toc-item {
+            display: block;
+            padding: 12px 15px;
+            color: #495057;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .toc-item:hover {
+            background: #e9ecef;
+            border-left-color: #3498db;
+        }
+
+        .toc-item.active {
+            background: #3498db;
+            color: white;
+            border-left-color: #2980b9;
+        }
+
+        .toc-item .chapter-number {
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        /* Right Content Area */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tab-header {
+            background: #fff;
+            border-bottom: 1px solid #dee2e6;
+            padding: 15px 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tab-title {
+            font-size: 1.8em;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .tab-subtitle {
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .tab-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #fff;
+        }
+
+        .tab-page {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .tab-page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Content Styling */
+        .tab-page h1 {
+            font-size: 2.2em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .tab-page h2 {
+            font-size: 1.6em;
+            color: #34495e;
+            margin: 25px 0 15px 0;
+        }
+
+        .tab-page h3 {
+            font-size: 1.3em;
+            color: #34495e;
+            margin: 20px 0 10px 0;
+        }
+
+        .tab-page p {
+            line-height: 1.7;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .tab-page ul, .tab-page ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+
+        .tab-page li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        /* Code Styling */
+        code {
+            background: #f1f3f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            color: #c7254e;
+        }
+
+        pre {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-left: 4px solid #3498db;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        /* Information Boxes */
+        .info-box, .warning-box, .tip-box, .error-box {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            border-left: 4px solid;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left-color: #3498db;
+        }
+
+        .warning-box {
+            background: #fff8e1;
+            border-left-color: #ff9800;
+        }
+
+        .tip-box {
+            background: #e8f5e8;
+            border-left-color: #4caf50;
+        }
+
+        .error-box {
+            background: #ffebee;
+            border-left-color: #f44336;
+        }
+
+        .box-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        /* Two Column Layout */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        /* Figure Styling */
+        .figure {
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .figure img {
+            max-width: 100%;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .caption {
+            font-style: italic;
+            color: #6c757d;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 200px;
+                order: 2;
+            }
+            
+            .content-area {
+                order: 1;
+            }
+            
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Sidebar - Table of Contents -->
+        <div class="sidebar">
+            <h2>📚 Table of Contents</h2>
+            
+            <a href="#" class="toc-item active" data-tab="title">
+                <span class="chapter-number">📖</span>Title Page
+            </a>
+            
+            <a href="#" class="toc-item" data-tab="introduction">
+                <span class="chapter-number">1.</span>Introduction
+            </a>
+            
+            <a href="#" class="toc-item" data-tab="setup">
+                <span class="chapter-number">2.</span>Getting Started
+            </a>
+            
+            <a href="#" class="toc-item" data-tab="concepts">
+                <span class="chapter-number">3.</span>Core Concepts
+            </a>
+            
+            <a href="#" class="toc-item" data-tab="advanced">
+                <span class="chapter-number">4.</span>Advanced Topics
+            </a>
+            
+            <a href="#" class="toc-item" data-tab="examples">
+                <span class="chapter-number">5.</span>Code Examples
+            </a>
+            
+            <a href="#" class="toc-item" data-tab="best-practices">
+                <span class="chapter-number">6.</span>Best Practices
+            </a>
+            
+            <a href="#" class="toc-item" data-tab="conclusion">
+                <span class="chapter-number">7.</span>Conclusion
+            </a>
+            
+            <a href="#" class="toc-item" data-tab="appendix">
+                <span class="chapter-number">A.</span>Appendix
+            </a>
+        </div>
+
+        <!-- Right Content Area -->
+        <div class="content-area">
+            <div class="tab-header">
+                <div class="tab-title" id="current-title">Your Technical eBook Title</div>
+                <div class="tab-subtitle" id="current-subtitle">Professional Documentation Template</div>
+            </div>
+
+            <div class="tab-content">
+                <!-- Title Page Tab -->
+                <div class="tab-page active" id="title">
+                    <div style="text-align: center; padding: 60px 0;">
+                        <h1 style="font-size: 3em; margin-bottom: 30px; border: none;">Your Technical eBook Title</h1>
+                        <div style="font-size: 1.5em; color: #6c757d; margin-bottom: 40px;">A Comprehensive Guide to [Your Topic]</div>
+                        <div style="font-size: 1.2em; margin-bottom: 20px;">By [Author Name]</div>
+                        <div style="color: #6c757d;">Version 1.0 | [Date]</div>
+                        
+                        <div style="margin-top: 60px; padding: 30px; background: #f8f9fa; border-radius: 10px;">
+                            <h3>About This eBook</h3>
+                            <p style="text-align: left; margin-top: 15px;">This technical documentation provides comprehensive coverage of [your topic]. Each chapter builds upon the previous one, offering practical examples and real-world applications.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Introduction Tab -->
+                <div class="tab-page" id="introduction">
+                    <h1>Introduction</h1>
+                    
+                    <p>Welcome to this comprehensive technical guide. This introduction will help you understand what you'll learn and how to make the most of this documentation.</p>
+
+                    <h2>What You'll Learn</h2>
+                    <ul>
+                        <li><strong>Fundamental concepts</strong> and core principles</li>
+                        <li><strong>Practical implementation</strong> with step-by-step guides</li>
+                        <li><strong>Advanced techniques</strong> for experienced users</li>
+                        <li><strong>Best practices</strong> and common pitfalls to avoid</li>
+                    </ul>
+
+                    <div class="info-box">
+                        <div class="box-title">💡 How to Use This Template</div>
+                        <p>Each tab represents a chapter or section. Click on items in the left sidebar to navigate between sections. You can easily add new tabs by duplicating the tab structure in the HTML.</p>
+                    </div>
+
+                    <h2>Prerequisites</h2>
+                    <p>Before diving into this guide, you should have:</p>
+                    <ul>
+                        <li>Basic understanding of [relevant technology]</li>
+                        <li>Familiarity with [required tools]</li>
+                        <li>Access to [necessary resources]</li>
+                    </ul>
+                </div>
+
+                <!-- Getting Started Tab -->
+                <div class="tab-page" id="setup">
+                    <h1>Getting Started</h1>
+                    
+                    <p>This chapter covers the initial setup and configuration needed to follow along with the examples in this guide.</p>
+
+                    <h2>Installation</h2>
+                    <p>Start by installing the required tools and dependencies:</p>
+
+                    <pre><code># Install the main package
+npm install your-package-name
+
+# Install additional dependencies
+npm install --save-dev development-tools
+
+# Verify installation
+your-command --version</code></pre>
+
+                    <div class="warning-box">
+                        <div class="box-title">⚠️ System Requirements</div>
+                        <p>Make sure your system meets the minimum requirements before proceeding with the installation.</p>
+                    </div>
+
+                    <h2>Initial Configuration</h2>
+                    <p>Create a basic configuration file to get started:</p>
+
+                    <pre><code>{
+  "name": "your-project",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "npm test"
+  }
+}</code></pre>
+
+                    <h3>Environment Setup</h3>
+                    <p>Configure your development environment with these settings:</p>
+                    <ul>
+                        <li>Set up your IDE with appropriate extensions</li>
+                        <li>Configure linting and formatting tools</li>
+                        <li>Establish version control with Git</li>
+                    </ul>
+                </div>
+
+                <!-- Core Concepts Tab -->
+                <div class="tab-page" id="concepts">
+                    <h1>Core Concepts</h1>
+                    
+                    <p>Understanding these fundamental concepts is crucial for working effectively with this technology.</p>
+
+                    <div class="two-column">
+                        <div>
+                            <h3>Key Concept 1</h3>
+                            <p>Explanation of the first important concept that users need to understand. Provide clear definitions and context.</p>
+                            
+                            <h3>Key Concept 2</h3>
+                            <p>Description of another fundamental concept. Use examples to illustrate complex ideas.</p>
+                        </div>
+                        <div>
+                            <h3>Practical Applications</h3>
+                            <p>Show how these concepts apply in real-world scenarios.</p>
+                            
+                            <div class="tip-box">
+                                <div class="box-title">💡 Pro Tip</div>
+                                <p>Always test your understanding with practical examples before moving to advanced topics.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2>Architecture Overview</h2>
+                    <p>Here's how the components work together:</p>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Purpose</th>
+                                <th>Key Features</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Core Engine</td>
+                                <td>Main processing unit</td>
+                                <td>Fast, reliable, scalable</td>
+                            </tr>
+                            <tr>
+                                <td>API Layer</td>
+                                <td>External interface</td>
+                                <td>RESTful, documented, secure</td>
+                            </tr>
+                            <tr>
+                                <td>Data Store</td>
+                                <td>Information persistence</td>
+                                <td>Efficient, consistent, backed up</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Advanced Topics Tab -->
+                <div class="tab-page" id="advanced">
+                    <h1>Advanced Topics</h1>
+                    
+                    <p>Once you've mastered the basics, these advanced techniques will help you build more sophisticated solutions.</p>
+
+                    <h2>Advanced Configuration</h2>
+                    <p>For complex scenarios, you'll need more sophisticated configuration options:</p>
+
+                    <pre><code>// Advanced configuration example
+const config = {
+  production: {
+    database: {
+      host: 'prod-db.example.com',
+      port: 5432,
+      ssl: true,
+      poolSize: 20
+    },
+    cache: {
+      enabled: true,
+      ttl: 3600,
+      maxSize: '1GB'
+    }
+  },
+  
+  development: {
+    database: {
+      host: 'localhost',
+      port: 5432,
+      ssl: false,
+      poolSize: 5
+    },
+    cache: {
+      enabled: false
+    }
+  }
+};</code></pre>
+
+                    <div class="error-box">
+                        <div class="box-title">🚫 Common Pitfall</div>
+                        <p>Avoid hardcoding configuration values. Always use environment variables or configuration files for deployment-specific settings.</p>
+                    </div>
+
+                    <h2>Performance Optimization</h2>
+                    <p>Consider these optimization strategies for production deployments:</p>
+                    <ul>
+                        <li>Implement efficient caching mechanisms</li>
+                        <li>Use connection pooling for database operations</li>
+                        <li>Enable compression for API responses</li>
+                        <li>Monitor and log performance metrics</li>
+                    </ul>
+                </div>
+
+                <!-- Code Examples Tab -->
+                <div class="tab-page" id="examples">
+                    <h1>Code Examples</h1>
+                    
+                    <p>This section provides practical code examples that you can adapt for your own projects.</p>
+
+                    <h2>Basic Implementation</h2>
+                    <p>Here's a simple example to get you started:</p>
+
+                    <pre><code>class ExampleClass {
+  constructor(options) {
+    this.config = {
+      timeout: 5000,
+      retries: 3,
+      ...options
+    };
+  }
+
+  async process(data) {
+    try {
+      const result = await this.performOperation(data);
+      return this.formatResult(result);
+    } catch (error) {
+      console.error('Processing failed:', error);
+      throw error;
+    }
+  }
+
+  performOperation(data) {
+    // Your implementation here
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(data), 100);
+    });
+  }
+
+  formatResult(result) {
+    return {
+      success: true,
+      data: result,
+      timestamp: new Date().toISOString()
+    };
+  }
+}</code></pre>
+
+                    <h3>Usage Example</h3>
+                    <pre><code>// Initialize the class
+const processor = new ExampleClass({
+  timeout: 10000,
+  retries: 5
+});
+
+// Process some data
+const result = await processor.process({
+  id: 1,
+  name: 'Sample Data'
+});
+
+console.log(result);</code></pre>
+
+                    <div class="tip-box">
+                        <div class="box-title">💡 Code Organization</div>
+                        <p>Structure your code with clear separation of concerns. Use classes for complex logic and functions for simple operations.</p>
+                    </div>
+                </div>
+
+                <!-- Best Practices Tab -->
+                <div class="tab-page" id="best-practices">
+                    <h1>Best Practices</h1>
+                    
+                    <p>Following these best practices will help you create maintainable, efficient, and reliable solutions.</p>
+
+                    <h2>Code Quality</h2>
+                    <div class="two-column">
+                        <div>
+                            <h3>✅ Do This</h3>
+                            <ul>
+                                <li>Write clear, descriptive variable names</li>
+                                <li>Add comprehensive error handling</li>
+                                <li>Include inline documentation</li>
+                                <li>Follow consistent coding style</li>
+                                <li>Write unit tests for critical functions</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3>❌ Avoid This</h3>
+                            <ul>
+                                <li>Hardcoding configuration values</li>
+                                <li>Ignoring error conditions</li>
+                                <li>Writing functions that do too much</li>
+                                <li>Skipping input validation</li>
+                                <li>Committing sensitive information</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h2>Security Considerations</h2>
+                    <p>Always prioritize security in your implementations:</p>
+
+                    <div class="warning-box">
+                        <div class="box-title">🔒 Security Checklist</div>
+                        <ul>
+                            <li>Validate all user inputs</li>
+                            <li>Use parameterized queries for database operations</li>
+                            <li>Implement proper authentication and authorization</li>
+                            <li>Keep dependencies updated</li>
+                            <li>Use HTTPS for all communications</li>
+                        </ul>
+                    </div>
+
+                    <h2>Performance Guidelines</h2>
+                    <p>Optimize your code for better performance:</p>
+                    <ul>
+                        <li>Profile your application to identify bottlenecks</li>
+                        <li>Implement caching where appropriate</li>
+                        <li>Use asynchronous operations for I/O tasks</li>
+                        <li>Minimize resource usage in loops</li>
+                    </ul>
+                </div>
+
+                <!-- Conclusion Tab -->
+                <div class="tab-page" id="conclusion">
+                    <h1>Conclusion</h1>
+                    
+                    <p>Congratulations! You've completed this technical guide. You should now have a solid understanding of the concepts and practical skills needed to implement effective solutions.</p>
+
+                    <h2>What You've Learned</h2>
+                    <ul>
+                        <li>Fundamental concepts and principles</li>
+                        <li>Practical implementation techniques</li>
+                        <li>Advanced configuration and optimization</li>
+                        <li>Best practices for production use</li>
+                    </ul>
+
+                    <h2>Next Steps</h2>
+                    <p>To continue your learning journey:</p>
+                    <ol>
+                        <li>Practice with the provided examples</li>
+                        <li>Build a small project using these concepts</li>
+                        <li>Explore the additional resources listed in the appendix</li>
+                        <li>Join the community forums for ongoing support</li>
+                    </ol>
+
+                    <div class="info-box">
+                        <div class="box-title">📖 Template Usage</div>
+                        <p>This template is designed to be easily modified. Simply update the content in each tab section, add new tabs as needed, and customize the styling to match your brand or preferences.</p>
+                    </div>
+                </div>
+
+                <!-- Appendix Tab -->
+                <div class="tab-page" id="appendix">
+                    <h1>Appendix A: Reference</h1>
+                    
+                    <h2>Template Customization Guide</h2>
+                    <p>To customize this template for your own content:</p>
+
+                    <h3>Adding New Tabs</h3>
+                    <p>1. Add a new TOC item in the sidebar:</p>
+                    <pre><code>&lt;a href="#" class="toc-item" data-tab="your-tab-id"&gt;
+    &lt;span class="chapter-number"&gt;X.&lt;/span&gt;Your Chapter Title
+&lt;/a&gt;</code></pre>
+
+                    <p>2. Add the corresponding tab content:</p>
+                    <pre><code>&lt;div class="tab-page" id="your-tab-id"&gt;
+    &lt;h1&gt;Your Chapter Title&lt;/h1&gt;
+    &lt;p&gt;Your content goes here...&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+
+                    <h3>Available Elements</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Element</th>
+                                <th>Class Name</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Info Box</td>
+                                <td><code>info-box</code></td>
+                                <td>Important information</td>
+                            </tr>
+                            <tr>
+                                <td>Warning Box</td>
+                                <td><code>warning-box</code></td>
+                                <td>Cautions and warnings</td>
+                            </tr>
+                            <tr>
+                                <td>Tip Box</td>
+                                <td><code>tip-box</code></td>
+                                <td>Helpful tips</td>
+                            </tr>
+                            <tr>
+                                <td>Error Box</td>
+                                <td><code>error-box</code></td>
+                                <td>Common errors</td>
+                            </tr>
+                            <tr>
+                                <td>Two Column</td>
+                                <td><code>two-column</code></td>
+                                <td>Side-by-side content</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="tip-box">
+                        <div class="box-title">🎨 Styling Tips</div>
+                        <p>Modify the CSS variables at the top of the style section to quickly change colors, fonts, and spacing throughout the entire template.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Navigation System
+        const tocItems = document.querySelectorAll('.toc-item');
+        const tabPages = document.querySelectorAll('.tab-page');
+        const titleElement = document.getElementById('current-title');
+        const subtitleElement = document.getElementById('current-subtitle');
+
+        // Tab titles and subtitles
+        const tabInfo = {
+            'title': { title: 'Your Technical eBook Title', subtitle: 'Professional Documentation Template' },
+            'introduction': { title: 'Introduction', subtitle: 'Getting oriented with this guide' },
+            'setup': { title: 'Getting Started', subtitle: 'Installation and initial setup' },
+            'concepts': { title: 'Core Concepts', subtitle: 'Fundamental principles and architecture' },
+            'advanced': { title: 'Advanced Topics', subtitle: 'Complex configurations and optimizations' },
+            'examples': { title: 'Code Examples', subtitle: 'Practical implementations and usage' },
+            'best-practices': { title: 'Best Practices', subtitle: 'Guidelines for production-ready code' },
+            'conclusion': { title: 'Conclusion', subtitle: 'Summary and next steps' },
+            'appendix': { title: 'Appendix', subtitle: 'Reference materials and customization guide' }
+        };
+
+        function showTab(targetTabId) {
+            // Hide all tabs
+            tabPages.forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Remove active class from all TOC items
+            tocItems.forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show target tab
+            const targetTab = document.getElementById(targetTabId);
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
+            
+            // Add active class to clicked TOC item
+            const activeItem = document.querySelector(`[data-tab="${targetTabId}"]`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+            }
+            
+            // Update header
+            if (tabInfo[targetTabId]) {
+                titleElement.textContent = tabInfo[targetTabId].title;
+                subtitleElement.textContent = tabInfo[targetTabId].subtitle;
+            }
+        }
+
+        // Add click event listeners to TOC items
+        tocItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetTab = item.getAttribute('data-tab');
+                showTab(targetTab);
+            });
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                const currentActive = document.querySelector('.toc-item.active');
+                const currentIndex = Array.from(tocItems).indexOf(currentActive);
+                
+                if (e.key === 'ArrowLeft' && currentIndex > 0) {
+                    e.preventDefault();
+                    const targetTab = tocItems[currentIndex - 1].getAttribute('data-tab');
+                    showTab(targetTab);
+                } else if (e.key === 'ArrowRight' && currentIndex < tocItems.length - 1) {
+                    e.preventDefault();
+                    const targetTab = tocItems[currentIndex + 1].getAttribute('data-tab');
+                    showTab(targetTab);
+                }
+            }
+        });
+
+        // Utility function to add new tabs programmatically (optional)
+        function addNewTab(id, title, subtitle, content) {
+            // Add TOC item
+            const tocItem = document.createElement('a');
+            tocItem.href = '#';
+            tocItem.className = 'toc-item';
+            tocItem.setAttribute('data-tab', id);
+            tocItem.innerHTML = `<span class="chapter-number">${tocItems.length}.</span>${title}`;
+            document.querySelector('.sidebar').appendChild(tocItem);
+            
+            // Add tab content
+            const tabPage = document.createElement('div');
+            tabPage.className = 'tab-page';
+            tabPage.id = id;
+            tabPage.innerHTML = content;
+            document.querySelector('.tab-content').appendChild(tabPage);
+            
+            // Update tab info
+            tabInfo[id] = { title, subtitle };
+            
+            // Add event listener
+            tocItem.addEventListener('click', (e) => {
+                e.preventDefault();
+                showTab(id);
+            });
+        }
+    </script>
+</body>
+</html>
